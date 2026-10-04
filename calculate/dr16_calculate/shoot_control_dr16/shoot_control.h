@@ -19,6 +19,11 @@ err_t shoot_control_init(void);
 void shoot_speed_pid_init(void);
 
 /**
+ * @brief 控制单台发射电机转到目标角度（角度单位：度）。
+ */
+void dj_motor_pid_control_location(uint8_t motor_id, float target_angle);
+
+/**
  * @brief 发射模式控制主函数
  * @details 根据遥控器状态执行对应的发射控制逻辑
  */
