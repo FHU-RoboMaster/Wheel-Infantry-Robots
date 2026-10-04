@@ -21,7 +21,7 @@ volatile err_t gimbal_status = PENDING;
  *   2. 初始化云台电机速度环 PID 参数
  *   3. 周期性调用云台控制函数（2ms 周期）
  */
-void gimbal_task(void *argument) {
+void gimbal_task(void* argument) {
   RM_UNUSED(argument);
 
   /* CAN2 及云台电机已由 main.c 完成注册和启动。 */

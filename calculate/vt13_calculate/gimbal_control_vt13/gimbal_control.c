@@ -17,7 +17,7 @@
 #include "vt13.h"
 
 /* VT13 task owns the decoded command and updates it periodically. */
-extern vt13_t *vt13;
+extern vt13_t* vt13;
 
 /* 云台电机总线与实例 */
 static dj_motor_bus_t gimbal_bus;
@@ -41,7 +41,7 @@ err_t gimbal_control_init(void) {
     return NOT_FOUND;
   }
 
-  STM32CAN_t *can1 = STM32CAN_GetInstance(can_id);
+  STM32CAN_t* can1 = STM32CAN_GetInstance(can_id);
   if (can1 == NULL) {
     return PTR_NULL;
   }
@@ -60,14 +60,12 @@ err_t gimbal_control_init(void) {
   gimbal_init_result[0] =
       dj_motor_init(&gimbal_motors[0], &gimbal_bus, DJ_MOTOR_GM6020, 1,
                     false); /* 偏航YAW电机 = 1 号 */
-  if (gimbal_init_result[0] != OK)
-    return gimbal_init_result[0];
+  if (gimbal_init_result[0] != OK) return gimbal_init_result[0];
 
   gimbal_init_result[1] =
       dj_motor_init(&gimbal_motors[1], &gimbal_bus, DJ_MOTOR_GM6020, 2,
                     false); /* 俯仰PITCH电机 = 2 号 */
-  if (gimbal_init_result[1] != OK)
-    return gimbal_init_result[1];
+  if (gimbal_init_result[1] != OK) return gimbal_init_result[1];
 
   return OK;
 }

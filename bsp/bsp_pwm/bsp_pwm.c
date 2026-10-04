@@ -3,7 +3,8 @@
 // ==================== PWM 基础控制 ====================
 
 //! 初始化 PWM BSP 控制块。
-//! PWM 对象按调用方传入的 TIM_HandleTypeDef* 和 TIM_CHANNEL_x 工作，不硬编码业务通道。
+//! PWM 对象按调用方传入的 TIM_HandleTypeDef* 和 TIM_CHANNEL_x
+//! 工作，不硬编码业务通道。
 err_t STM32PWM_Init(STM32PWM_t* self, TIM_HandleTypeDef* tim_handle,
                     uint32_t channel) {
   if (self == NULL) {

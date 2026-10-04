@@ -8,7 +8,8 @@
 // ==================== IIC 类型与回调定义 ====================
 
 //! IIC BSP 逻辑设备编号。
-//! 枚举项按当前芯片支持的 I2C 外设宏展开，不绑定具体 CubeMX 生成的 hi2c 全局句柄。
+//! 枚举项按当前芯片支持的 I2C 外设宏展开，不绑定具体 CubeMX 生成的 hi2c
+//! 全局句柄。
 typedef enum {
 #ifdef I2C1
   BSP_IIC1,
@@ -25,7 +26,8 @@ typedef enum {
 } BSP_IIC_t;
 
 //! IIC 事件回调类型。
-//! 类型覆盖 HAL I2C 的主/从收发完成、内存读写完成、监听完成、错误和终止完成事件。
+//! 类型覆盖 HAL I2C
+//! 的主/从收发完成、内存读写完成、监听完成、错误和终止完成事件。
 typedef enum {
   BSP_IIC_MASTER_TX_CPLT_CB,
   BSP_IIC_MASTER_RX_CPLT_CB,

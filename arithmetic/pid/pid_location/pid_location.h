@@ -40,7 +40,7 @@ typedef enum {
 
 //* ================= 位置式 PID 错误状态 =================
 //? 当前错误处理只实现电机堵转检测，ERRORType 按 bit
-//保存，便于后续扩展多个故障源。
+// 保存，便于后续扩展多个故障源。
 typedef enum errorType_e {
   PID_ERROR_NONE = 0x00U,
   PID_MOTOR_BLOCKED_ERROR = 0x01U
@@ -53,7 +53,7 @@ typedef struct {
 
 //* ================= 位置式 PID 运行实例 =================
 //? PIDInstance 同时保存配置参数和运行时状态，PIDCalculate()
-//每轮都会更新缓存字段。
+// 每轮都会更新缓存字段。
 //! 外部不要在控制循环中直接改写 Last_*、Iout、Dout
 //! 等运行时字段，否则会破坏状态连续性。
 typedef struct {
@@ -75,7 +75,7 @@ typedef struct {
 
   //-----------------------------------
   //? for calculating: 以下字段由 PIDCalculate()
-  //维护，用于保存当前值和上一次状态。
+  // 维护，用于保存当前值和上一次状态。
   float Measure;
   float Last_Measure;
   float Err;

@@ -7,7 +7,8 @@
 //! HAL 回调只负责切分数据和推进发送状态，协议解析和复杂业务应放在任务上下文。
 
 //! 单缓冲 RX 控制块映射表。
-//! 第一维按 BSP_UART_t 逻辑设备索引，HAL RX 事件通过外设 Instance 反查到对应对象。
+//! 第一维按 BSP_UART_t 逻辑设备索引，HAL RX 事件通过外设 Instance
+//! 反查到对应对象。
 static STM32UART_t* stm32_uart_map[BSP_UART_NUMBER] = {0};
 
 //! 变长帧 TX 控制块映射表。
@@ -143,8 +144,9 @@ err_t STM32UART_Init(STM32UART_t* self, UART_HandleTypeDef* uart_handle,
 }
 
 //! 启动单缓冲 DMA RX。
-//! RX DMA 使用 DMA_CIRCULAR，HAL_UARTEx_ReceiveToIdle_DMA() 用 IDLE 事件驱动数据切分。
-//! 调用前必须保证 dma_buff_rx_ 指向的缓冲区在整个接收期间有效。
+//! RX DMA 使用 DMA_CIRCULAR，HAL_UARTEx_ReceiveToIdle_DMA() 用 IDLE
+//! 事件驱动数据切分。 调用前必须保证 dma_buff_rx_
+//! 指向的缓冲区在整个接收期间有效。
 err_t STM32UART_SetRxDMA(STM32UART_t* self) {
   if (self == NULL) {
     return PTR_NULL;
@@ -251,8 +253,8 @@ void STM32UART_HandleRxData(STM32UART_t* self, uint8_t* data, size_t size) {
 }
 
 //! 单缓冲 RX 事件处理入口。
-//! 根据 DMA 剩余计数计算当前写入位置，并把 last_rx_pos_ 到 curr_pos 的增量切片回调。
-//! 环形缓冲回绕时会拆成尾部和头部两段分别回调。
+//! 根据 DMA 剩余计数计算当前写入位置，并把 last_rx_pos_ 到 curr_pos
+//! 的增量切片回调。 环形缓冲回绕时会拆成尾部和头部两段分别回调。
 static void STM32_UART_RX_ISR_Handler(UART_HandleTypeDef* uart_handle) {
   ASSERT(uart_handle != NULL);
   if (uart_handle == NULL) {
@@ -410,7 +412,8 @@ err_t STM32UARTFrameTx_Init(STM32UARTFrameTx_t* self,
 }
 
 //! 配置变长帧 TX 的 DMA 通道。
-//! TX DMA 使用 DMA_NORMAL，每次 Flush 只发送当前 active buffer 的 pending 数据。
+//! TX DMA 使用 DMA_NORMAL，每次 Flush 只发送当前 active buffer 的 pending
+//! 数据。
 err_t STM32UARTFrameTx_SetTxDMA(STM32UARTFrameTx_t* self) {
   if (self == NULL) {
     return PTR_NULL;
@@ -459,8 +462,9 @@ err_t STM32UARTFrameTx_SetTxDMA(STM32UARTFrameTx_t* self) {
 }
 
 //! 写入一帧 TX 数据。
-//! DMA 空闲时写入 active buffer 并立即启动发送；DMA 忙时写入另一块缓冲等待完成回调续发。
-//! 只保留一块 pending 缓冲；已满时返回 BUSY，不覆盖已接受的帧。
+//! DMA 空闲时写入 active buffer 并立即启动发送；DMA
+//! 忙时写入另一块缓冲等待完成回调续发。 只保留一块 pending 缓冲；已满时返回
+//! BUSY，不覆盖已接受的帧。
 err_t STM32UARTFrameTx_Write(STM32UARTFrameTx_t* self, const uint8_t* data,
                              size_t size) {
   if (self == NULL) {
@@ -516,7 +520,8 @@ err_t STM32UARTFrameTx_Write(STM32UARTFrameTx_t* self, const uint8_t* data,
 }
 
 //! 提交 pending 数据到 HAL DMA 发送。
-//! Flush 成功后 pending_size_ 清零，发送完成后由 HAL_UART_TxCpltCallback() 切换 active buffer。
+//! Flush 成功后 pending_size_ 清零，发送完成后由 HAL_UART_TxCpltCallback() 切换
+//! active buffer。
 err_t STM32UARTFrameTx_Flush(STM32UARTFrameTx_t* self) {
   if (self == NULL) {
     return PTR_NULL;
@@ -570,7 +575,8 @@ err_t STM32UARTFrameTx_GetLastError(const STM32UARTFrameTx_t* self) {
 }
 
 //! 处理 TX DMA 完成事件。
-//! 释放 busy 状态、切换 active buffer；如果另一块缓冲有 pending 数据则立即续发。
+//! 释放 busy 状态、切换 active buffer；如果另一块缓冲有 pending
+//! 数据则立即续发。
 void STM32UARTFrameTx_HandleTxComplete(STM32UARTFrameTx_t* self) {
   if ((self == NULL) || !self->tx_busy_) {
     return;
@@ -625,8 +631,9 @@ static void STM32_UART_DBM_Error(DMA_HandleTypeDef* hdma) {
   __HAL_DMA_DISABLE_IT(hdma, DMA_IT_TC | DMA_IT_HT | DMA_IT_TE | DMA_IT_DME);
   __HAL_DMA_DISABLE_IT(hdma, DMA_IT_FE);
   __HAL_DMA_DISABLE(hdma);
-  // HAL 的 DMA 错误分支只在 TE 时复位状态；FE/DME 进入本回调时 State 仍为 BUSY 且持锁。
-  // 流已被上面停止，这里补齐复位，任务侧 SetTxDMA + Flush 的恢复路径才能走通。
+  // HAL 的 DMA 错误分支只在 TE 时复位状态；FE/DME 进入本回调时 State 仍为 BUSY
+  // 且持锁。 流已被上面停止，这里补齐复位，任务侧 SetTxDMA + Flush
+  // 的恢复路径才能走通。
   hdma->State = HAL_DMA_STATE_READY;
   __HAL_UNLOCK(hdma);
   self->uart_handle_->ErrorCode |= HAL_UART_ERROR_DMA;
@@ -940,7 +947,8 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart) {
 
 //! HAL UART 错误回调，回收被错误路径终止的变长帧 TX 发送状态。
 //! RX 侧错误同样会进入本回调；只有 TX DMA 已物理停止且 UART TC 中断未挂起时，
-//! 才能确认本次传输是被错误路径终止的，此时复位 tx_busy_，pending 数据由 Write/Flush 重试。
+//! 才能确认本次传输是被错误路径终止的，此时复位 tx_busy_，pending 数据由
+//! Write/Flush 重试。
 void HAL_UART_ErrorCallback(UART_HandleTypeDef* huart) {
   if (huart == NULL) {
     return;

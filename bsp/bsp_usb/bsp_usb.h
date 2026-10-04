@@ -17,7 +17,8 @@ typedef enum {
 } BSP_USB_t;
 
 //! 用户接收回调。
-//! data 指向本次 CDC OUT 收到的数据片段，size 为片段长度；回调由 USB CDC 接收路径触发。
+//! data 指向本次 CDC OUT 收到的数据片段，size 为片段长度；回调由 USB CDC
+//! 接收路径触发。
 typedef void (*STM32USB_RxCallback_t)(uint8_t* data, size_t size);
 
 //! 用户发送完成回调。
@@ -45,7 +46,8 @@ extern "C" {
 BSP_USB_t BSP_USB_get_id(USBD_HandleTypeDef* usb_handle);
 
 //! 初始化 USB CDC BSP 控制块。
-//! 只绑定 USB Device 句柄和用户回调；USB 设备启动仍由 MX_USB_DEVICE_Init() 完成。
+//! 只绑定 USB Device 句柄和用户回调；USB 设备启动仍由 MX_USB_DEVICE_Init()
+//! 完成。
 err_t STM32USB_Init(STM32USB_t* self, USBD_HandleTypeDef* usb_handle,
                     STM32USB_RxCallback_t rx_callback,
                     STM32USB_TxCompleteCallback_t tx_callback);
@@ -68,7 +70,8 @@ bool STM32USB_IsConfigured(const STM32USB_t* self);
 err_t STM32USB_GetLastError(const STM32USB_t* self);
 
 //! 处理 CDC OUT 收到的数据。
-//! 由 CDC_Receive_FS() 调用；未注册对象时静默返回，保持 CubeMX 默认接收流程可用。
+//! 由 CDC_Receive_FS() 调用；未注册对象时静默返回，保持 CubeMX
+//! 默认接收流程可用。
 void STM32USB_HandleRxData(USBD_HandleTypeDef* usb_handle, uint8_t* data,
                            size_t size);
 

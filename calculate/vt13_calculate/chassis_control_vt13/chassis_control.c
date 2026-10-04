@@ -16,7 +16,7 @@
 #include "vt13.h"
 
 /* VT13 task owns the decoded command and updates it periodically. */
-extern vt13_t *vt13;
+extern vt13_t* vt13;
 
 /* 底盘电机总线与实例 */
 dj_motor_bus_t chassis_bus;
@@ -44,7 +44,7 @@ err_t chassis_control_init(void) {
     return NOT_FOUND;
   }
 
-  STM32CAN_t *can2 = STM32CAN_GetInstance(can_id);
+  STM32CAN_t* can2 = STM32CAN_GetInstance(can_id);
   if (can2 == NULL) {
     return PTR_NULL;
   }
@@ -65,31 +65,27 @@ err_t chassis_control_init(void) {
   chassis_init_result[0] =
       dj_motor_init(&chassis_motors[CHASSIS_MOTOR_FL], &chassis_bus,
                     DJ_MOTOR_M3508, 4, false); /* 左前轮 = 4 号 */
-  if (chassis_init_result[0] != OK)
-    return chassis_init_result[0];
+  if (chassis_init_result[0] != OK) return chassis_init_result[0];
 
   chassis_init_result[1] =
       dj_motor_init(&chassis_motors[CHASSIS_MOTOR_FR], &chassis_bus,
                     DJ_MOTOR_M3508, 3, false); /* 右前轮 = 3 号 */
-  if (chassis_init_result[1] != OK)
-    return chassis_init_result[1];
+  if (chassis_init_result[1] != OK) return chassis_init_result[1];
 
   chassis_init_result[2] =
       dj_motor_init(&chassis_motors[CHASSIS_MOTOR_RL], &chassis_bus,
                     DJ_MOTOR_M3508, 2, false); /* 左后轮 = 2 号 */
-  if (chassis_init_result[2] != OK)
-    return chassis_init_result[2];
+  if (chassis_init_result[2] != OK) return chassis_init_result[2];
 
   chassis_init_result[3] =
       dj_motor_init(&chassis_motors[CHASSIS_MOTOR_RR], &chassis_bus,
                     DJ_MOTOR_M3508, 1, false); /* 右后轮 = 1 号 */
-  if (chassis_init_result[3] != OK)
-    return chassis_init_result[3];
+  if (chassis_init_result[3] != OK) return chassis_init_result[3];
 
   return OK;
 }
 
-static void chassis_speed_pid_init_single(PIDInstance *pid, float kp, float ki,
+static void chassis_speed_pid_init_single(PIDInstance* pid, float kp, float ki,
                                           float kd, float max_out) {
   PIDInit(pid, kp, ki, kd, max_out, 3000.0f, 0.0f,
           PID_Integral_Limit | PID_Derivative_On_Measurement |
@@ -110,8 +106,7 @@ void chassis_speed_pid_init(void) {
 
 static void chassis_motor_pid_control_speed(uint8_t motor_index,
                                             float target_speed) {
-  if (motor_index >= 4)
-    return;
+  if (motor_index >= 4) return;
 
   /* 获取电机反馈 */
   dj_motor_feedback_t feedback;
@@ -143,7 +138,7 @@ static void chassis_stop(void) {
 }
 
 static void chassis_control(void) {
-  const vt13_cmd_rc_t *command = &vt13->cmd;
+  const vt13_cmd_rc_t* command = &vt13->cmd;
 
   chassis_dynamics_feedforward(torque_ff_current);
   /*
@@ -157,8 +152,8 @@ static void chassis_control(void) {
    *   注意：这里保留当前遥控器通道的实际方向反号，
    *   只把它统一映射到机器人底盘坐标系。
    */
-  chassis_control_state_.command.vx = -command->ch.l.y * 3000.0f; // +X：前
-  chassis_control_state_.command.vy = -command->ch.l.x * 3000.0f; // +Y：左
+  chassis_control_state_.command.vx = -command->ch.l.y * 3000.0f;  // +X：前
+  chassis_control_state_.command.vy = -command->ch.l.x * 3000.0f;  // +Y：左
   chassis_control_state_.command.wz = command->ch.r.x * 3000.0f;  // +wz：顺时针
 
   /*
@@ -198,7 +193,6 @@ void Chassis_Mode(void) {
   }
 
   if (vt13->cmd.mode_sw == vt13_CMD_SW_MID) {
-
     chassis_control();
 
   } else {

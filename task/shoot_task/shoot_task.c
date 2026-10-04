@@ -21,7 +21,7 @@ volatile err_t shoot_status = PENDING;
  *   2. 初始化发射电机速度环 PID 参数
  *   3. 周期性调用发射控制函数（2ms 周期）
  */
-void shoot_task(void *argument) {
+void shoot_task(void* argument) {
   RM_UNUSED(argument);
 
   /* CAN2 及发射电机已由 main.c 完成注册和启动。 */

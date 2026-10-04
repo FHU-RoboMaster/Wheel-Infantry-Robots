@@ -20,7 +20,8 @@
 
 //* ================= 增量式 PID 改进功能开关 =================
 //? Improve 使用按位或组合，PID_Calculate_jie() 通过位与选择启用的增量修正环节。
-//! 该枚举和位置式 PID 同名项较多，跨模块引用时注意使用 PID_Improvement_jie_e 类型。
+//! 该枚举和位置式 PID 同名项较多，跨模块引用时注意使用 PID_Improvement_jie_e
+//! 类型。
 typedef enum {
   PID_IMPROVE_NONE = 0b00000000,
   /* 0000 0000 */  // 无改进

@@ -88,7 +88,8 @@ static void f_Derivative_On_actualment_jie(PIDInstance_jie* pid) {
  * alpha = dt / (RC + dt)
  */
 static void f_Derivative_Filter_jie(PIDInstance_jie* pid, float raw_dout) {
-  //! Derivative_LPF_RC 越大滤波越重，响应也越慢；调参时需结合噪声和相位滞后一起看。
+  //! Derivative_LPF_RC
+  //! 越大滤波越重，响应也越慢；调参时需结合噪声和相位滞后一起看。
   float rc = pid->Derivative_LPF_RC;
   float factor;
 
@@ -177,7 +178,8 @@ static float f_FeedForward_jie(PIDInstance_jie* pid) {
 void PID_Init_Params_jie(PIDInstance_jie* pid, float kp, float ki, float kd,
                          float dt, float max_output, float max_integral,
                          float deadzone, PID_Improvement_jie_e improve_flags) {
-  //! 该初始化接口只做参数写入和运行时清零，调用方负责保证 dt/max_output 等参数有效。
+  //! 该初始化接口只做参数写入和运行时清零，调用方负责保证 dt/max_output
+  //! 等参数有效。
   if (pid == NULL) return;
 
   /* 清零结构体 */

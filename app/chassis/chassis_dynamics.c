@@ -76,7 +76,7 @@ void chassis_dynamics_inverse(float vx, float vy, float wz, float o[4]) {
    *   +X：前
    *   +Y：左
    *   +Z：上
-  *   +wz：顺时针
+   *   +wz：顺时针
    *
    * 输出顺序固定为 [FL, FR, RL, RR] = [4, 3, 2, 1]。
    * 注意：这里是“运动学正方向”，不等同于电机机械正转方向。

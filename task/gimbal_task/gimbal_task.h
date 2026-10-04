@@ -16,4 +16,4 @@ extern volatile err_t gimbal_status;
  * @brief 云台任务入口函数
  * @param argument FreeRTOS 任务参数（未使用）
  */
-void gimbal_task(void *argument);
+void gimbal_task(void* argument);

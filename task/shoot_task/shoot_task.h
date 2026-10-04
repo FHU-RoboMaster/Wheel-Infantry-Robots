@@ -16,4 +16,4 @@ extern volatile err_t shoot_status;
  * @brief 发射任务入口函数
  * @param argument FreeRTOS 任务参数（未使用）
  */
-void shoot_task(void *argument);
+void shoot_task(void* argument);

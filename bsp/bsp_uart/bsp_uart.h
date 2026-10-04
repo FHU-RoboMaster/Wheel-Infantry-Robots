@@ -34,7 +34,8 @@ typedef enum {
 } BSP_UART_t;
 
 //! 用户接收回调。
-//! data 指向本次新收到的数据片段，size 为片段长度；回调由 HAL RX 事件分发路径触发。
+//! data 指向本次新收到的数据片段，size 为片段长度；回调由 HAL RX
+//! 事件分发路径触发。
 typedef void (*STM32UART_RxCallback_t)(uint8_t* data, size_t size);
 
 //! 用户发送完成回调。
@@ -42,7 +43,8 @@ typedef void (*STM32UART_RxCallback_t)(uint8_t* data, size_t size);
 typedef void (*STM32UART_TxCompleteCallback_t)(void);
 
 //! 硬件 DBM 换页回调：data 指向刚发送完的空闲页，size 为固定页长。
-//! 在 DMA ISR 中填充下一轮数据，必须在另一页发送完成前返回；不更新则循环发送旧内容。
+//! 在 DMA ISR
+//! 中填充下一轮数据，必须在另一页发送完成前返回；不更新则循环发送旧内容。
 typedef void (*STM32UART_TxRefillCallback_t)(uint8_t* data, size_t size);
 
 //! 通用原始数据缓冲描述。
@@ -53,7 +55,8 @@ typedef struct {
 } BSP_UART_RawData_t;
 
 //! 单缓冲 DMA RX 控制块。
-//! RX 使用硬件循环 DMA + last_rx_pos_ 软件读指针，HAL 空闲线事件到来时切分新数据。
+//! RX 使用硬件循环 DMA + last_rx_pos_ 软件读指针，HAL
+//! 空闲线事件到来时切分新数据。
 typedef struct {
   BSP_UART_t id_;                    //! BSP 逻辑串口编号
   size_t last_rx_pos_;               //! 软件读指针，上次处理到的 DMA 写入位置
@@ -64,8 +67,9 @@ typedef struct {
 } STM32UART_t;
 
 //! 变长帧 DMA TX 控制块。
-//! active_buf_ 表示当前 DMA 正在发送的缓冲，pending_size_ 表示另一块缓冲中待发送字节数。
-//! 两块 TX 缓冲须等长、非重叠且容量为 1..65535 字节，单次写入不能超过容量。
+//! active_buf_ 表示当前 DMA 正在发送的缓冲，pending_size_
+//! 表示另一块缓冲中待发送字节数。 两块 TX 缓冲须等长、非重叠且容量为 1..65535
+//! 字节，单次写入不能超过容量。
 typedef struct {
   BSP_UART_t id_;                               //! BSP 逻辑串口编号
   size_t last_tx_pos_;                          //! 预留发送位置记录
@@ -101,7 +105,8 @@ extern "C" {
 // ==================== UART 公开接口 ====================
 
 //! 将 HAL 外设 Instance 映射到 BSP UART 逻辑 ID。
-//! HAL 回调里只有 USART_TypeDef* 或 UART_HandleTypeDef*，BSP 通过该函数反查对象表。
+//! HAL 回调里只有 USART_TypeDef* 或 UART_HandleTypeDef*，BSP
+//! 通过该函数反查对象表。
 BSP_UART_t BSP_UART_get_id(USART_TypeDef* addr);
 
 // ==================== 单缓冲 DMA RX ====================
@@ -112,7 +117,8 @@ err_t STM32UART_Init(STM32UART_t* self, UART_HandleTypeDef* uart_handle,
                      STM32UART_RxCallback_t callback);
 
 //! 启动单缓冲 DMA 接收。
-//! 将 RX DMA 配置为 DMA_CIRCULAR，并调用 HAL_UARTEx_ReceiveToIdle_DMA() 开始接收。
+//! 将 RX DMA 配置为 DMA_CIRCULAR，并调用 HAL_UARTEx_ReceiveToIdle_DMA()
+//! 开始接收。
 err_t STM32UART_SetRxDMA(STM32UART_t* self);
 
 //! 更新单缓冲 RX 用户回调。
@@ -129,7 +135,8 @@ void STM32UART_HandleRxData(STM32UART_t* self, uint8_t* data, size_t size);
 
 // ==================== 变长帧 DMA TX ====================
 //! 初始化变长帧 DMA TX 控制块。
-//! 只绑定句柄、两块发送缓冲和完成回调；真正配置 TX DMA 由 STM32UARTFrameTx_SetTxDMA() 完成。
+//! 只绑定句柄、两块发送缓冲和完成回调；真正配置 TX DMA 由
+//! STM32UARTFrameTx_SetTxDMA() 完成。
 err_t STM32UARTFrameTx_Init(STM32UARTFrameTx_t* self,
                             UART_HandleTypeDef* uart_handle,
                             BSP_UART_RawData_t dma_buff_0,
@@ -157,7 +164,8 @@ void STM32UARTFrameTx_SetTxCompleteCallback(
 err_t STM32UARTFrameTx_GetLastError(const STM32UARTFrameTx_t* self);
 
 //! 处理变长帧 UART TC 完成事件。
-//! HAL_UART_TxCpltCallback() 调用该函数，切换 active buffer 并尝试续发 pending 数据。
+//! HAL_UART_TxCpltCallback() 调用该函数，切换 active buffer 并尝试续发 pending
+//! 数据。
 void STM32UARTFrameTx_HandleTxComplete(STM32UARTFrameTx_t* self);
 
 // ==================== 硬件双缓冲 DMA TX ====================
@@ -177,10 +185,12 @@ err_t STM32UARTDoubleBufTx_SetTxDMA(STM32UARTDoubleBufTx_t* self);
 err_t STM32UARTDoubleBufTx_Write(STM32UARTDoubleBufTx_t* self,
                                  const uint8_t* data, size_t size);
 
-//! 启动连续 DBM；调用前两页必须均已填满有效数据。不会自动停机或按 pending 续发。
+//! 启动连续 DBM；调用前两页必须均已填满有效数据。不会自动停机或按 pending
+//! 续发。
 err_t STM32UARTDoubleBufTx_Flush(STM32UARTDoubleBufTx_t* self);
 
-//! 任务上下文且未进入临界区时停止 TX DMA，不影响 RX；可能截断当前页，已进入 UART 的字节仍会发出。
+//! 任务上下文且未进入临界区时停止 TX DMA，不影响 RX；可能截断当前页，已进入
+//! UART 的字节仍会发出。
 err_t STM32UARTDoubleBufTx_Stop(STM32UARTDoubleBufTx_t* self);
 
 //! 更新空闲页填充回调；回调耗时和中断延迟必须小于一页发送时间。

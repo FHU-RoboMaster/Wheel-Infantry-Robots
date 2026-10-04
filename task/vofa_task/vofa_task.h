@@ -9,8 +9,9 @@ extern "C" {
 /**
  * @brief FreeRTOS 中 VOFA 任务入口。
  *
- * CubeMX 在 Core/Src/freertos.c 中生成了同名弱函数 vofa_task；本函数提供强定义，
- * 由系统创建的 vofa 线程调用，用于启动 USART3 上的 VOFA 收发逻辑。
+ * CubeMX 在 Core/Src/freertos.c 中生成了同名弱函数
+ * vofa_task；本函数提供强定义， 由系统创建的 vofa 线程调用，用于启动 USART3
+ * 上的 VOFA 收发逻辑。
  */
 void vofa_task(void* argument);
 
@@ -44,14 +45,16 @@ bool VofaTask_GetAngle(float* angle);
  *
  * @param name 参数名，例如 "speed" 或 "angle"。
  * @param value 输出参数地址，不能为 NULL。
- * @return true 表示参数存在且已经收到过；false 表示参数不存在、参数为空或尚未收到。
+ * @return true 表示参数存在且已经收到过；false
+ * 表示参数不存在、参数为空或尚未收到。
  */
 bool VofaTask_GetParameter(const char* name, float* value);
 
 /**
  * @brief VOFA ASCII 命令接收扩展点。
  *
- * Vofa 解析到合法的 `name=value!` 命令后，会先更新模块内部参数表，再调用此扩展点。
+ * Vofa 解析到合法的 `name=value!`
+ * 命令后，会先更新模块内部参数表，再调用此扩展点。
  * 默认实现为空，业务代码可在其他编译单元中提供同名强定义来接收额外参数，不需要
  * 修改 Vofa 驱动或任务循环。
  *
