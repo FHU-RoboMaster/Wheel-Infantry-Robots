@@ -4,10 +4,10 @@
 
 ## 脚本列表
 
-| 脚本 | 平台 | 说明 |
-| --- | --- | --- |
-| `format.sh` | Linux / macOS / Git Bash | Bash 版一键格式化脚本 |
-| `format.ps1` | Windows PowerShell | PowerShell 版一键格式化脚本 |
+| 脚本         | 平台                     | 说明                        |
+| ------------ | ------------------------ | --------------------------- |
+| `format.sh`  | Linux / macOS / Git Bash | Bash 版一键格式化脚本       |
+| `format.ps1` | Windows PowerShell       | PowerShell 版一键格式化脚本 |
 
 两个脚本逻辑完全一致，任选其一即可。
 

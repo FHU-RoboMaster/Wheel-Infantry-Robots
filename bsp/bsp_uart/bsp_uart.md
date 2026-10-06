@@ -1,87 +1,93 @@
 # bsp_uart
 
-RX 使用 `ReceiveToIdle + DMA_CIRCULAR`，TX 根据发送语义选择两条独立路径：
+UART BSP,提供三种独立通道:单缓冲 DMA RX(循环 DMA + 空闲线切分)、变长帧 DMA TX(软件双缓冲)和定长连续流 TX(硬件 DBM).HAL 回调只负责切分数据与推进发送状态,协议解析和业务逻辑应放在任务上下文.
 
-| 接口 | DMA 模式 | 用途 |
-| --- | --- | --- |
-| `STM32UARTDoubleBufTx_*` | 硬件 DBM，M0/M1 自动循环切换 | 定长连续数据流 |
-| `STM32UARTFrameTx_*` | `DMA_NORMAL`，一帧发送、一帧等待 | 变长协议帧，每帧只发送一次 |
+## 常用功能
 
-同一 UART 只能绑定一个 TX 对象，可以同时绑定 RX 对象。实现见 [bsp_uart.c](./bsp_uart.c)，接口见 [bsp_uart.h](./bsp_uart.h)。
+### DMA 接收(空闲线切分)
 
-## 单缓冲循环 RX
-
-`STM32UART_Init()` 绑定 RX 缓冲和接收回调，`STM32UART_SetRxDMA()` 启动循环接收。`HAL_UARTEx_RxEventCallback()` 根据 DMA 计数器切分新增字节，回绕时最多分为两段。对象和缓冲必须长期有效，中断中将新字节交给 FIFO，在任务中解析协议。
-
-## 硬件双缓冲连续 TX
-
-STM32F405 DBM 的两页共用一个 `NDTR` 重载长度。传输完成时硬件立即切换 `CT`，不等待 CPU 中断。因此本接口始终按完整页连续发送，不支持“pending 为空就精确停止”或两页不同帧长。
+RX 使用硬件循环 DMA,HAL 空闲线(IDLE)事件到来时按 DMA 写入位置切分新数据并回调;环形缓冲回绕时会拆成尾、头两段分别回调(摘自 `modules/dm_imu/imu_rs485`):
 
 ```c
-static uint8_t tx_pages[2][128];
-static STM32UARTDoubleBufTx_t tx;
+#include "bsp_uart.h"
 
-static void RefillTxPage(uint8_t *data, size_t size)
+static uint8_t dma_buffer_[256];
+
+static void my_rx_callback(uint8_t* data, size_t size)
 {
-  // data 是刚发送完的页。填满 size 字节，供硬件下一轮使用。
-  // 示例保持内容不变，因此会循环发送原有内容。
-  RM_UNUSED(data);
-  RM_UNUSED(size);
+    /* data 指向 DMA 缓冲内本次新收到的片段,仅本次回调有效 */
 }
 
-err_t StartStream(void)
+static STM32UART_t uart_rx;
+
+err_t uart_rx_init(UART_HandleTypeDef* huart)
 {
-  err_t err = STM32UARTDoubleBufTx_Init(&tx, &huart1,
-      (BSP_UART_RawData_t){tx_pages[0], sizeof(tx_pages[0])},
-      (BSP_UART_RawData_t){tx_pages[1], sizeof(tx_pages[1])}, RefillTxPage);
-  if (err != OK)
-  {
-    return err;
-  }
-  err = STM32UARTDoubleBufTx_SetTxDMA(&tx);
-  if (err != OK)
-  {
-    return err;
-  }
-  // 此处两页均为有效的零数据；实际应用应先填满两页。
-  return STM32UARTDoubleBufTx_Flush(&tx);
+    err_t err = STM32UART_Init(&uart_rx, huart,
+                               (BSP_UART_RawData_t){dma_buffer_, sizeof(dma_buffer_)},
+                               my_rx_callback);       /* 1. 绑定句柄/缓冲/回调 */
+    return STM32UART_SetRxDMA(&uart_rx);              /* 2. 启动循环 DMA 接收 */
 }
 ```
 
-- `SetTxDMA()` 配置 `DMA_CIRCULAR + DBM`、`PAR`、`M0AR`、`M1AR` 和固定 `NDTR`，尚不发送。
-- `Flush()` 调用 `HAL_DMAEx_MultiBufferStart_IT()` 并开启 UART `DMAT`；两页必须都已准备好。运行中再次调用返回 `BUSY`。
-- `Write()` 仅供空闲时启动：长度必须等于页容量，复制同一份数据到两页后调用 `Flush()`。运行中返回 `BUSY`，不会改写 DMA 使用中的页。
-- M0/M1 完成事件均从 DMA 回调进入 `HandleTxComplete()`，读取硬件 `CT` 并把刚完成页交给填充回调。不会重启 DMA，也不会通过 `HAL_UART_TxCpltCallback()` 重复分发。
-- 回调签名变为 `void (*)(uint8_t *data, size_t size)`。回调运行在 DMA ISR 中，只能写传入页；不更新时该页内容会在下一轮重复发送。
-- **最大 DMA 中断延迟 + 回调填充耗时必须小于一页发送时间**。8N1 时一页时间约为 `size × 10 / baud_rate` 秒；高优先级中断和临界区耗时也要计入。超过期限可能写到硬件已重新使用的页。应先在任务中准备数据，在回调中快速复制，不能阻塞等待。
-- 两页须等长、非重叠，容量为 1～65535 字节，位于 DMA 可访问的 SRAM（不能使用 F405 CCM）。不支持 9 位无校验的数据格式。
-- `Stop()` 只能在任务上下文且未进入临界区时调用，只关闭 TX DMA，RX 不受影响。停止可能截断当前页，UART 中已有的字节仍会发出；需要完整单次帧时使用 `FrameTx`。
-- DMA 错误关闭 TX 请求与中断，将 `last_error_` 设为 `FAILED`；任务可重新调用 `SetTxDMA()`，准备两页后再次启动。配置、启动和停止等生命周期操作由一个任务串行管理。
+### 变长帧 DMA 发送
 
-## 变长帧 TX 与模块迁移
-
-`Vofa` 和 `LX824` 已迁移到 `STM32UARTFrameTx_*`，保留原来的 firewater 帧及舵机请求/应答协议：不补齐发送、不自动重复指令。
+软件双缓冲轮转:DMA 空闲时 `Write` 立即发送;忙时写入另一块缓冲排队一帧,完成中断后自动续发:
 
 ```c
-static uint8_t frame_pages[2][32];
-static STM32UARTFrameTx_t frame_tx;
+static uint8_t tx_buf0[64], tx_buf1[64];
+static STM32UARTFrameTx_t uart_tx;
 
-err_t InitFrameTx(void)
+err_t uart_tx_init(UART_HandleTypeDef* huart)
 {
-  err_t err = STM32UARTFrameTx_Init(&frame_tx, &huart6,
-      (BSP_UART_RawData_t){frame_pages[0], sizeof(frame_pages[0])},
-      (BSP_UART_RawData_t){frame_pages[1], sizeof(frame_pages[1])}, NULL);
-  return (err == OK) ? STM32UARTFrameTx_SetTxDMA(&frame_tx) : err;
+    err_t err = STM32UARTFrameTx_Init(&uart_tx, huart,
+                                      (BSP_UART_RawData_t){tx_buf0, sizeof(tx_buf0)},
+                                      (BSP_UART_RawData_t){tx_buf1, sizeof(tx_buf1)},
+                                      NULL);
+    return STM32UARTFrameTx_SetTxDMA(&uart_tx);
+}
+
+void send_frame(const uint8_t* data, size_t size)
+{
+    /* 忙时排队;pending 已满返回 BUSY,不覆盖已接受的帧 */
+    (void)STM32UARTFrameTx_Write(&uart_tx, data, size);
 }
 ```
 
-调用 `STM32UARTFrameTx_Write(&frame_tx, data, actual_size)` 发送实际长度。返回 `OK` 表示帧已接受；一帧在发送且一帧已排队时返回 `BUSY`，新帧未入队，调用方可以稍后重试。BSP 内部保存/恢复 `PRIMASK`，模块无需再包裹 FreeRTOS 临界区。
+### 定长连续流发送(硬件 DBM)
 
-`HAL_UART_TxCpltCallback()` 在 UART TC 后释放当前页并启动排队帧。初次提交失败不会保留未接受的新帧；已接受的排队帧若续发失败，则保留并可用 `Flush()` 重试，后续 `Write()` 也会尝试推进旧帧并对新帧返回 `BUSY`。
+M0/M1 两页以相同 NDTR 由硬件自动循环切换,适合音频流、调试波形等恒定码率输出;每次页发送完成时回调刚空闲的页,在 ISR 中填充下一轮数据:
 
-## 验证
+```c
+static uint8_t page0[512] __attribute__((section(".sram")));  /* 须在 DMA 可访问的 SRAM */
+static uint8_t page1[512];
+static STM32UARTDoubleBufTx_t uart_stream;
 
-主机状态测试见 [tests/uart_tx](../../tests/uart_tx/README.md)。该测试覆盖接口与状态转换；真实 DMA 时序、回调期限和串口波形需要上板验证。
+static void refill_callback(uint8_t* data, size_t size)
+{
+    /* data 指向刚发送完的空闲页;不更新则循环发送旧内容 */
+}
 
+err_t stream_init(UART_HandleTypeDef* huart)
+{
+    err_t err = STM32UARTDoubleBufTx_Init(&uart_stream, huart,
+                                          (BSP_UART_RawData_t){page0, sizeof(page0)},
+                                          (BSP_UART_RawData_t){page1, sizeof(page1)},
+                                          refill_callback);
+    err = STM32UARTDoubleBufTx_SetTxDMA(&uart_stream);
+    /* Write 同步填充两页并启动连续发送;之后由回调逐页刷新 */
+    return STM32UARTDoubleBufTx_Write(&uart_stream, init_page, sizeof(page0));
+}
 
-IMU RS485 follows the same RX contract: its callback accepts arbitrary DMA fragments, accumulates the four protocol packets into an 80-byte snapshot, and wakes the task only after a complete aggregate has been received. The protocol parser therefore remains in task context and does not perform floating-point decoding from the UART ISR.
+/* 需要停止时(仅任务上下文且未进临界区): */
+/* STM32UARTDoubleBufTx_Stop(&uart_stream); */
+```
+
+## 注意事项
+
+- 缓冲区由调用方持有,BSP 不管理生命周期;RX/TX 缓冲必须在整个使用期间有效.
+- RX 回调运行在 HAL 回调(中断)上下文,必须短且非阻塞;延后处理先拷贝.
+- 变长帧与硬件 DBM 互斥:同一 UART 只能注册一个 TX 对象.
+- 两块 TX 缓冲必须等长、非重叠且 ≤ 65535 字节(DMA NDTR 为 16 位);单次 Write 不能超过缓冲容量.
+- 硬件 DBM 的缓冲必须位于 DMA 可访问的 SRAM,不能放在 CCM;页填充回调的耗时和中断延迟必须小于一页的发送时间.
+- 变长帧 TX 只保留一块 pending 缓冲,已满返回 `BUSY`;返回失败表示本次写入未被接受,可安全重试.
+- `Stop()` 不是页边界操作,可能截断当前页,已进入 UART 的字节仍会发出.

@@ -1,4 +1,6 @@
-# 底盘控制模块 (Chassis Control)
+# chassis_control_dr16
+
+> 底盘控制模块(DR16 遥控器)
 
 ## 概述
 
@@ -7,11 +9,10 @@
 ## 文件结构
 
 ```
-calculate/chassis_control/
+calculate/dr16_calculate/chassis_control_dr16/
 ├── chassis_control.h       # 公开接口
 ├── chassis_control.c       # 实现
-├── ADAPTATION.md          # 详细适配说明
-└── README.md              # 本文件
+└── chassis_control_dr16.md   # 本文件
 ```
 
 ## 快速集成
@@ -248,4 +249,3 @@ static void chassis_control(void) {
 
 ## 更多信息
 
-详细的适配说明和 API 对照请参考 [ADAPTATION.md](ADAPTATION.md)。
