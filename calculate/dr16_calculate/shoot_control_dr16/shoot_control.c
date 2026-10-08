@@ -28,14 +28,6 @@ static PIDInstance_jie pid_speed[3];
 /* 位置环 PID 实例：仅拨弹电机 M2006 需要位置环 */
 static PIDInstance_jie pid_location;
 
-typedef struct {
-  float target_angle_deg;
-  bool initialized;
-} shoot_motor_location_state_t;
-
-/* 位置环状态：仅拨弹电机使用 */
-static shoot_motor_location_state_t shoot_motor_location_state;
-
 /**
  * @brief 初始化发射 CAN 总线与三台发射电机
  * @return OK 或错误码
@@ -104,8 +96,6 @@ void shoot_speed_pid_init(void) {
                       1000.0f, 0.0f,
                       PID_Integral_Limit | PID_Derivative_On_Measurement |
                           PID_OutputFilter | PID_DerivativeFilter);
-  shoot_motor_location_state.target_angle_deg = 0.0f;
-  shoot_motor_location_state.initialized = false;
 }
 void dj_motor_pid_control_location(uint8_t motor_id, float target_angle) {
   dj_motor_feedback_t feedback;
@@ -120,17 +110,8 @@ void dj_motor_pid_control_location(uint8_t motor_id, float target_angle) {
   const float normalized_target =
       GetAngleBetween180(GetAngleBetween360(target_angle));
 
-  if (!shoot_motor_location_state.initialized) {
-    shoot_motor_location_state.target_angle_deg = current_angle_deg;
-    shoot_motor_location_state.initialized = true;
-    PID_Reset_jie(&pid_location);
-    PID_Reset_jie(&pid_speed[motor_id]);
-  } else {
-    shoot_motor_location_state.target_angle_deg = normalized_target;
-  }
-
-  const float angle_error = GetAngleBetween180(
-      shoot_motor_location_state.target_angle_deg - current_angle_deg);
+  const float angle_error =
+      GetAngleBetween180(normalized_target - current_angle_deg);
   const float target_speed =
       PID_Calculate_jie(&pid_location, angle_error, 0.0f);
   float motor_current = PID_Calculate_jie(&pid_speed[motor_id], target_speed,
