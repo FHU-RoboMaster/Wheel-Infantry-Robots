@@ -20,9 +20,8 @@
 
 #include <string.h>
 
-
- //! 在初始化总线时调用，或在注销所有电机后调用
- //清空单条 CAN 总线上的所有电机组状态(不影响控制组 ID)(用作清零并建表)
+//! 在初始化总线时调用，或在注销所有电机后调用
+// 清空单条 CAN 总线上的所有电机组状态(不影响控制组 ID)(用作清零并建表)
 static void dj_motor_groups_reset(dj_motor_bus_t *bus) {
   static const dj_motor_group_e ids[DJ_MOTOR_GROUP_COUNT] = {
       DJ_MOTOR_GROUP_200, DJ_MOTOR_GROUP_1FF, DJ_MOTOR_GROUP_2FF};
@@ -34,8 +33,8 @@ static void dj_motor_groups_reset(dj_motor_bus_t *bus) {
   }
 }
 
-
- //根据控制组 ID 取得 bus 内对应的 group_state 指针（0x200、0x1FF、0x2FF 各一组）
+// 根据控制组 ID 取得 bus 内对应的 group_state 指针（0x200、0x1FF、0x2FF
+// 各一组）
 static dj_motor_group_state_t *dj_motor_group_state(dj_motor_bus_t *bus,
                                                     dj_motor_group_e group) {
   const uint8_t index = dj_motor_drv_group_index(group);
@@ -45,13 +44,13 @@ static dj_motor_group_state_t *dj_motor_group_state(dj_motor_bus_t *bus,
   return &bus->groups[index];
 }
 
-//在临界区外根据 是否在 pending_mask 中置位来发送命令快照，成功时可选清零 pending
+// 在临界区外根据 是否在 pending_mask 中置位来发送命令快照，成功时可选清零
+// pending
 static err_t dj_motor_send_snapshot(dj_motor_bus_t *bus,
                                     dj_motor_group_state_t *group,
                                     const int16_t commands[4],
                                     bool clear_pending_on_ok) {
-  const err_t result =
-      dj_motor_drv_send_group(bus->can, group->id, commands);
+  const err_t result = dj_motor_drv_send_group(bus->can, group->id, commands);
   if ((result == OK) && clear_pending_on_ok) {
     taskENTER_CRITICAL();
     group->pending_mask = 0U;
@@ -112,8 +111,7 @@ err_t dj_motor_bus_init(dj_motor_bus_t *bus, STM32CAN_t *can) {
   bus->can = can;
   dj_motor_groups_reset(bus);
 
-  const err_t result =
-      STM32CAN_SubscribeRx(can, dj_motor_rx_callback, bus);
+  const err_t result = STM32CAN_SubscribeRx(can, dj_motor_rx_callback, bus);
   if (result != OK) {
     memset(bus, 0, sizeof(*bus));
     return result;
@@ -147,10 +145,9 @@ err_t dj_motor_init(dj_motor_t *motor, dj_motor_bus_t *bus,
     return STATE_ERR;
   }
 
-  //根据设备 ID 推导路由
+  // 根据设备 ID 推导路由
   dj_motor_route_t route;
-  const err_t route_result =
-      dj_motor_drv_derive_route(type, device_id, &route);
+  const err_t route_result = dj_motor_drv_derive_route(type, device_id, &route);
   if (route_result != OK) {
     return route_result;
   }
@@ -210,8 +207,7 @@ err_t dj_motor_set_command(dj_motor_t *motor, int16_t command) {
   if (motor == NULL) {
     return PTR_NULL;
   }
-  if (!motor->initialized || (motor->bus == NULL) ||
-      !motor->bus->initialized) {
+  if (!motor->initialized || (motor->bus == NULL) || !motor->bus->initialized) {
     return STATE_ERR;
   }
 
@@ -236,8 +232,7 @@ err_t dj_motor_set_command(dj_motor_t *motor, int16_t command) {
   group->tx_buff[motor->route.slot] = physical;
   group->pending_mask =
       (uint8_t)(group->pending_mask | (uint8_t)(1U << motor->route.slot));
-  if ((group->group_mask != 0U) &&
-      (group->pending_mask == group->group_mask)) {
+  if ((group->group_mask != 0U) && (group->pending_mask == group->group_mask)) {
     memcpy(snapshot, group->tx_buff, sizeof(snapshot));
     group->pending_mask = 0U;
     should_send = true;

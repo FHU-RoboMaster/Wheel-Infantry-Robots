@@ -52,7 +52,7 @@ err_t gimbal_control_init(void) {
     return gimbal_bus_init_result;
   }
 
-  /* 初始化两个 M3508 云台电机（控制组 0x200）
+  /* 初始化两个 M6020 云台电机（控制组 0x200）
    * 实车电机编号与轮位的对应关系：
    *   偏航电机 YAW = 1 号电机
    *   俯仰电机 PITCH = 2 号电机

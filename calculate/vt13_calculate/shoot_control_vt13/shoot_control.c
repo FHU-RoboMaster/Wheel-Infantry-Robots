@@ -9,6 +9,7 @@
 
 #include "bsp_can.h"
 #include "can.h"
+#include "convert.h"
 #include "dj_motor_ctrl.h"
 #include "pid_incremental.h"
 #include "process.h"
@@ -24,7 +25,7 @@ static err_t shoot_bus_init_result;
 static err_t shoot_init_result[3];
 /* 速度环 PID 实例：三台电机各一个 */
 static PIDInstance_jie pid_speed[3];
-/* 位置环 PID 实例：仅拨弹电机使用速度位置双环 */
+/* 位置环 PID 实例：仅拨弹电机 M2006 需要位置环 */
 static PIDInstance_jie pid_location;
 
 /**
@@ -90,13 +91,51 @@ void shoot_speed_pid_init(void) {
                       3000.0f, 0.0f,
                       PID_Integral_Limit | PID_Derivative_On_Measurement |
                           PID_OutputFilter | PID_DerivativeFilter);
-  // 初始化拨弹电机位置环 PID 参数（M2006 双环外环，输出为目标速度）
+  // 初始化拨弹电机位置环 PID（仅 M2006 需要位置环，输出为目标速度）
   PID_Init_Params_jie(&pid_location, 8.0f, 0.0f, 0.0f, 0.0002f, 3000.0f,
                       1000.0f, 0.0f,
                       PID_Integral_Limit | PID_Derivative_On_Measurement |
                           PID_OutputFilter | PID_DerivativeFilter);
 }
+void dj_motor_pid_control_location(uint8_t motor_id, float target_angle) {
+  dj_motor_feedback_t feedback;
+  if ((dj_motor_get_feedback(&shoot_motors[motor_id], &feedback) != OK) ||
+      !feedback.valid) {
+    return;
+  }
+
+  /* dj_motor reports the output-shaft position in radians. */
+  const float current_angle_deg = GetAngleBetween180(
+      GetAngleBetween360(feedback.position_rad * (180.0f / jie_MI)));
+  const float normalized_target =
+      GetAngleBetween180(GetAngleBetween360(target_angle));
+
+  const float angle_error =
+      GetAngleBetween180(normalized_target - current_angle_deg);
+  const float target_speed =
+      PID_Calculate_jie(&pid_location, angle_error, 0.0f);
+  float motor_current = PID_Calculate_jie(&pid_speed[motor_id], target_speed,
+                                          (float)feedback.speed_rpm);
+
+  const float current_limit =
+      (float)dj_motor_drv_command_limit(shoot_motors[motor_id].type);
+  motor_current = CONSTRAIN(motor_current, -current_limit, current_limit);
+  (void)dj_motor_set_command(&shoot_motors[motor_id], (int16_t)motor_current);
+}
+
+/**
+ * @brief 安全停止发射机构所有电机
+ * @details 将所有发射电机的命令清零并立即发送
+ */
+static void shoot_stop(void) {
+  /* 发射机构所有电机（ID 1-3）都在 0x200 控制组，只需清空该组 */
+  dj_motor_zero_and_flush(&shoot_bus, DJ_MOTOR_GROUP_200);
+}
 
 void Shoot_Mode(void) {
-  // TODO: 实现发射模式控制逻辑
+  if ((vt13 == NULL) || !vt13->online_) {
+    shoot_stop();
+    return;
+  }
+  // TODO: 根据VT13遥控器按键状态实现发射模式控制逻辑
 }

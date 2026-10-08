@@ -122,7 +122,20 @@ void dj_motor_pid_control_location(uint8_t motor_id, float target_angle) {
   motor_current = CONSTRAIN(motor_current, -current_limit, current_limit);
   (void)dj_motor_set_command(&shoot_motors[motor_id], (int16_t)motor_current);
 }
-
+/**
+ * @brief 安全停止发射机构所有电机
+ * @details 将所有发射电机的命令清零并立即发送
+ */
+static void shoot_stop(void) {
+  /* 发射机构所有电机（ID 1-3）都在 0x200 控制组，只需清空该组 */
+  dj_motor_zero_and_flush(&shoot_bus, DJ_MOTOR_GROUP_200);
+}
 void Shoot_Mode(void) {
-  // TODO: 实现发射模式控制逻辑
+  if ((dr16 == NULL) || !dr16->online_) {
+    shoot_stop();
+    return;
+  }
+  if (dr16->dr16_cmd.sw_l == CMD_SW_MID) {
+    // TODO: Implement发射 mode control logic
+  }
 }
