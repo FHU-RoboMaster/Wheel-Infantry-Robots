@@ -138,6 +138,13 @@ const osThreadAttr_t super_power_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for version */
+osThreadId_t versionHandle;
+const osThreadAttr_t version_attributes = {
+  .name = "version",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -157,6 +164,7 @@ void chassis_task(void *argument);
 void game_task(void *argument);
 void shoot_task(void *argument);
 void super_power_task(void *argument);
+void version_task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -269,6 +277,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of super_power */
   super_powerHandle = osThreadNew(super_power_task, NULL, &super_power_attributes);
+
+  /* creation of version */
+  versionHandle = osThreadNew(version_task, NULL, &version_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -512,6 +523,24 @@ __weak void super_power_task(void *argument)
     osDelay(1);
   }
   /* USER CODE END super_power_task */
+}
+
+/* USER CODE BEGIN Header_version_task */
+/**
+* @brief Function implementing the version thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_version_task */
+__weak void version_task(void *argument)
+{
+  /* USER CODE BEGIN version_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END version_task */
 }
 
 /* Private application code --------------------------------------------------*/

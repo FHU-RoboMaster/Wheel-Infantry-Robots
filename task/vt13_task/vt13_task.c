@@ -1,6 +1,5 @@
 #include "vt13_task.h"
 
-#include "../../modules/vt13/vt13.h"
 #include "FreeRTOS.h"
 #include "comp_utils.h"
 #include "task.h"

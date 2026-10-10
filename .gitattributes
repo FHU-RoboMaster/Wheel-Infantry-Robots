@@ -1,0 +1,5 @@
+# 确保 shell 脚本在 Windows 上也使用 LF 行尾符
+*.sh text eol=lf
+
+# 其他文本文件使用默认设置（Windows 上 CRLF，Linux/Mac 上 LF）
+* text=auto

@@ -4,13 +4,14 @@
 # 不动 Core/、Drivers/、Middlewares/(CubeMX/HAL 生成代码)和 modules/(submodule)。
 #
 # 需要 clang-format 23.1.1(与 CI 一致):pip install clang-format==23.1.1
-set -euo pipefail
+set -eu
+if [ -n "${BASH_VERSION:-}" ]; then set -o pipefail; fi
 cd "$(dirname "$0")/.."
 
-command -v clang-format >/dev/null 2>&1 || {
+if ! clang-format --version >/dev/null 2>&1; then
   echo "错误: 未找到 clang-format,请先安装: pip install clang-format==23.1.1" >&2
   exit 1
-}
+fi
 echo "使用: $(clang-format --version)"
 
 # 以 NUL 分隔收集文件到数组,文件名含空格等字符也不会被错误拆分
