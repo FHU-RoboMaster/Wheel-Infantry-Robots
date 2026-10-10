@@ -20,6 +20,7 @@ CMakeUserPresets.json
 
 # Build outputs
 build/Debug
+build/Release
 
 # IDE and editor settings
 .settings

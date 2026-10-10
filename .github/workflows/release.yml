@@ -1,0 +1,71 @@
+name: Release firmware
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and publish firmware
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install ARM GCC and build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            cmake \
+            gcc-arm-none-eabi \
+            binutils-arm-none-eabi \
+            ninja-build \
+            zip
+
+      - name: Configure Release build
+        run: cmake --preset Release
+
+      - name: Build firmware
+        run: cmake --build --preset Release --parallel
+
+      - name: Convert firmware images
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p dist
+          elf="build/Release/jie_max.elf"
+
+          arm-none-eabi-objcopy -O binary "$elf" dist/jie_max-${GITHUB_REF_NAME}.bin
+          arm-none-eabi-objcopy -O ihex "$elf" dist/jie_max-${GITHUB_REF_NAME}.hex
+          cp "$elf" "dist/jie_max-${GITHUB_REF_NAME}.elf"
+          cp build/Release/jie_max.map "dist/jie_max-${GITHUB_REF_NAME}.map"
+
+          (cd dist && zip -9 "jie_max-${GITHUB_REF_NAME}.zip" \
+            "jie_max-${GITHUB_REF_NAME}.elf" \
+            "jie_max-${GITHUB_REF_NAME}.bin" \
+            "jie_max-${GITHUB_REF_NAME}.hex" \
+            "jie_max-${GITHUB_REF_NAME}.map")
+          (cd dist && sha256sum * > SHA256SUMS)
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+          else
+            gh release create "$TAG" dist/* \
+              --title "$TAG" \
+              --generate-notes \
+              --verify-tag
+          fi
