@@ -1,0 +1,3 @@
+[submodule "arithmetic/CMSIS-DSP"]
+	path = arithmetic/CMSIS-DSP
+	url = https://github.com/ARM-software/CMSIS-DSP.git

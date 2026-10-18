@@ -50,7 +50,8 @@ add_subdirectory(modules)
 add_subdirectory(calculate)
 add_subdirectory(app)
 add_subdirectory(task)
-
+# Add CMSIS-DSP sources
+add_subdirectory(arithmetic/CMSIS-DSP)
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
@@ -79,6 +80,7 @@ list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
     # Add user defined libraries
+    CMSISDSP
 )
 
 target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
