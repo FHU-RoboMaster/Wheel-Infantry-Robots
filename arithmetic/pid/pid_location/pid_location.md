@@ -34,7 +34,7 @@ static void chassis_speed_pid_init_single(PIDInstance* pid, float kp, float ki,
 void chassis_control_task(void)
 {
     float motor_current =
-        PIDCalculate(&pid_speed[motor_index], current_speed, target_speed);
+        PIDCalculate(&pid_speed[motor_index], target_speed, current_speed);
     dj_motor_set_command(&chassis_motors[motor_index], (int16_t)motor_current);
 }
 ```
@@ -47,6 +47,16 @@ void chassis_control_task(void)
 PIDInstance* pid = PIDRegister(10.0f, 1.0f, 0.0f, 16384.0f, 3000.0f, 0.0f,
                                PID_Integral_Limit, 0.0f, 0.0f, 0.0f, 0.0f);
 ```
+
+### 中途复位
+
+与增量式 `PID_Reset_jie()` 对应，位置式提供 `PIDReset()`：
+
+```c
+PIDReset(&pid_speed[motor_index]);
+```
+
+清空目标/反馈缓存、误差历史、积分和各项输出、滤波历史以及错误计数/标志，保留 Kp/Ki/Kd、限幅、死区、Improve 和滤波等配置。复位同时清零 `dt` 并刷新 DWT 时间基准；传入 `NULL` 时直接返回。此函数只复位 PID 内部状态，不发送电机停机命令。
 
 ### 堵转检测
 

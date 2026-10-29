@@ -26,8 +26,8 @@ void chassis_speed_pid_init(void)
                         12000.0f,           /* 输出限幅 */
                         8000.0f,            /* 积分限幅 */
                         0.0f,               /* 死区 */
-                        PID_Trapezoid_Intergral | PID_Integral_Limit |
-                            PID_Derivative_On_Measurement | PID_FeedForward);
+                        PID_INC_TRAPEZOID_INTEGRAL | PID_INC_INTEGRAL_LIMIT |
+                            PID_INC_DERIVATIVE_ON_MEASUREMENT | PID_INC_FEEDFORWARD);
 
     /* 改进项默认参数可在初始化后按需覆盖 */
     speed_pid.Kf = 0.05f;  /* 前馈系数 */
@@ -63,13 +63,13 @@ PID_Reset_jie(&speed_pid);
 
 | 标志位 | 作用 |
 | --- | --- |
-| `PID_Integral_Limit` | 积分限幅,本轮积分增量钳位到 ±IntegralLimit |
-| `PID_Derivative_On_Measurement` | 微分先行,只对测量值微分,避免目标阶跃冲击 |
-| `PID_Trapezoid_Intergral` | 梯形积分,低采样频率下积分精度更高 |
-| `PID_FeedForward` | 前馈,Kf·(target−last_target)/dt,限幅 ±FeedForward_Max |
-| `PID_OutputFilter` | 输出低通滤波,抑制执行器指令抖动 |
-| `PID_ChangingIntegrationRate` | 变速积分,误差大时削弱/暂停积分 |
-| `PID_DerivativeFilter` | 微分低通滤波(不完全微分),减少噪声放大 |
+| `PID_INC_INTEGRAL_LIMIT` | 积分限幅,本轮积分增量钳位到 ±IntegralLimit |
+| `PID_INC_DERIVATIVE_ON_MEASUREMENT` | 微分先行,只对测量值微分,避免目标阶跃冲击 |
+| `PID_INC_TRAPEZOID_INTEGRAL` | 梯形积分,低采样频率下积分精度更高 |
+| `PID_INC_FEEDFORWARD` | 前馈,Kf·(target−last_target)/dt,限幅 ±FeedForward_Max |
+| `PID_INC_OUTPUT_FILTER` | 输出低通滤波,抑制执行器指令抖动 |
+| `PID_INC_CHANGING_INTEGRATION_RATE` | 变速积分,误差大时削弱/暂停积分 |
+| `PID_INC_DERIVATIVE_FILTER` | 微分低通滤波(不完全微分),减少噪声放大 |
 
 `PID_Init_Params_jie()` 会为改进项填入默认值,可按需覆盖:`Derivative_LPF_RC=0.1f`、`Output_LPF_RC=0.05f`、`CoefA=max_output×0.5`、`CoefB=max_output×0.1`、`Kf=0`(禁用前馈)、`FeedForward_Max=max_output×0.5`.
 
@@ -77,8 +77,8 @@ PID_Reset_jie(&speed_pid);
 
 - `USE_TIME` 由 `pid_incremental.c` 内部定义,依赖 `bsp_dwt.h`.每次计算用 DWT 计数器实测两拍间隔并覆盖 `dt`,外部代码包含头文件时无需定义该宏.
 - 进入死区时增量清零但保持上次输出,执行器维持当前控制量;若需要死区内输出归零,请在外层处理.
-- 启用 `PID_Derivative_On_Measurement` 后,微分项直接由测量值差分得到,`PID_DerivativeFilter` 不参与该分支.
+- 启用 `PID_INC_DERIVATIVE_ON_MEASUREMENT` 后,微分项直接由测量值差分得到,`PID_INC_DERIVATIVE_FILTER` 不参与该分支.
 - `PID_Calculate_jie()` 位于高频控制路径,不做空指针检查.
-- 本模块枚举与位置式 PID(`pid_location`)的同名字面量较多,跨模块混用时使用各自的枚举类型.
+- 本模块功能标志使用 `PID_INC_*` 前缀，可与位置式 PID(`pid_location`)头文件同时包含；旧版增量式代码需将功能标志替换为对应的新名称，标志数值保持不变。
 
 位置式 PID 见 `../pid_location/pid_location.md`.

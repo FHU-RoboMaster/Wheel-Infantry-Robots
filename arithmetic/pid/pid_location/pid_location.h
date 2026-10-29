@@ -143,17 +143,19 @@ void PIDInit(PIDInstance* pid, float kp, float ki, float kd, float max_output,
              PID_Improvement_e improve_flags, float coef_a, float coef_b,
              float output_lpf_rc, float derivative_lpf_rc);
 
-PIDInstance* PIDRegister(float kp, float ki, float kd, float max_output,
-                         float max_integral, float deadzone,
-                         PID_Improvement_e improve_flags, float coef_a,
-                         float coef_b, float output_lpf_rc,
-                         float derivative_lpf_rc);
 /**
  * @brief 计算PID输出
  *
  * @param pid     PID实例指针
- * @param measure 反馈值
- * @param ref     设定值
+ * @param target  设定值
+ * @param actual  反馈值
  * @return float  PID计算输出
  */
-float PIDCalculate(PIDInstance* pid, float measure, float ref);
+float PIDCalculate(PIDInstance* pid, float target, float actual);
+
+/**
+ * @brief 清空运行状态，保留 PID 参数、限幅、滤波参数和 Improve 配置
+ * @param pid PID 实例指针；NULL 时直接返回
+ * @note 同时清除错误计数/标志并刷新 DWT 时间基准；不发送电机命令。
+ */
+void PIDReset(PIDInstance* pid);

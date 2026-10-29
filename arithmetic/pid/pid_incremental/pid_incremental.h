@@ -20,24 +20,23 @@
 
 //* ================= 增量式 PID 改进功能开关 =================
 //? Improve 使用按位或组合，PID_Calculate_jie() 通过位与选择启用的增量修正环节。
-//! 该枚举和位置式 PID 同名项较多，跨模块引用时注意使用 PID_Improvement_jie_e
-//! 类型。
+//! 增量式标志统一使用 PID_INC_ 前缀，可与位置式 PID 头文件同时包含。
 typedef enum {
-  PID_IMPROVE_NONE = 0b00000000,
+  PID_INC_IMPROVE_NONE = 0b00000000,
   /* 0000 0000 */  // 无改进
-  PID_Integral_Limit = 0b00000001,
+  PID_INC_INTEGRAL_LIMIT = 0b00000001,
   /* 0000 0001 */  // 积分限幅
-  PID_Derivative_On_Measurement = 0b00000010,
+  PID_INC_DERIVATIVE_ON_MEASUREMENT = 0b00000010,
   /* 0000 0010 */  // 微分先行
-  PID_Trapezoid_Intergral = 0b00000100,
+  PID_INC_TRAPEZOID_INTEGRAL = 0b00000100,
   /* 0000 0100 */  // 梯形积分
-  PID_FeedForward = 0b00001000,
+  PID_INC_FEEDFORWARD = 0b00001000,
   /* 0000 1000 */  // 前馈控制
-  PID_OutputFilter = 0b00010000,
+  PID_INC_OUTPUT_FILTER = 0b00010000,
   /* 0001 0000 */  // 输出滤波
-  PID_ChangingIntegrationRate = 0b00100000,
+  PID_INC_CHANGING_INTEGRATION_RATE = 0b00100000,
   /* 0010 0000 */  // 变速积分
-  PID_DerivativeFilter = 0b01000000,
+  PID_INC_DERIVATIVE_FILTER = 0b01000000,
   /* 0100 0000 */  // 微分项低通滤波
 } PID_Improvement_jie_e;
 

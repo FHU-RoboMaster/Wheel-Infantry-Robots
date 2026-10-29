@@ -263,24 +263,24 @@ float PID_Calculate_jie(PIDInstance_jie* pid, float target, float actual) {
 #endif
 
   /* 梯形积分：使用梯形公式代替矩形公式 */
-  if (pid->Improve & PID_Trapezoid_Intergral) {
+  if (pid->Improve & PID_INC_TRAPEZOID_INTEGRAL) {
     f_Trapezoid_Intergral_jie(pid);
   }
 
   /* 变速积分：根据误差大小调整积分作用 */
-  if (pid->Improve & PID_ChangingIntegrationRate) {
+  if (pid->Improve & PID_INC_CHANGING_INTEGRATION_RATE) {
     f_Changing_Integration_Rate_jie(pid);
   }
 
   /* 积分限幅：防止积分饱和 */
-  if (pid->Improve & PID_Integral_Limit) {
+  if (pid->Improve & PID_INC_INTEGRAL_LIMIT) {
     f_Integral_Limit_jie(pid);
   }
 
   //* ---------------- 微分项计算 ----------------
   float raw_dout = 0.0f;
 
-  if (pid->Improve & PID_Derivative_On_Measurement) {
+  if (pid->Improve & PID_INC_DERIVATIVE_ON_MEASUREMENT) {
     /* 微分先行：仅对测量值微分，避免设定值突变冲击 */
     f_Derivative_On_actualment_jie(pid);
   } else {
@@ -293,7 +293,7 @@ float PID_Calculate_jie(PIDInstance_jie* pid, float target, float actual) {
 #endif
 
     /* 微分滤波：不完全微分，使用低通滤波器平滑 */
-    if (pid->Improve & PID_DerivativeFilter) {
+    if (pid->Improve & PID_INC_DERIVATIVE_FILTER) {
       f_Derivative_Filter_jie(pid, raw_dout);
     } else {
       pid->Dout = raw_dout;
@@ -302,7 +302,7 @@ float PID_Calculate_jie(PIDInstance_jie* pid, float target, float actual) {
 
   //* ---------------- 前馈控制 ----------------
   float feedforward = 0.0f;
-  if (pid->Improve & PID_FeedForward) {
+  if (pid->Improve & PID_INC_FEEDFORWARD) {
     feedforward = f_FeedForward_jie(pid);
   }
 
@@ -314,7 +314,7 @@ float PID_Calculate_jie(PIDInstance_jie* pid, float target, float actual) {
   float raw_output = pid->Last_Output + pid->Output_Inc;
 
   /* 输出滤波：使用低通滤波器平滑输出 */
-  if (pid->Improve & PID_OutputFilter) {
+  if (pid->Improve & PID_INC_OUTPUT_FILTER) {
     f_Output_Filter_jie(pid, raw_output);
   } else {
     pid->Output = raw_output;
