@@ -14,8 +14,7 @@ static DR16_t *instance_ = NULL;
 // ==================== 原始帧校验与解析 ====================
 
 //! 检查 DR16 原始通道值和拨杆值是否落在协议合法范围内。
-static bool DR16_DataCorrupted(const dr16_data_t *dr16)
-{
+static bool DR16_DataCorrupted(const dr16_data_t *dr16) {
   ASSERT(dr16);
 
   if ((dr16->ch_r_x < DR16_CH_VALUE_MIN) || (dr16->ch_r_x > DR16_CH_VALUE_MAX))
@@ -40,8 +39,7 @@ static bool DR16_DataCorrupted(const dr16_data_t *dr16)
 }
 
 //! 将 18 字节原始帧解析为通用 cmd_rc_t，并把摇杆通道归一化到约 -1~1。
-static err_t DR16_ParseRc(const dr16_data_t *dr16, cmd_rc_t *rc)
-{
+static err_t DR16_ParseRc(const dr16_data_t *dr16, cmd_rc_t *rc) {
   ASSERT(dr16);
   ASSERT(rc);
 
@@ -55,7 +53,8 @@ static err_t DR16_ParseRc(const dr16_data_t *dr16, cmd_rc_t *rc)
 
   memset(rc, 0, sizeof(*rc));
 
-  const float full_range = (float)(DR16_CH_VALUE_MAX - DR16_CH_VALUE_MIN);  // 归一化分母。
+  const float full_range =
+      (float)(DR16_CH_VALUE_MAX - DR16_CH_VALUE_MIN); // 归一化分母。
 
   rc->ch.r.x = 2.0f * ((float)dr16->ch_r_x - DR16_CH_VALUE_MID) / full_range;
   rc->ch.r.y = 2.0f * ((float)dr16->ch_r_y - DR16_CH_VALUE_MID) / full_range;
@@ -72,7 +71,7 @@ static err_t DR16_ParseRc(const dr16_data_t *dr16, cmd_rc_t *rc)
   rc->mouse.click.r = dr16->press_r;
 
   rc->key = dr16->key;
-  rc->ch_res = ((float)dr16->res - DR16_CH_VALUE_MID) / full_range;
+  rc->ch_res = 2.0f * ((float)dr16->res - DR16_CH_VALUE_MID) / full_range;
 
   return OK;
 }
@@ -80,10 +79,10 @@ static err_t DR16_ParseRc(const dr16_data_t *dr16, cmd_rc_t *rc)
 // ==================== ISR 接收入口 ====================
 
 //! RX DMA 接收回调（中断上下文）：只接受完整 DR16 帧并通知任务解析。
-static void DR16_RxCallback(uint8_t *data, size_t size)
-{
+static void DR16_RxCallback(uint8_t *data, size_t size) {
   if (size == DR16_FRAME_SIZE) {
-    memcpy(dr16_rx_buffer_, data, DR16_FRAME_SIZE);  // DMA 会继续写原缓冲，先快照一份。
+    memcpy(dr16_rx_buffer_, data,
+           DR16_FRAME_SIZE); // DMA 会继续写原缓冲，先快照一份。
     frame_ready_ = true;
 
     if ((instance_ != NULL) && (instance_->thread_alert != NULL)) {
@@ -98,8 +97,7 @@ static void DR16_RxCallback(uint8_t *data, size_t size)
 // ==================== 初始化与任务周期处理 ====================
 
 //! 初始化 DR16 对象，绑定 UART RX DMA 和接收回调。
-err_t DR16_Init(DR16_t *self, UART_HandleTypeDef *uart_handle)
-{
+err_t DR16_Init(DR16_t *self, UART_HandleTypeDef *uart_handle) {
   if (self == NULL) {
     return PTR_NULL;
   }
@@ -115,8 +113,7 @@ err_t DR16_Init(DR16_t *self, UART_HandleTypeDef *uart_handle)
 }
 
 //! 启动 DR16 UART DMA 接收。
-err_t DR16_Start(DR16_t *self)
-{
+err_t DR16_Start(DR16_t *self) {
   if (self == NULL) {
     return PTR_NULL;
   }
@@ -127,8 +124,7 @@ err_t DR16_Start(DR16_t *self)
 }
 
 //! 等待一帧 DR16 数据；超时或解析失败时清零命令并标记离线。
-void DR16_Update(DR16_t *self, uint32_t timeout_ms)
-{
+void DR16_Update(DR16_t *self, uint32_t timeout_ms) {
   if (self == NULL) {
     return;
   }
@@ -139,7 +135,8 @@ void DR16_Update(DR16_t *self, uint32_t timeout_ms)
 
   if ((result == pdTRUE) && frame_ready_) {
     frame_ready_ = false;
-    memcpy(&self->dr16_data_, dr16_rx_buffer_, DR16_FRAME_SIZE);  // 使用快照解析，避免 DMA 并发改写。
+    memcpy(&self->dr16_data_, dr16_rx_buffer_,
+           DR16_FRAME_SIZE); // 使用快照解析，避免 DMA 并发改写。
 
     if (DR16_ParseRc(&self->dr16_data_, &self->dr16_cmd) == OK) {
       self->online_ = true;
