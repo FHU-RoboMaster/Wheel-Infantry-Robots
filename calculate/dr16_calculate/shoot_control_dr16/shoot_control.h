@@ -19,16 +19,6 @@ err_t shoot_control_init(void);
  */
 void shoot_speed_pid_init(void);
 
-/** 公共 PID 设备：0=左摩擦轮，1=右摩擦轮，2=拨弹；越界返回 NULL。
- *  控制前须完成 shoot_control_init 和 shoot_speed_pid_init。 */
-pid_device_t* shoot_get_pid_device(uint8_t motor_index);
-
-/**
- * @brief 兼容旧入口：仅 motor_id=2 的拨弹电机支持位置环（转子角度，度）。
- * @note 新调用方使用 pid_device_control_location(shoot_get_pid_device(2), ...)。
- */
-void dj_motor_pid_control_location(uint8_t motor_id, float target_angle);
-
 /**
  * @brief 发射模式控制主函数
  * @details 根据遥控器状态执行对应的发射控制逻辑
