@@ -5,6 +5,7 @@
 #pragma once
 
 #include "comp_cmd.h"
+#include "pid_device.h"
 
 /**
  * @brief 初始化发射机构总线与电机（须在 CAN Start 之前调用）
@@ -18,8 +19,13 @@ err_t shoot_control_init(void);
  */
 void shoot_speed_pid_init(void);
 
+/** 公共 PID 设备：0=左摩擦轮，1=右摩擦轮，2=拨弹；越界返回 NULL。
+ *  控制前须完成 shoot_control_init 和 shoot_speed_pid_init。 */
+pid_device_t* shoot_get_pid_device(uint8_t motor_index);
+
 /**
- * @brief 控制单台发射电机转到目标角度（角度单位：度）。
+ * @brief 兼容旧入口：仅 motor_id=2 的拨弹电机支持位置环（转子角度，度）。
+ * @note 新调用方使用 pid_device_control_location(shoot_get_pid_device(2), ...)。
  */
 void dj_motor_pid_control_location(uint8_t motor_id, float target_angle);
 

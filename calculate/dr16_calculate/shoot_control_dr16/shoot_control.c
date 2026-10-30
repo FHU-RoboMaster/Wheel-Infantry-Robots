@@ -4,16 +4,13 @@
  */
 #include "shoot_control.h"
 
-#include <math.h>
 #include <stdbool.h>
 
 #include "bsp_can.h"
 #include "can.h"
-#include "convert.h"
 #include "dj_motor_ctrl.h"
 #include "dr16.h"
 #include "pid_incremental.h"
-#include "process.h"
 
 /* DR16 task owns the decoded command and updates it periodically. */
 extern DR16_t* dr16;
@@ -27,6 +24,7 @@ static err_t shoot_init_result[3];
 static PIDInstance_jie pid_speed[3];
 /* 位置环 PID 实例：仅拨弹电机 M2006 需要位置环 */
 static PIDInstance_jie pid_location;
+static pid_device_t shoot_pid_devices[3];
 
 /**
  * @brief 初始化发射 CAN 总线与三台发射电机
@@ -79,48 +77,39 @@ void shoot_speed_pid_init(void) {
   // 初始化左摩擦轮电机速度 PID 参数（M3508 单速度环）
   PID_Init_Params_jie(&pid_speed[0], 10.0f, 0.0f, 0.0f, 0.0002f, 12000.0f,
                       3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+                      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+                          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
   // 初始化右摩擦轮电机速度 PID 参数（M3508 单速度环）
   PID_Init_Params_jie(&pid_speed[1], 10.0f, 0.0f, 0.0f, 0.0002f, 12000.0f,
                       3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+                      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+                          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
   // 初始化拨弹电机速度环 PID 参数（M2006 双环内环，输出电流限幅 10000）
   PID_Init_Params_jie(&pid_speed[2], 8.0f, 0.0f, 0.0f, 0.0002f, 10000.0f,
                       3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+                      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+                          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
   // 初始化拨弹电机位置环 PID（仅 M2006 需要位置环，输出为目标速度）
   PID_Init_Params_jie(&pid_location, 8.0f, 0.0f, 0.0f, 0.0002f, 3000.0f,
                       1000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
-}
-void dj_motor_pid_control_location(uint8_t motor_id, float target_angle) {
-  dj_motor_feedback_t feedback;
-  if ((dj_motor_get_feedback(&shoot_motors[motor_id], &feedback) != OK) ||
-      !feedback.valid) {
-    return;
+                      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+                          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
+
+  for (uint8_t i = 0; i < 3; ++i) {
+    (void)pid_device_init(&shoot_pid_devices[i], &shoot_motors[i],
+                          PID_DEVICE_INCREMENTAL, &pid_speed[i],
+                          i == 2 ? &pid_location : NULL);
   }
+}
 
-  /* dj_motor reports the output-shaft position in radians. */
-  const float current_angle_deg = GetAngleBetween180(
-      GetAngleBetween360(feedback.position_rad * (180.0f / jie_MI)));
-  const float normalized_target =
-      GetAngleBetween180(GetAngleBetween360(target_angle));
+pid_device_t* shoot_get_pid_device(uint8_t motor_index) {
+  return motor_index < 3 ? &shoot_pid_devices[motor_index] : NULL;
+}
 
-  const float angle_error =
-      GetAngleBetween180(normalized_target - current_angle_deg);
-  const float target_speed =
-      PID_Calculate_jie(&pid_location, angle_error, 0.0f);
-  float motor_current = PID_Calculate_jie(&pid_speed[motor_id], target_speed,
-                                          (float)feedback.speed_rpm);
-
-  const float current_limit =
-      (float)dj_motor_drv_command_limit(shoot_motors[motor_id].type);
-  motor_current = CONSTRAIN(motor_current, -current_limit, current_limit);
-  (void)dj_motor_set_command(&shoot_motors[motor_id], (int16_t)motor_current);
+void dj_motor_pid_control_location(uint8_t motor_id, float target_angle) {
+  /* 保留旧入口；摩擦轮未绑定位置环，不能误用拨弹 PID 状态。 */
+  (void)pid_device_control_location(shoot_get_pid_device(motor_id), target_angle,
+                                    0.0f, true);
 }
 /**
  * @brief 安全停止发射机构所有电机

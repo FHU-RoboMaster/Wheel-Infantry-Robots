@@ -16,16 +16,19 @@
 | --- | --- |
 | `err_t shoot_control_init(void)` | 初始化 CAN1 总线对象并注册 3 台电机(须在 `CAN_StartAll()` 之前;当前尚无调用方) |
 | `void shoot_speed_pid_init(void)` | 初始化摩擦轮速度环与拨弹双环 PID |
-| `void dj_motor_pid_control_location(motor_id, target_angle)` | 控制单台发射电机转到目标角度(单位:度),拨弹位置控制入口 |
+| `pid_device_t* shoot_get_pid_device(index)` | 获取公共 PID 设备：0=左摩擦轮、1=右摩擦轮、2=拨弹，越界返回 NULL |
+| `void dj_motor_pid_control_location(motor_id, target_angle)` | 兼容入口，仅索引 2 的拨弹电机支持位置控制，单位为转子角度（度） |
 | `void Shoot_Mode(void)` | 模式控制主函数,控制任务 2ms 周期调用 |
 
 ## 拨弹角度闭环
 
-`dj_motor_pid_control_location()` 的流程:读取反馈输出轴弧度并转为角度 → `GetAngleBetween180` 归一化 → 首次调用时以当前角度为目标并复位 PID → 位置环输出目标速度 → 速度环输出电流 → 按电机类型限幅后下发.
+`dj_motor_pid_control_location()` 以 `is_optimize=true` 转调公共 `pid_device_control_location()`：读取有效的 `position_deg` 反馈 → 计算单圈最短路径误差 → 位置环输出目标转子 RPM → 速度环输出电流指令 → 按电机型号限幅后写入组缓存。不累计减速器输出轴圈数，不在首次调用时重设目标或复位 PID。
+
+新调用方可直接使用 `pid_device_control_speed(shoot_get_pid_device(0), rpm, ff)` 或 `pid_device_control_location(shoot_get_pid_device(2), angle_deg, ff, true)`；末参为 `false` 时直接使用目标和反馈角度，不取最短路径。初始化前提与统一接口说明见 [pid_device](../../../app/pid_device/pid_device.md)。
 
 ## PID 参数
 
-各环均启用 `PID_Integral_Limit | PID_Derivative_On_Measurement | PID_OutputFilter | PID_DerivativeFilter`:
+各环均启用 `PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT | PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER`:
 
 | 电机 | 环 | Kp | MaxOut |
 | --- | --- | --- | --- |

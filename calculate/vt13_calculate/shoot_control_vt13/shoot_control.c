@@ -16,7 +16,7 @@
 #include "vt13.h"
 
 /* VT13 task owns the decoded command and updates it periodically. */
-extern vt13_t* vt13;
+extern vt13_t *vt13;
 
 /* 发射机构电机总线与实例 */
 static dj_motor_bus_t shoot_bus;
@@ -40,7 +40,7 @@ err_t shoot_control_init(void) {
     return NOT_FOUND;
   }
 
-  STM32CAN_t* can1 = STM32CAN_GetInstance(can_id);
+  STM32CAN_t *can1 = STM32CAN_GetInstance(can_id);
   if (can1 == NULL) {
     return PTR_NULL;
   }
@@ -60,42 +60,45 @@ err_t shoot_control_init(void) {
   shoot_init_result[0] =
       dj_motor_init(&shoot_motors[0], &shoot_bus, DJ_MOTOR_M3508, 1,
                     false); /* 左摩擦轮 = 1 号 */
-  if (shoot_init_result[0] != OK) return shoot_init_result[0];
+  if (shoot_init_result[0] != OK)
+    return shoot_init_result[0];
 
   shoot_init_result[1] =
       dj_motor_init(&shoot_motors[1], &shoot_bus, DJ_MOTOR_M3508, 2,
                     false); /* 右摩擦轮 = 2 号 */
-  if (shoot_init_result[1] != OK) return shoot_init_result[1];
+  if (shoot_init_result[1] != OK)
+    return shoot_init_result[1];
 
   shoot_init_result[2] =
       dj_motor_init(&shoot_motors[2], &shoot_bus, DJ_MOTOR_M2006, 3,
                     false); /* 拨弹电机 = 3 号 */
-  if (shoot_init_result[2] != OK) return shoot_init_result[2];
+  if (shoot_init_result[2] != OK)
+    return shoot_init_result[2];
 
   return OK;
 }
 
 void shoot_speed_pid_init(void) {
   // 初始化左摩擦轮电机速度 PID 参数（M3508 单速度环）
-  PID_Init_Params_jie(&pid_speed[0], 10.0f, 0.0f, 0.0f, 0.0002f, 12000.0f,
-                      3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+  PID_Init_Params_jie(
+      &pid_speed[0], 10.0f, 0.0f, 0.0f, 0.0002f, 12000.0f, 3000.0f, 0.0f,
+      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
   // 初始化右摩擦轮电机速度 PID 参数（M3508 单速度环）
-  PID_Init_Params_jie(&pid_speed[1], 10.0f, 0.0f, 0.0f, 0.0002f, 12000.0f,
-                      3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+  PID_Init_Params_jie(
+      &pid_speed[1], 10.0f, 0.0f, 0.0f, 0.0002f, 12000.0f, 3000.0f, 0.0f,
+      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
   // 初始化拨弹电机速度环 PID 参数（M2006 双环内环，输出电流限幅 10000）
-  PID_Init_Params_jie(&pid_speed[2], 8.0f, 0.0f, 0.0f, 0.0002f, 10000.0f,
-                      3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+  PID_Init_Params_jie(
+      &pid_speed[2], 8.0f, 0.0f, 0.0f, 0.0002f, 10000.0f, 3000.0f, 0.0f,
+      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
   // 初始化拨弹电机位置环 PID（仅 M2006 需要位置环，输出为目标速度）
-  PID_Init_Params_jie(&pid_location, 8.0f, 0.0f, 0.0f, 0.0002f, 3000.0f,
-                      1000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+  PID_Init_Params_jie(
+      &pid_location, 8.0f, 0.0f, 0.0f, 0.0002f, 3000.0f, 1000.0f, 0.0f,
+      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
 }
 void dj_motor_pid_control_location(uint8_t motor_id, float target_angle) {
   dj_motor_feedback_t feedback;
@@ -104,9 +107,8 @@ void dj_motor_pid_control_location(uint8_t motor_id, float target_angle) {
     return;
   }
 
-  /* dj_motor reports the output-shaft position in radians. */
-  const float current_angle_deg = GetAngleBetween180(
-      GetAngleBetween360(feedback.position_rad * (180.0f / jie_MI)));
+  /* 直接使用驱动提供的逻辑方向转子单圈角度。 */
+  const float current_angle_deg = feedback.position_deg;
   const float normalized_target =
       GetAngleBetween180(GetAngleBetween360(target_angle));
 

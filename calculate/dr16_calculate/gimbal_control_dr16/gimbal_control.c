@@ -4,17 +4,13 @@
  */
 #include "gimbal_control.h"
 
-#include <math.h>
 #include <stdbool.h>
 
 #include "bsp_can.h"
 #include "can.h"
-// #include "chassis_dynamics.h"
-#include "comp_cmd.h"
 #include "dj_motor_ctrl.h"
 #include "dr16.h"
 #include "pid_incremental.h"
-#include "process.h"
 
 /* DR16 task owns the decoded command and updates it periodically. */
 extern DR16_t* dr16;
@@ -27,11 +23,12 @@ static err_t gimbal_init_result[2];
 /* 速度环 PID 实例 */
 static PIDInstance_jie pid_speed[2];
 static PIDInstance_jie pid_location[2];
+static pid_device_t gimbal_pid_devices[2];
 /* 云台状态与目标速度 */
 // static gimbal_control_state_t gimbal_control_state_;
 
 /**
- * @brief 初始化云台 CAN 总线与两个 M3508 电机
+ * @brief 初始化云台 CAN 总线与两个 GM6020 电机
  * @return OK 或错误码
  */
 err_t gimbal_control_init(void) {
@@ -52,7 +49,7 @@ err_t gimbal_control_init(void) {
     return gimbal_bus_init_result;
   }
 
-  /* 初始化两个 M6020 云台电机（控制组 0x200）
+  /* 初始化两个 GM6020 云台电机（控制组 0x1FF）
    * 实车电机编号与轮位的对应关系：
    *   偏航电机 YAW = 1 号电机
    *   俯仰电机 PITCH = 2 号电机
@@ -73,21 +70,31 @@ void gimbal_speed_pid_init(void) {
   // 初始化偏航电机速度 PID 参数
   PID_Init_Params_jie(&pid_speed[0], 12.0f, 0.0f, 0.0f, 0.0002f, 12000.0f,
                       3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+                      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+                          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
   PID_Init_Params_jie(&pid_location[0], 12.0f, 0.0f, 0.0f, 0.0002f, 12000.0f,
                       3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+                      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+                          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
   // 初始化俯仰电机速度 PID 参数
   PID_Init_Params_jie(&pid_speed[1], 8.0f, 0.0f, 0.0f, 0.0002f, 12000.0f,
                       3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+                      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+                          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
   PID_Init_Params_jie(&pid_location[1], 12.0f, 0.0f, 0.0f, 0.0002f, 12000.0f,
                       3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+                      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+                          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
+
+  for (uint8_t i = 0; i < 2; ++i) {
+    (void)pid_device_init(&gimbal_pid_devices[i], &gimbal_motors[i],
+                          PID_DEVICE_INCREMENTAL, &pid_speed[i],
+                          &pid_location[i]);
+  }
+}
+
+pid_device_t* gimbal_get_pid_device(uint8_t motor_index) {
+  return motor_index < 2 ? &gimbal_pid_devices[motor_index] : NULL;
 }
 
 void Gimbal_Mode(void) {

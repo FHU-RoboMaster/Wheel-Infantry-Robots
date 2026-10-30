@@ -73,21 +73,21 @@ void gimbal_speed_pid_init(void) {
   // 初始化偏航电机速度 PID 参数
   PID_Init_Params_jie(&pid_speed[0], 12.0f, 0.0f, 0.0f, 0.0002f, 12000.0f,
                       3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+                      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+                          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
   PID_Init_Params_jie(&pid_location[0], 12.0f, 0.0f, 0.0f, 0.0002f, 12000.0f,
                       3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+                      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+                          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
   // 初始化俯仰电机速度 PID 参数
   PID_Init_Params_jie(&pid_speed[1], 8.0f, 0.0f, 0.0f, 0.0002f, 12000.0f,
                       3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+                      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+                          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
   PID_Init_Params_jie(&pid_location[1], 12.0f, 0.0f, 0.0f, 0.0002f, 12000.0f,
                       3000.0f, 0.0f,
-                      PID_Integral_Limit | PID_Derivative_On_Measurement |
-                          PID_OutputFilter | PID_DerivativeFilter);
+                      PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
+                          PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
 }
 
 void Gimbal_Mode(void) {

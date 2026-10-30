@@ -93,7 +93,13 @@ void ChassisControlTask(void *argument) {
 
 初始化四个底盘电机的速度环 PID 参数。
 
+同时绑定公共 `pid_device_t` 设备，原有两种底盘模式均通过 `pid_device_control_speed()` 执行闭环并叠加原来的力矩前馈。算法与参数保持原有位置式 PID。
+
 **调用时机：** 在 `chassis_control_init()` 之后，`STM32CAN_Start()` 之前或之后均可
+
+### `pid_device_t* chassis_get_pid_device(uint8_t motor_index)`
+
+获取公共 PID 设备，索引为 `CHASSIS_MOTOR_FL/FR/RL/RR`，越界返回 `NULL`。例如 `pid_device_control_speed(chassis_get_pid_device(CHASSIS_MOTOR_FL), 3000.0f, 100.0f)`，目标为转子 RPM，末参数为电调原始指令单位的前馈。组内所有电机写齐后发送 CAN 帧，详见 [pid_device](../../../app/pid_device/pid_device.md)。
 
 ### `void Chassis_Mode(void)`
 

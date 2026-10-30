@@ -4,7 +4,6 @@
  */
 #include "chassis_control.h"
 
-#include <math.h>
 #include <stdbool.h>
 
 #include "bsp_can.h"
@@ -13,7 +12,6 @@
 #include "dj_motor_ctrl.h"
 #include "dr16.h"
 #include "pid_location.h"
-#include "process.h"
 
 /* DR16 task owns the decoded command and updates it periodically. */
 extern DR16_t* dr16;
@@ -24,6 +22,7 @@ dj_motor_t chassis_motors[4];
 
 /* 速度环 PID 实例 */
 static PIDInstance pid_speed[4];
+static pid_device_t chassis_pid_devices[4];
 
 static err_t chassis_bus_init_result;
 static err_t chassis_init_result[4];
@@ -102,30 +101,15 @@ void chassis_speed_pid_init(void) {
                                 12000.0f);
   chassis_speed_pid_init_single(&pid_speed[CHASSIS_MOTOR_RR], 14.0f, 2.0f, 0.0f,
                                 12000.0f);
+
+  for (uint8_t i = 0; i < 4; ++i) {
+    (void)pid_device_init(&chassis_pid_devices[i], &chassis_motors[i],
+                          PID_DEVICE_POSITIONAL, &pid_speed[i], NULL);
+  }
 }
 
-static void chassis_motor_pid_control_speed(uint8_t motor_index,
-                                            float target_speed) {
-  if (motor_index >= 4) return;
-
-  /* 获取电机反馈 */
-  dj_motor_feedback_t feedback;
-  if (dj_motor_get_feedback(&chassis_motors[motor_index], &feedback) != OK) {
-    return;
-  }
-
-  /* 速度环 PID 控制（反馈为 rad/s，需要转换或统一单位）
-   * 这里假设目标速度与反馈速度单位一致（RPM） */
-  float current_speed = feedback.speed_rpm;
-  float motor_current =
-      PIDCalculate(&pid_speed[motor_index], current_speed, target_speed);
-
-  /* 限幅到 M3508 允许范围 */
-  motor_current += torque_ff_current[motor_index];
-  motor_current = CONSTRAIN(motor_current, -16384.0f, 16384.0f);
-
-  /* 发送命令（写齐后自动发送） */
-  dj_motor_set_command(&chassis_motors[motor_index], (int16_t)motor_current);
+pid_device_t* chassis_get_pid_device(uint8_t motor_index) {
+  return motor_index < 4 ? &chassis_pid_devices[motor_index] : NULL;
 }
 
 static void chassis_stop(void) {
@@ -181,7 +165,8 @@ static void chassis_control(void) {
 
   /* 执行速度环 PID 控制（写齐后自动发送 CAN 帧） */
   for (uint8_t i = 0; i < 4; i++) {
-    chassis_motor_pid_control_speed(i, motor_target_speed[i]);
+    (void)pid_device_control_speed(&chassis_pid_devices[i], motor_target_speed[i],
+                                   torque_ff_current[i]);
   }
 }
 
@@ -222,7 +207,8 @@ static void chassis_small_gyro_control(void) {
       chassis_control_state_.command.wz, motor_target_speed);
 
   for (uint8_t i = 0; i < 4; i++) {
-    chassis_motor_pid_control_speed(i, motor_target_speed[i]);
+    (void)pid_device_control_speed(&chassis_pid_devices[i], motor_target_speed[i],
+                                   torque_ff_current[i]);
   }
 }
 

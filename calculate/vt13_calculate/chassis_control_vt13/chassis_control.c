@@ -118,7 +118,7 @@ static void chassis_motor_pid_control_speed(uint8_t motor_index,
    * 这里假设目标速度与反馈速度单位一致（RPM） */
   float current_speed = feedback.speed_rpm;
   float motor_current =
-      PIDCalculate(&pid_speed[motor_index], current_speed, target_speed);
+      PIDCalculate(&pid_speed[motor_index], target_speed, current_speed);
 
   /* 限幅到 M3508 允许范围 */
   motor_current += torque_ff_current[motor_index];

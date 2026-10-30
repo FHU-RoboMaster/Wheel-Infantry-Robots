@@ -6,8 +6,8 @@
 
 | 机构 | 电机 | 设备 ID | CAN 总线 | 控制组 |
 | --- | --- | --- | --- | --- |
-| 偏航 YAW | GM6020 | 1 | CAN1 | 0x200 |
-| 俯仰 PITCH | GM6020 | 2 | CAN1 | 0x200 |
+| 偏航 YAW | GM6020 | 1 | CAN1 | 0x1FF |
+| 俯仰 PITCH | GM6020 | 2 | CAN1 | 0x1FF |
 
 `reversed` 参数当前均为 `false`,按实际机械安装方向调整.
 
@@ -17,11 +17,14 @@
 | --- | --- |
 | `err_t gimbal_control_init(void)` | 初始化 CAN1 总线对象并注册 2 台 GM6020(须在 `CAN_StartAll()` 之前调用;当前尚无调用方,接入时在 `can_device` 注册流程中调用) |
 | `void gimbal_speed_pid_init(void)` | 初始化速度环 + 位置环 PID 实例(增量式 `PIDInstance_jie`) |
+| `pid_device_t* gimbal_get_pid_device(index)` | 获取公共 PID 设备：0=YAW、1=PITCH，越界返回 NULL |
 | `void Gimbal_Mode(void)` | 模式控制主函数,控制任务 2ms 周期调用 |
 
 ## PID 参数
 
-各环均启用 `PID_Integral_Limit | PID_Derivative_On_Measurement | PID_OutputFilter | PID_DerivativeFilter`:
+完成电机注册和 PID 初始化后，统一通过 `pid_device_control_speed()` 或 `pid_device_control_location()` 控制，例如 `pid_device_control_location(gimbal_get_pid_device(0), 30.0f, 0.0f, true)`；末参为 `true` 时走最短路径，`false` 时直接使用目标和反馈角度。速度单位为转子 RPM，位置为单圈编码器角度（度），详见 [pid_device](../../../app/pid_device/pid_device.md)。
+
+各环均启用 `PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT | PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER`:
 
 | 电机 | 环 | Kp | MaxOut |
 | --- | --- | --- | --- |
