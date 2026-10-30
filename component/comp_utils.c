@@ -4,6 +4,7 @@
 
 #include "comp_utils.h"
 
+#include <math.h>
 #include <string.h>
 
 /**
@@ -92,6 +93,8 @@ inline float signf(float x) {
 inline float circle_error(float sp, float fb, float range) {
   float error = sp - fb;
   if (range > 0.0f) {
+    /* 先取余，支持超过一圈的目标角度。 */
+    error = fmodf(error, range);
     float half_range = range / 2.0f;
 
     if (error > half_range)
