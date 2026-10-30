@@ -318,6 +318,7 @@ err_t dj_motor_zero_and_flush(dj_motor_bus_t *bus, dj_motor_group_e group_id) {
  * @brief 拷贝原始反馈并在任务上下文完成方向与单位换算。
  *
  * reversed 时对 rpm、current、position 取反；encoder_raw 保持硬件值。
+ * position_deg 在取反后归一化到 [0, 360)。
  * speed_rad_s 使用逻辑方向下的 rpm 与型号减速比计算输出轴角速度。
  */
 err_t dj_motor_get_feedback(const dj_motor_t *motor,
@@ -342,10 +343,14 @@ err_t dj_motor_get_feedback(const dj_motor_t *motor,
   int16_t speed = raw.speed_rpm;
   int16_t current = raw.current;
   float position = dj_motor_drv_encoder_to_rad(raw.encoder);
+  float position_deg = dj_motor_drv_encoder_to_deg(raw.encoder);
   if (motor->reversed) {
     speed = (int16_t)(-speed);
     current = (int16_t)(-current);
     position = -position;
+    if (position_deg > 0.0f) {
+      position_deg = 360.0f - position_deg;
+    }
   }
 
   feedback->encoder_raw = raw.encoder;
@@ -353,6 +358,7 @@ err_t dj_motor_get_feedback(const dj_motor_t *motor,
   feedback->current = current;
   feedback->temperature = raw.temperature;
   feedback->position_rad = position;
+  feedback->position_deg = position_deg;
   feedback->speed_rad_s = dj_motor_drv_rpm_to_rad_s(motor->type, speed);
   feedback->last_feedback_tick = tick;
   feedback->valid = valid;

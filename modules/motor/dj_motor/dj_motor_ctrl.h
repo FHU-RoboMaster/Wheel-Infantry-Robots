@@ -93,7 +93,7 @@ err_t dj_motor_zero_and_flush(dj_motor_bus_t *bus, dj_motor_group_e group);
  * @param feedback 输出快照；不可为 NULL。
  * @return OK / PTR_NULL / STATE_ERR。
  *
- * 短临界区内只拷贝原始整数与 tick；编码器→弧度、RPM→rad/s 以及 reverse 处理
+ * 短临界区内只拷贝原始整数与 tick；编码器→弧度/角度、RPM→rad/s 以及 reverse 处理
  * 在临界区外完成，避免在关中断期间做浮点运算。
  */
 err_t dj_motor_get_feedback(const dj_motor_t *motor,

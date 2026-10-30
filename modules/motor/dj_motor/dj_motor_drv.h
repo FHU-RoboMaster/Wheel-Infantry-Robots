@@ -76,6 +76,13 @@ err_t dj_motor_drv_decode_feedback(const uint8_t data[8],
 float dj_motor_drv_encoder_to_rad(uint16_t encoder);
 
 /**
+ * @brief 将编码器原始值换算为角度。
+ * @param encoder 编码器值 0..8191。
+ * @return 转子单圈角度，单位 °，范围 [0, 360)。
+ */
+float dj_motor_drv_encoder_to_deg(uint16_t encoder);
+
+/**
  * @brief 将转子 RPM 换算为输出轴角速度。
  * @param type 用于选择减速比的电机型号。
  * @param rpm 转子侧转速（逻辑方向下可已取反）。

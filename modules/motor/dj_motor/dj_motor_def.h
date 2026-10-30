@@ -23,7 +23,7 @@
  * 当两者相等时，ctrl 层打包 8 字节大端帧并通过 bsp_can 发送。安全停机请使用
  * dj_motor_zero_and_flush()，不要依赖”碰巧写齐”。
  *
- * @note 位置在反馈快照中单位为 rad；输出轴角速度单位为 rad/s；命令为协议原始
+ * @note 位置在反馈快照中提供 rad 和 deg；输出轴角速度单位为 rad/s；命令为协议原始
  *       int16_t。逻辑方向与物理方向由实例的 reversed 标志区分。
  */
 #pragma once
@@ -113,6 +113,7 @@ typedef struct {
  *
  * 由 dj_motor_get_feedback() 在短临界区拷贝原始状态后，在任务上下文填充换算量。
  * reversed=true 时，speed_rpm、current、position_rad 为逻辑方向（已取反）；
+ * position_deg 为逻辑方向单圈角度，取反后归一化到 [0, 360)；
  * encoder_raw 始终保持硬件编码器原始值。
  */
 typedef struct {
@@ -121,6 +122,7 @@ typedef struct {
   int16_t current;             /**< 逻辑方向下的电流原始量 */
   uint8_t temperature;         /**< 温度，单位 ℃ */
   float position_rad;          /**< 逻辑方向位置角，单位 rad，约 [0, 2π) 或取反 */
+  float position_deg;          /**< 逻辑方向转子单圈角度，单位 °，范围 [0, 360) */
   float speed_rad_s;           /**< 输出轴角速度，单位 rad/s（已除减速比） */
   uint32_t last_feedback_tick; /**< 最近一次合法反馈的 HAL_GetTick */
   bool valid;                  /**< true 表示至少成功解析过一帧反馈 */

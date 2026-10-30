@@ -187,6 +187,13 @@ float dj_motor_drv_encoder_to_rad(uint16_t encoder) {
 }
 
 /**
+ * @brief encoder / 8192 * 360° → [0, 360)。
+ */
+float dj_motor_drv_encoder_to_deg(uint16_t encoder) {
+  return ((float)encoder / (float)DJ_MOTOR_ENCODER_RESOLUTION) * 360.0f;
+}
+
+/**
  * @brief (rpm / 60 * 2π) / reduction → 输出轴 rad/s。
  */
 float dj_motor_drv_rpm_to_rad_s(dj_motor_type_e type, int16_t rpm) {
