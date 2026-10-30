@@ -71,16 +71,6 @@ static err_t pid_device_write_command(pid_device_t *device, float output,
   return dj_motor_set_command(device->motor, (int16_t)command);
 }
 
-/** 将角度折算到 [-180, 180]，用于位置环最短路径误差。 */
-static float pid_device_wrap_degrees(float angle) {
-  angle = fmodf(angle, 360.0f);
-  if (angle > 180.0f)
-    angle -= 360.0f;
-  if (angle < -180.0f)
-    angle += 360.0f;
-  return angle;
-}
-
 /** 执行转子 RPM 速度环控制，并写入最终电机命令。 */
 err_t pid_device_control_speed(pid_device_t *device, float target_rpm,
                                float feedforward) {
@@ -117,9 +107,7 @@ err_t pid_device_control_location(pid_device_t *device, float target_deg,
 
   float target_rpm;
   if (is_optimize) {
-    const float actual = feedback.position_deg;
-    const float target = pid_device_wrap_degrees(target_deg);
-    const float error = pid_device_wrap_degrees(target - actual);
+    const float error = circle_error(target_deg, feedback.position_deg, 360.0f);
     target_rpm = device->calculate(device->location_pid, error, 0.0f);
   } else {
     target_rpm = device->calculate(device->location_pid, target_deg,
