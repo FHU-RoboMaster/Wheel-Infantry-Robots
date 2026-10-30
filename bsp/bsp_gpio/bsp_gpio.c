@@ -10,7 +10,7 @@ enum {
 };
 
 /* EXTI 线由所有 GPIO 端口共享，因此每条线只映射一个 GPIO 对象。 */
-static GPIO *gpio_map[GPIO_LINE_COUNT] = {0};
+static GPIO* gpio_map[GPIO_LINE_COUNT] = {0};
 
 /**
  * @brief 将单 bit GPIO 引脚掩码转换为 EXTI 线号。
@@ -37,7 +37,7 @@ static uint8_t GPIO_PinToLine(uint16_t pin) {
  * @param gpio GPIO 对象。
  * @param error 要保存的错误码。
  */
-static void GPIO_SetError(GPIO *gpio, err_t error) {
+static void GPIO_SetError(GPIO* gpio, err_t error) {
   if (gpio != NULL) {
     gpio->last_error = error;
   }
@@ -51,7 +51,7 @@ static void GPIO_SetError(GPIO *gpio, err_t error) {
  * @param irq 对应的 NVIC 中断号；NonMaskableInt_IRQn 表示不使用中断。
  * @return 初始化后的 GPIO 对象副本。
  */
-GPIO GPIO_Init(GPIO *gpio, GPIO_TypeDef *port, uint16_t pin, IRQn_Type irq) {
+GPIO GPIO_Init(GPIO* gpio, GPIO_TypeDef* port, uint16_t pin, IRQn_Type irq) {
   GPIO empty = {0};
   const uint8_t line = GPIO_PinToLine(pin);
   const uint8_t old_line =
@@ -91,7 +91,7 @@ GPIO GPIO_Init(GPIO *gpio, GPIO_TypeDef *port, uint16_t pin, IRQn_Type irq) {
  * @param gpio GPIO 对象。
  * @return true 表示高电平，false 表示低电平。
  */
-bool GPIO_Read(const GPIO *gpio) {
+bool GPIO_Read(const GPIO* gpio) {
   ASSERT(gpio != NULL);
   ASSERT(gpio->port != NULL);
   return (gpio->port->IDR & gpio->pin) != 0U;
@@ -102,7 +102,7 @@ bool GPIO_Read(const GPIO *gpio) {
  * @param gpio GPIO 对象。
  * @param value true 输出高电平，false 输出低电平。
  */
-void GPIO_Write(GPIO *gpio, bool value) {
+void GPIO_Write(GPIO* gpio, bool value) {
   ASSERT(gpio != NULL);
   ASSERT(gpio->port != NULL);
 
@@ -118,7 +118,7 @@ void GPIO_Write(GPIO *gpio, bool value) {
  * @param gpio GPIO 对象。
  * @return OK 表示成功，PTR_NULL 或 STATE_ERR 表示参数/状态错误。
  */
-err_t GPIO_EnableInterrupt(GPIO *gpio) {
+err_t GPIO_EnableInterrupt(GPIO* gpio) {
   if (gpio == NULL) {
     return PTR_NULL;
   }
@@ -137,7 +137,7 @@ err_t GPIO_EnableInterrupt(GPIO *gpio) {
  * @param gpio GPIO 对象。
  * @return OK 表示成功，PTR_NULL 或 STATE_ERR 表示参数/状态错误。
  */
-err_t GPIO_DisableInterrupt(GPIO *gpio) {
+err_t GPIO_DisableInterrupt(GPIO* gpio) {
   if (gpio == NULL) {
     return PTR_NULL;
   }
@@ -157,7 +157,7 @@ err_t GPIO_DisableInterrupt(GPIO *gpio) {
  * @param config GPIO 方向及上下拉配置。
  * @return OK 表示配置成功，其他值表示参数错误。
  */
-err_t GPIO_SetConfig(GPIO *gpio, GPIO_Configuration config) {
+err_t GPIO_SetConfig(GPIO* gpio, GPIO_Configuration config) {
   GPIO_InitTypeDef init = {0};
 
   if ((gpio == NULL) || (gpio->port == NULL) ||
@@ -169,43 +169,43 @@ err_t GPIO_SetConfig(GPIO *gpio, GPIO_Configuration config) {
   init.Pin = gpio->pin;
   /* 将自定义方向枚举转换为 STM32 HAL 工作模式。 */
   switch (config.direction) {
-  case GPIO_DIRECTION_INPUT:
-    init.Mode = GPIO_MODE_INPUT;
-    break;
-  case GPIO_DIRECTION_OUTPUT_PUSH_PULL:
-    init.Mode = GPIO_MODE_OUTPUT_PP;
-    break;
-  case GPIO_DIRECTION_OUTPUT_OPEN_DRAIN:
-    init.Mode = GPIO_MODE_OUTPUT_OD;
-    break;
-  case GPIO_DIRECTION_FALL_INTERRUPT:
-    init.Mode = GPIO_MODE_IT_FALLING;
-    break;
-  case GPIO_DIRECTION_RISING_INTERRUPT:
-    init.Mode = GPIO_MODE_IT_RISING;
-    break;
-  case GPIO_DIRECTION_FALL_RISING_INTERRUPT:
-    init.Mode = GPIO_MODE_IT_RISING_FALLING;
-    break;
-  default:
-    GPIO_SetError(gpio, ARG_ERR);
-    return gpio->last_error;
+    case GPIO_DIRECTION_INPUT:
+      init.Mode = GPIO_MODE_INPUT;
+      break;
+    case GPIO_DIRECTION_OUTPUT_PUSH_PULL:
+      init.Mode = GPIO_MODE_OUTPUT_PP;
+      break;
+    case GPIO_DIRECTION_OUTPUT_OPEN_DRAIN:
+      init.Mode = GPIO_MODE_OUTPUT_OD;
+      break;
+    case GPIO_DIRECTION_FALL_INTERRUPT:
+      init.Mode = GPIO_MODE_IT_FALLING;
+      break;
+    case GPIO_DIRECTION_RISING_INTERRUPT:
+      init.Mode = GPIO_MODE_IT_RISING;
+      break;
+    case GPIO_DIRECTION_FALL_RISING_INTERRUPT:
+      init.Mode = GPIO_MODE_IT_RISING_FALLING;
+      break;
+    default:
+      GPIO_SetError(gpio, ARG_ERR);
+      return gpio->last_error;
   }
 
   /* 将自定义上下拉枚举转换为 HAL 上下拉配置。 */
   switch (config.pull) {
-  case GPIO_PULL_NONE:
-    init.Pull = GPIO_NOPULL;
-    break;
-  case GPIO_PULL_UP:
-    init.Pull = GPIO_PULLUP;
-    break;
-  case GPIO_PULL_DOWN:
-    init.Pull = GPIO_PULLDOWN;
-    break;
-  default:
-    GPIO_SetError(gpio, ARG_ERR);
-    return gpio->last_error;
+    case GPIO_PULL_NONE:
+      init.Pull = GPIO_NOPULL;
+      break;
+    case GPIO_PULL_UP:
+      init.Pull = GPIO_PULLUP;
+      break;
+    case GPIO_PULL_DOWN:
+      init.Pull = GPIO_PULLDOWN;
+      break;
+    default:
+      GPIO_SetError(gpio, ARG_ERR);
+      return gpio->last_error;
   }
 
   init.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -221,7 +221,7 @@ err_t GPIO_SetConfig(GPIO *gpio, GPIO_Configuration config) {
  * @param context 传递给回调的用户上下文。
  * @return OK 表示注册成功，PTR_NULL 表示 GPIO 对象为空。
  */
-err_t GPIO_RegisterCallback(GPIO *gpio, GPIO_Callback callback, void *context) {
+err_t GPIO_RegisterCallback(GPIO* gpio, GPIO_Callback callback, void* context) {
   if (gpio == NULL) {
     return PTR_NULL;
   }
@@ -237,7 +237,7 @@ err_t GPIO_RegisterCallback(GPIO *gpio, GPIO_Callback callback, void *context) {
  * @param gpio GPIO 对象。
  * @return 最近一次错误码；传入 NULL 时返回 PTR_NULL。
  */
-err_t GPIO_GetLastError(const GPIO *gpio) {
+err_t GPIO_GetLastError(const GPIO* gpio) {
   return (gpio != NULL) ? gpio->last_error : PTR_NULL;
 }
 
@@ -251,7 +251,7 @@ void GPIO_DispatchInterrupt(uint16_t pin) {
     return;
   }
 
-  GPIO *gpio = gpio_map[line];
+  GPIO* gpio = gpio_map[line];
   /* 无映射或未注册回调时，忽略本次中断。 */
   if ((gpio != NULL) && (gpio->callback != NULL)) {
     gpio->callback(gpio, true, gpio->callback_context);

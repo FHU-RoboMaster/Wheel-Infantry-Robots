@@ -165,8 +165,8 @@ static void chassis_control(void) {
 
   /* 执行速度环 PID 控制（写齐后自动发送 CAN 帧） */
   for (uint8_t i = 0; i < 4; i++) {
-    (void)pid_device_control_speed(&chassis_pid_devices[i], motor_target_speed[i],
-                                   torque_ff_current[i]);
+    (void)pid_device_control_speed(&chassis_pid_devices[i],
+                                   motor_target_speed[i], torque_ff_current[i]);
   }
 }
 
@@ -207,8 +207,8 @@ static void chassis_small_gyro_control(void) {
       chassis_control_state_.command.wz, motor_target_speed);
 
   for (uint8_t i = 0; i < 4; i++) {
-    (void)pid_device_control_speed(&chassis_pid_devices[i], motor_target_speed[i],
-                                   torque_ff_current[i]);
+    (void)pid_device_control_speed(&chassis_pid_devices[i],
+                                   motor_target_speed[i], torque_ff_current[i]);
   }
 }
 

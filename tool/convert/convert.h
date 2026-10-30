@@ -11,9 +11,9 @@
   ((angle) > 180) ? ((angle) - 360) \
                   : (((angle) < -180) ? ((angle) + 360) : (angle))
 #define TWO_PI (2.0f * M_PI)
-#define Limit_Radian(angle)            \
+#define Limit_Radian(angle)          \
   ((angle) > M_PI ? (angle) - TWO_PI \
-                    : ((angle) < -M_PI ? (angle) + TWO_PI : (angle)))
+                  : ((angle) < -M_PI ? (angle) + TWO_PI : (angle)))
 #define YAW_ALIGN_ANGLE 0
 // 无符号整数转换函数
 int float_to_uint(float x_float, float x_min, float x_max, int bits);

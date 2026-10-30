@@ -9,24 +9,24 @@
 typedef struct GPIO GPIO;
 
 typedef enum {
-  GPIO_DIRECTION_INPUT = 0,              /* 浮空输入 */
-  GPIO_DIRECTION_OUTPUT_PUSH_PULL,       /* 推挽输出 */
-  GPIO_DIRECTION_OUTPUT_OPEN_DRAIN,      /* 开漏输出 */
-  GPIO_DIRECTION_FALL_INTERRUPT,         /* 下降沿中断 */
-  GPIO_DIRECTION_RISING_INTERRUPT,       /* 上升沿中断 */
-  GPIO_DIRECTION_FALL_RISING_INTERRUPT   /* 双边沿中断 */
+  GPIO_DIRECTION_INPUT = 0,            /* 浮空输入 */
+  GPIO_DIRECTION_OUTPUT_PUSH_PULL,     /* 推挽输出 */
+  GPIO_DIRECTION_OUTPUT_OPEN_DRAIN,    /* 开漏输出 */
+  GPIO_DIRECTION_FALL_INTERRUPT,       /* 下降沿中断 */
+  GPIO_DIRECTION_RISING_INTERRUPT,     /* 上升沿中断 */
+  GPIO_DIRECTION_FALL_RISING_INTERRUPT /* 双边沿中断 */
 } GPIO_Direction;
 
 /* GPIO 输入模式的上拉/下拉配置。 */
 typedef enum {
-  GPIO_PULL_NONE = 0,  /* 无上下拉 */
-  GPIO_PULL_UP,        /* 上拉 */
-  GPIO_PULL_DOWN       /* 下拉 */
+  GPIO_PULL_NONE = 0, /* 无上下拉 */
+  GPIO_PULL_UP,       /* 上拉 */
+  GPIO_PULL_DOWN      /* 下拉 */
 } GPIO_Pull;
 
 typedef struct {
-  GPIO_Direction direction;  /* 引脚方向或中断触发方式 */
-  GPIO_Pull pull;            /* 输入上下拉方式 */
+  GPIO_Direction direction; /* 引脚方向或中断触发方式 */
+  GPIO_Pull pull;           /* 输入上下拉方式 */
 } GPIO_Configuration;
 
 typedef void (*GPIO_Callback)(GPIO* gpio, bool active, void* context);

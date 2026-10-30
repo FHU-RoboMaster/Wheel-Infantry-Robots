@@ -14,7 +14,7 @@
 #include "pid_incremental.h"
 
 /* DR16 task owns the decoded command and updates it periodically. */
-extern DR16_t *dr16;
+extern DR16_t* dr16;
 
 /* 发射机构电机总线与实例 */
 static dj_motor_bus_t shoot_bus;
@@ -40,7 +40,7 @@ err_t shoot_control_init(void) {
     return NOT_FOUND;
   }
 
-  STM32CAN_t *can1 = STM32CAN_GetInstance(can_id);
+  STM32CAN_t* can1 = STM32CAN_GetInstance(can_id);
   if (can1 == NULL) {
     return PTR_NULL;
   }
@@ -60,20 +60,17 @@ err_t shoot_control_init(void) {
   shoot_init_result[0] =
       dj_motor_init(&shoot_motors[0], &shoot_bus, DJ_MOTOR_M3508, 1,
                     false); /* 左摩擦轮 = 1 号 */
-  if (shoot_init_result[0] != OK)
-    return shoot_init_result[0];
+  if (shoot_init_result[0] != OK) return shoot_init_result[0];
 
   shoot_init_result[1] =
       dj_motor_init(&shoot_motors[1], &shoot_bus, DJ_MOTOR_M3508, 2,
                     false); /* 右摩擦轮 = 2 号 */
-  if (shoot_init_result[1] != OK)
-    return shoot_init_result[1];
+  if (shoot_init_result[1] != OK) return shoot_init_result[1];
 
   shoot_init_result[2] =
       dj_motor_init(&shoot_motors[2], &shoot_bus, DJ_MOTOR_M2006, 3,
                     false); /* 拨弹电机 = 3 号 */
-  if (shoot_init_result[2] != OK)
-    return shoot_init_result[2];
+  if (shoot_init_result[2] != OK) return shoot_init_result[2];
 
   return OK;
 }
