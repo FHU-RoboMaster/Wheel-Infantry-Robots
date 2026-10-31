@@ -4,11 +4,13 @@
  */
 #include "chassis_control.h"
 
+#include <math.h>
 #include <stdbool.h>
 
 #include "bsp_can.h"
 #include "can.h"
 #include "chassis_dynamics.h"
+#include "comp_utils.h"
 #include "dj_motor_ctrl.h"
 #include "dr16.h"
 #include "pid_location.h"
@@ -38,18 +40,22 @@ static float torque_ff_current[4];
  */
 err_t chassis_control_init(void) {
   /* 获取 CAN2 的 BSP 对象（假设 CAN2 用于底盘） */
+  ASSERT(CAN2 != NULL);
   BSP_CAN_t can_id = BSP_CAN_get_id(CAN2);
+  ASSERT(can_id != BSP_CAN_ID_ERROR);
   if (can_id == BSP_CAN_ID_ERROR) {
     return NOT_FOUND;
   }
 
   STM32CAN_t* can2 = STM32CAN_GetInstance(can_id);
+  ASSERT(can2 != NULL);
   if (can2 == NULL) {
     return PTR_NULL;
   }
 
   /* 初始化底盘总线 */
   chassis_bus_init_result = dj_motor_bus_init(&chassis_bus, can2);
+  VERIFY(chassis_bus_init_result == OK);
   if (chassis_bus_init_result != OK) {
     return chassis_bus_init_result;
   }
@@ -64,21 +70,25 @@ err_t chassis_control_init(void) {
   chassis_init_result[0] =
       dj_motor_init(&chassis_motors[CHASSIS_MOTOR_FL], &chassis_bus,
                     DJ_MOTOR_M3508, 4, false); /* 左前轮 = 4 号 */
+  VERIFY(chassis_init_result[0] == OK);
   if (chassis_init_result[0] != OK) return chassis_init_result[0];
 
   chassis_init_result[1] =
       dj_motor_init(&chassis_motors[CHASSIS_MOTOR_FR], &chassis_bus,
                     DJ_MOTOR_M3508, 3, false); /* 右前轮 = 3 号 */
+  VERIFY(chassis_init_result[1] == OK);
   if (chassis_init_result[1] != OK) return chassis_init_result[1];
 
   chassis_init_result[2] =
       dj_motor_init(&chassis_motors[CHASSIS_MOTOR_RL], &chassis_bus,
                     DJ_MOTOR_M3508, 2, false); /* 左后轮 = 2 号 */
+  VERIFY(chassis_init_result[2] == OK);
   if (chassis_init_result[2] != OK) return chassis_init_result[2];
 
   chassis_init_result[3] =
       dj_motor_init(&chassis_motors[CHASSIS_MOTOR_RR], &chassis_bus,
                     DJ_MOTOR_M3508, 1, false); /* 右后轮 = 1 号 */
+  VERIFY(chassis_init_result[3] == OK);
   if (chassis_init_result[3] != OK) return chassis_init_result[3];
 
   return OK;
@@ -86,6 +96,9 @@ err_t chassis_control_init(void) {
 
 static void chassis_speed_pid_init_single(PIDInstance* pid, float kp, float ki,
                                           float kd, float max_out) {
+  ASSERT(pid != NULL);
+  ASSERT(isfinite(kp) && isfinite(ki) && isfinite(kd));
+  ASSERT(max_out > 0.0f);
   PIDInit(pid, kp, ki, kd, max_out, 3000.0f, 0.0f,
           PID_Integral_Limit | PID_Derivative_On_Measurement |
               PID_OutputFilter | PID_DerivativeFilter,
@@ -103,8 +116,8 @@ void chassis_speed_pid_init(void) {
                                 12000.0f);
 
   for (uint8_t i = 0; i < 4; ++i) {
-    (void)pid_device_init(&chassis_pid_devices[i], &chassis_motors[i],
-                          PID_DEVICE_POSITIONAL, &pid_speed[i], NULL);
+    VERIFY(pid_device_init(&chassis_pid_devices[i], &chassis_motors[i],
+                           PID_DEVICE_POSITIONAL, &pid_speed[i], NULL) == OK);
   }
 }
 
@@ -118,11 +131,14 @@ static void chassis_stop(void) {
   chassis_control_state_.command.wz = 0.0f;
 
   /* 使用 zero_and_flush 安全停机（推荐的停机方式） */
-  dj_motor_zero_and_flush(&chassis_bus, DJ_MOTOR_GROUP_200);
+  VERIFY(dj_motor_zero_and_flush(&chassis_bus, DJ_MOTOR_GROUP_200) == OK);
 }
 
 static void chassis_control(void) {
+  ASSERT(dr16 != NULL);
   const cmd_rc_t* command = &dr16->dr16_cmd;
+  ASSERT(isfinite(command->ch.l.x) && isfinite(command->ch.l.y) &&
+         isfinite(command->ch.r.x));
 
   chassis_dynamics_feedforward(torque_ff_current);
   /*
@@ -165,8 +181,10 @@ static void chassis_control(void) {
 
   /* 执行速度环 PID 控制（写齐后自动发送 CAN 帧） */
   for (uint8_t i = 0; i < 4; i++) {
-    (void)pid_device_control_speed(&chassis_pid_devices[i],
-                                   motor_target_speed[i], torque_ff_current[i]);
+    ASSERT(isfinite(motor_target_speed[i]) && isfinite(torque_ff_current[i]));
+    VERIFY(pid_device_control_speed(&chassis_pid_devices[i],
+                                    motor_target_speed[i],
+                                    torque_ff_current[i]) == OK);
   }
 }
 
@@ -184,7 +202,9 @@ static void chassis_control(void) {
  *   wz = 固定小陀螺速度
  */
 static void chassis_small_gyro_control(void) {
+  ASSERT(dr16 != NULL);
   const cmd_rc_t* command = &dr16->dr16_cmd;
+  ASSERT(isfinite(command->ch.l.x) && isfinite(command->ch.l.y));
 
   chassis_dynamics_feedforward(torque_ff_current);
 
@@ -207,8 +227,10 @@ static void chassis_small_gyro_control(void) {
       chassis_control_state_.command.wz, motor_target_speed);
 
   for (uint8_t i = 0; i < 4; i++) {
-    (void)pid_device_control_speed(&chassis_pid_devices[i],
-                                   motor_target_speed[i], torque_ff_current[i]);
+    ASSERT(isfinite(motor_target_speed[i]) && isfinite(torque_ff_current[i]));
+    VERIFY(pid_device_control_speed(&chassis_pid_devices[i],
+                                    motor_target_speed[i],
+                                    torque_ff_current[i]) == OK);
   }
 }
 

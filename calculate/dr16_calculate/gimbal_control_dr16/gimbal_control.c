@@ -8,6 +8,7 @@
 
 #include "bsp_can.h"
 #include "can.h"
+#include "comp_utils.h"
 #include "dj_motor_ctrl.h"
 #include "dr16.h"
 #include "pid_incremental.h"
@@ -33,18 +34,22 @@ static pid_device_t gimbal_pid_devices[2];
  */
 err_t gimbal_control_init(void) {
   /* 获取 CAN1 的 BSP 对象（假设 CAN1 用于云台） */
+  ASSERT(CAN1 != NULL);
   BSP_CAN_t can_id = BSP_CAN_get_id(CAN1);
+  ASSERT(can_id != BSP_CAN_ID_ERROR);
   if (can_id == BSP_CAN_ID_ERROR) {
     return NOT_FOUND;
   }
 
   STM32CAN_t* can1 = STM32CAN_GetInstance(can_id);
+  ASSERT(can1 != NULL);
   if (can1 == NULL) {
     return PTR_NULL;
   }
 
   /* 初始化云台总线 */
   gimbal_bus_init_result = dj_motor_bus_init(&gimbal_bus, can1);
+  VERIFY(gimbal_bus_init_result == OK);
   if (gimbal_bus_init_result != OK) {
     return gimbal_bus_init_result;
   }
@@ -57,11 +62,13 @@ err_t gimbal_control_init(void) {
   gimbal_init_result[0] =
       dj_motor_init(&gimbal_motors[0], &gimbal_bus, DJ_MOTOR_GM6020, 1,
                     false); /* 偏航YAW电机 = 1 号 */
+  VERIFY(gimbal_init_result[0] == OK);
   if (gimbal_init_result[0] != OK) return gimbal_init_result[0];
 
   gimbal_init_result[1] =
       dj_motor_init(&gimbal_motors[1], &gimbal_bus, DJ_MOTOR_GM6020, 2,
                     false); /* 俯仰PITCH电机 = 2 号 */
+  VERIFY(gimbal_init_result[1] == OK);
   if (gimbal_init_result[1] != OK) return gimbal_init_result[1];
 
   return OK;
@@ -87,9 +94,9 @@ void gimbal_speed_pid_init(void) {
           PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
 
   for (uint8_t i = 0; i < 2; ++i) {
-    (void)pid_device_init(&gimbal_pid_devices[i], &gimbal_motors[i],
-                          PID_DEVICE_INCREMENTAL, &pid_speed[i],
-                          &pid_location[i]);
+    VERIFY(pid_device_init(&gimbal_pid_devices[i], &gimbal_motors[i],
+                           PID_DEVICE_INCREMENTAL, &pid_speed[i],
+                           &pid_location[i]) == OK);
   }
 }
 

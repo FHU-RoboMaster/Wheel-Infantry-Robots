@@ -4,6 +4,7 @@
  */
 #include "shoot_control.h"
 
+#include <math.h>
 #include <stdbool.h>
 
 #include "bsp_can.h"
@@ -35,18 +36,22 @@ static pid_device_t shoot_pid_devices[3];
 err_t shoot_control_init(void) {
   /* 获取 CAN1 的 BSP 对象（假设 CAN1 用于发射机构，与云台同总线）
    * CAN2 上底盘已占用 0x200 控制组的 1-4 号电机，发射机构不能复用同组 ID */
+  ASSERT(CAN1 != NULL);
   BSP_CAN_t can_id = BSP_CAN_get_id(CAN1);
+  ASSERT(can_id != BSP_CAN_ID_ERROR);
   if (can_id == BSP_CAN_ID_ERROR) {
     return NOT_FOUND;
   }
 
   STM32CAN_t* can1 = STM32CAN_GetInstance(can_id);
+  ASSERT(can1 != NULL);
   if (can1 == NULL) {
     return PTR_NULL;
   }
 
   /* 初始化发射机构总线 */
   shoot_bus_init_result = dj_motor_bus_init(&shoot_bus, can1);
+  VERIFY(shoot_bus_init_result == OK);
   if (shoot_bus_init_result != OK) {
     return shoot_bus_init_result;
   }
@@ -60,16 +65,19 @@ err_t shoot_control_init(void) {
   shoot_init_result[0] =
       dj_motor_init(&shoot_motors[0], &shoot_bus, DJ_MOTOR_M3508, 1,
                     false); /* 左摩擦轮 = 1 号 */
+  VERIFY(shoot_init_result[0] == OK);
   if (shoot_init_result[0] != OK) return shoot_init_result[0];
 
   shoot_init_result[1] =
       dj_motor_init(&shoot_motors[1], &shoot_bus, DJ_MOTOR_M3508, 2,
                     false); /* 右摩擦轮 = 2 号 */
+  VERIFY(shoot_init_result[1] == OK);
   if (shoot_init_result[1] != OK) return shoot_init_result[1];
 
   shoot_init_result[2] =
       dj_motor_init(&shoot_motors[2], &shoot_bus, DJ_MOTOR_M2006, 3,
                     false); /* 拨弹电机 = 3 号 */
+  VERIFY(shoot_init_result[2] == OK);
   if (shoot_init_result[2] != OK) return shoot_init_result[2];
 
   return OK;
@@ -100,12 +108,15 @@ void shoot_speed_pid_init(void) {
   pid_init_result[0] =
       pid_device_init(&shoot_pid_devices[0], &shoot_motors[0],
                       PID_DEVICE_INCREMENTAL, &pid_speed[0], NULL);
+  VERIFY(pid_init_result[0] == OK);
   pid_init_result[1] =
       pid_device_init(&shoot_pid_devices[1], &shoot_motors[1],
                       PID_DEVICE_INCREMENTAL, &pid_speed[1], NULL);
+  VERIFY(pid_init_result[1] == OK);
   pid_init_result[2] =
       pid_device_init(&shoot_pid_devices[2], &shoot_motors[2],
                       PID_DEVICE_INCREMENTAL, &pid_speed[2], &pid_location);
+  VERIFY(pid_init_result[2] == OK);
 }
 
 /**
@@ -114,7 +125,9 @@ void shoot_speed_pid_init(void) {
  */
 static void shoot_stop(void) {
   /* 发射机构所有电机（ID 1-3）都在 0x200 控制组，只需清空该组 */
-  dj_motor_zero_and_flush(&shoot_bus, DJ_MOTOR_GROUP_200);
+  /* CAN_RegisterAllDevices 当前尚未注册发射机构，未初始化时保持安全空操作。 */
+  if (!shoot_bus.initialized) return;
+  VERIFY(dj_motor_zero_and_flush(&shoot_bus, DJ_MOTOR_GROUP_200) == OK);
 }
 
 /* 单发目标只在进入 ch_res 正向模式时锁存一次。 */
@@ -130,30 +143,39 @@ static void shoot_single_reset(void) {
 }
 
 static void shoot_single_mode(void) {
+  ASSERT(shoot_bus.initialized);
+  ASSERT(shoot_pid_devices[0].calculate != NULL);
+  ASSERT(shoot_pid_devices[1].calculate != NULL);
+  ASSERT(shoot_pid_devices[2].calculate != NULL);
   /* 单发模式下摩擦轮持续运行，直到退出该模式。 */
-  (void)pid_device_control_speed(&shoot_pid_devices[0], 2000.0f, 0.0f);
-  (void)pid_device_control_speed(&shoot_pid_devices[1], 2000.0f, 0.0f);
+  VERIFY(pid_device_control_speed(&shoot_pid_devices[0], 2000.0f, 0.0f) == OK);
+  VERIFY(pid_device_control_speed(&shoot_pid_devices[1], 2000.0f, 0.0f) == OK);
 
   if (shoot_single_done) {
     /* 拨弹已完成，只给拨弹电机发送零速，同时保持摩擦轮运行。 */
-    (void)pid_device_control_speed(&shoot_pid_devices[2], 0.0f, 0.0f);
+    VERIFY(pid_device_control_speed(&shoot_pid_devices[2], 0.0f, 0.0f) == OK);
     return;
   }
 
   if (shoot_single_confirm_count < 5) {
     ++shoot_single_confirm_count;
     /* 等待正向输入稳定期间，拨弹电机保持停止。 */
-    (void)pid_device_control_speed(&shoot_pid_devices[2], 0.0f, 0.0f);
+    VERIFY(pid_device_control_speed(&shoot_pid_devices[2], 0.0f, 0.0f) == OK);
     return;
   }
 
   dj_motor_feedback_t feedback;
   if (!shoot_single_target_valid) {
-    if (dj_motor_get_feedback(&shoot_motors[2], &feedback) != OK ||
+    const err_t feedback_result =
+        dj_motor_get_feedback(&shoot_motors[2], &feedback);
+    VERIFY(feedback_result == OK);
+    if (feedback_result != OK ||
         !feedback.valid) {
-      (void)pid_device_control_speed(&shoot_pid_devices[2], 0.0f, 0.0f);
+      VERIFY(pid_device_control_speed(&shoot_pid_devices[2], 0.0f, 0.0f) ==
+             OK);
       return;
     }
+    ASSERT(isfinite(feedback.position_deg));
     shoot_single_target_deg = feedback.position_deg;
     circle_add(&shoot_single_target_deg, 30.0f, 360.0f);
     shoot_single_target_valid = true;
@@ -162,29 +184,39 @@ static void shoot_single_mode(void) {
   /* 摩擦轮已经持续运行，拨弹电机执行一次固定角度动作。 */
   const err_t location_result = pid_device_control_location(
       &shoot_pid_devices[2], shoot_single_target_deg, 0.0f, true);
+  VERIFY((location_result == OK) || (location_result == STATE_ERR));
   if (location_result != OK) {
-    (void)pid_device_control_speed(&shoot_pid_devices[2], 0.0f, 0.0f);
+    VERIFY(pid_device_control_speed(&shoot_pid_devices[2], 0.0f, 0.0f) == OK);
     return;
   }
 
-  if (dj_motor_get_feedback(&shoot_motors[2], &feedback) != OK ||
+  const err_t feedback_result =
+      dj_motor_get_feedback(&shoot_motors[2], &feedback);
+  VERIFY(feedback_result == OK);
+  if (feedback_result != OK ||
       !feedback.valid) {
-    (void)pid_device_control_speed(&shoot_pid_devices[2], 0.0f, 0.0f);
+    VERIFY(pid_device_control_speed(&shoot_pid_devices[2], 0.0f, 0.0f) == OK);
     return;
   }
 
+  ASSERT(isfinite(feedback.position_deg));
   const float angle_error =
       circle_error(shoot_single_target_deg, feedback.position_deg, 360.0f);
+  ASSERT(isfinite(angle_error));
   if (angle_error < 3.0f && angle_error > -3.0f) {
     shoot_single_done = true;
   }
 }
 
 static void shoot_continuous_mode(void) {
+  ASSERT(shoot_bus.initialized);
+  ASSERT(shoot_pid_devices[0].calculate != NULL);
+  ASSERT(shoot_pid_devices[1].calculate != NULL);
+  ASSERT(shoot_pid_devices[2].calculate != NULL);
   shoot_single_reset();
-  (void)pid_device_control_speed(&shoot_pid_devices[0], 2000.0f, 0.0f);
-  (void)pid_device_control_speed(&shoot_pid_devices[1], 2000.0f, 0.0f);
-  (void)pid_device_control_speed(&shoot_pid_devices[2], 3000.0f, 0.0f);
+  VERIFY(pid_device_control_speed(&shoot_pid_devices[0], 2000.0f, 0.0f) == OK);
+  VERIFY(pid_device_control_speed(&shoot_pid_devices[1], 2000.0f, 0.0f) == OK);
+  VERIFY(pid_device_control_speed(&shoot_pid_devices[2], 3000.0f, 0.0f) == OK);
 }
 
 void Shoot_Mode(void) {
@@ -197,6 +229,7 @@ void Shoot_Mode(void) {
   if ((dr16->dr16_cmd.sw_l == CMD_SW_MID) &&
       (dr16->dr16_cmd.sw_r == CMD_SW_MID)) {
     const float ch_res = dr16->dr16_cmd.ch_res;
+    ASSERT(isfinite(ch_res));
 
     if (ch_res > 0.5) {
       /* ch_res 正向保持 10 ms 后单发一次，拨弹完成后摩擦轮继续运行。 */
