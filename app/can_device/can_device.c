@@ -3,10 +3,10 @@
 #include "bsp_can.h"
 #include "can.h"
 #include "chassis_control.h"
-#include "dm_motor_ctrl.h"
 #include "imu_can.h"
 #include "imu_can_task.h"
 #include "main.h"
+#include "shoot_control.h"
 
 /* CAN1 过滤器：接收所有帧，CAN1 占用 Filter Bank 0-13。 */
 static const CAN_FilterTypeDef can1_filter = {
@@ -18,7 +18,8 @@ static const CAN_FilterTypeDef can1_filter = {
     .FilterMaskIdLow = 0x0000,
     .FilterFIFOAssignment = CAN_RX_FIFO1,
     .FilterActivation = ENABLE,
-    .FilterBank = 0};
+    .FilterBank = 0,
+    .SlaveStartFilterBank = 14};
 
 /* CAN2 过滤器：接收所有帧，CAN2 仅能使用 Filter Bank 14-27。 */
 static const CAN_FilterTypeDef can2_filter = {
@@ -30,9 +31,10 @@ static const CAN_FilterTypeDef can2_filter = {
     .FilterMaskIdLow = 0x0000,
     .FilterFIFOAssignment = CAN_RX_FIFO0,
     .FilterActivation = ENABLE,
-    .FilterBank = 14};
+    .FilterBank = 14,
+    .SlaveStartFilterBank = 14};
 
-/* CAN2：底盘 M3508 与 DM IMU；CAN1：6 台 DM 关节电机。 */
+/* CAN2：4 台底盘 M3508 与 DM IMU；CAN1：3 台发射机构电机。 */
 static STM32CAN_t can2_instance;
 static STM32CAN_t can1_instance;
 /* IMU 对象由本模块持有，任务通过 getter 函数访问。 */
@@ -77,7 +79,11 @@ err_t CAN_RegisterAllDevices(void) {
   if (status != OK) {
     return status;
   }
-
+  /* CAN1：发射机构总线回调 + 2 台 M3508 + 1 台 M2006。 */
+  status = shoot_control_init();
+  if (status != OK) {
+    return status;
+  }
   return OK;
 }
 
@@ -87,7 +93,7 @@ err_t CAN_RegisterAllDevices(void) {
  * 供 IMU 任务访问已注册的设备对象，无需暴露全局变量。
  * @return IMU 对象指针，若未初始化可能返回未就绪的对象。
  */
-IMUCAN_t* can_device_get_imu(void) { return &imu_can_instance; }
+IMUCAN_t *can_device_get_imu(void) { return &imu_can_instance; }
 
 /**
  * @brief 启动全部 CAN 总线。
