@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>My Project: bsp_log</title>
+<title>jie: bsp_log</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,9 +30,8 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">My Project<span id="projectnumber">&#160;1.0.1</span>
+   <div id="projectname">jie
    </div>
-   <div id="projectbrief">log日志库</div>
   </td>
  </tr>
  </tbody>
@@ -90,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 <script type="text/javascript">
-document.addEventListener('DOMContentLoaded',() => { initNavTree('md_bsp_2log_2bsp__log.html','',''); });
+document.addEventListener('DOMContentLoaded',() => { initNavTree('md_log_2bsp__log.html','',''); });
 </script>
 <div id="container">
 <div id="doc-content">
@@ -124,27 +123,27 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('md_bsp_2log_2b
 <h1 class="doxsection"><a class="anchor" id="autotoc_md1"></a>
 初始化</h1>
 <p>在调度器启动前调用一次：</p>
-<div class="fragment"><div class="line"><a class="code hl_function" href="group__bsp__log.html#ga066488cf2dd06fe00afebce86ef15a3c">BSPLogInit</a>();</div>
+<div class="fragment"><div class="line"><a class="code hl_function" href="group__bsp__log.html#ga766e146fe24ee52f68895f22b2ca72e3">BSPLogInit</a>();</div>
 <div class="line">osKernelInitialize();</div>
 <div class="line">MX_FREERTOS_Init();</div>
 <div class="line">osKernelStart();</div>
-<div class="ttc" id="agroup__bsp__log_html_ga066488cf2dd06fe00afebce86ef15a3c"><div class="ttname"><a href="group__bsp__log.html#ga066488cf2dd06fe00afebce86ef15a3c">BSPLogInit</a></div><div class="ttdeci">NO_THREAD_SAFE_PROMISE err_t BSPLogInit(void)</div><div class="ttdoc">在调度器启动前初始化 RTT 终端、数据及预留通道。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00218">bsp_log.c:218</a></div></div>
-</div><!-- fragment --><p><span class="tt"><a class="el" href="group__bsp__log.html#ga066488cf2dd06fe00afebce86ef15a3c" title="在调度器启动前初始化 RTT 终端、数据及预留通道。">BSPLogInit()</a></span> 初始化 RTT，将终端通道 0 显式设为 <span class="tt">SEGGER_RTT_MODE_NO_BLOCK_SKIP</span>，配置数据通道和 Reserved 通道，并把全局等级设为 <span class="tt"><a class="el" href="group__bsp__log.html#ga8d908a4fb5bb5dd6b46418c2179ebc68">BSP_LOG_DEFAULT_LEVEL</a></span>（默认 <span class="tt">INFO</span>）。日志层不创建或使用 mutex。初始化接口标记为 <span class="tt"><a class="el" href="group__bsp__log.html#gaa54832e66f9356cb6abd44a98479dbf6" title="标记需要由调用方串行化的接口；除非外部定义，否则展开为空。">NO_THREAD_SAFE_PROMISE</a></span>，只能由调度器启动前的单个线程调用；ISR 或调度器启动后调用返回 <span class="tt">STATE_ERR</span>。成功后重复初始化直接返回成功，不重置 RTT 中已有的数据或运行时等级；初始化失败可以在启动阶段重试。</p>
+<div class="ttc" id="agroup__bsp__log_html_ga766e146fe24ee52f68895f22b2ca72e3"><div class="ttname"><a href="group__bsp__log.html#ga766e146fe24ee52f68895f22b2ca72e3">BSPLogInit</a></div><div class="ttdeci">err_t BSPLogInit(void)</div><div class="ttdoc">在调度器启动前初始化 RTT 终端、数据及预留通道。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00234">bsp_log.c:234</a></div></div>
+</div><!-- fragment --><p><span class="tt"><a class="el" href="group__bsp__log.html#ga766e146fe24ee52f68895f22b2ca72e3" title="在调度器启动前初始化 RTT 终端、数据及预留通道。">BSPLogInit()</a></span> 初始化 RTT，将终端通道 0 显式设为 <span class="tt">SEGGER_RTT_MODE_NO_BLOCK_SKIP</span>，配置数据通道和 Reserved 通道，并把全局等级设为 <span class="tt"><a class="el" href="group__bsp__log.html#ga8d908a4fb5bb5dd6b46418c2179ebc68">BSP_LOG_DEFAULT_LEVEL</a></span>（默认 <span class="tt">INFO</span>）。日志层不创建或使用 mutex。初始化接口标记为 <span class="tt">NO_THREAD_SAFE_PROMISE</span>，只能由调度器启动前的单个线程调用；ISR 或调度器启动后调用返回 <span class="tt">STATE_ERR</span>。成功后重复初始化直接返回成功，不重置 RTT 中已有的数据或运行时等级；初始化失败可以在启动阶段重试。</p>
 <h1 class="doxsection"><a class="anchor" id="autotoc_md2"></a>
 等级和过滤</h1>
 <p>等级顺序为：</p>
 <div class="fragment"><div class="line">TRACE &lt; DEBUG &lt; INFO &lt; WARN &lt; ERROR &lt; FATAL</div>
 </div><!-- fragment --><p>默认全局等级为 <span class="tt">INFO</span>，可以运行时修改：</p>
 <div class="fragment"><div class="line"><a class="code hl_function" href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7">BSPLogSetLevel</a>(<a class="code hl_enumvalue" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ad7e338c14ea8186eca8d8202eb8edb7a">BSP_LOG_LEVEL_DEBUG</a>);</div>
-<div class="ttc" id="agroup__bsp__log_html_gaa83f7b624f3c1935147a0c27b6a0eca7"><div class="ttname"><a href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7">BSPLogSetLevel</a></div><div class="ttdeci">err_t BSPLogSetLevel(bsp_log_level_t level)</div><div class="ttdoc">设置后续日志记录使用的共享最低等级。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00263">bsp_log.c:263</a></div></div>
-<div class="ttc" id="agroup__bsp__log_html_ggab8cf237ccbf0e84a374c75be30ab2045ad7e338c14ea8186eca8d8202eb8edb7a"><div class="ttname"><a href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ad7e338c14ea8186eca8d8202eb8edb7a">BSP_LOG_LEVEL_DEBUG</a></div><div class="ttdeci">@ BSP_LOG_LEVEL_DEBUG</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8h_source.html#l00067">bsp_log.h:67</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_gaa83f7b624f3c1935147a0c27b6a0eca7"><div class="ttname"><a href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7">BSPLogSetLevel</a></div><div class="ttdeci">err_t BSPLogSetLevel(bsp_log_level_t level)</div><div class="ttdoc">设置后续日志记录使用的共享最低等级。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00279">bsp_log.c:279</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ggab8cf237ccbf0e84a374c75be30ab2045ad7e338c14ea8186eca8d8202eb8edb7a"><div class="ttname"><a href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ad7e338c14ea8186eca8d8202eb8edb7a">BSP_LOG_LEVEL_DEBUG</a></div><div class="ttdeci">@ BSP_LOG_LEVEL_DEBUG</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8h_source.html#l00076">bsp_log.h:76</a></div></div>
 </div><!-- fragment --><p>低于全局等级的日志在格式化前直接返回 <span class="tt">PENDING</span>，不会执行格式化或写入 RTT。这是正常的过滤结果，不会更新当前任务的最后错误。这里的 <span class="tt">PENDING</span> 表示本次日志跳过，不会加入队列或稍后补发。</p>
 <div class="fragment"><div class="line">err_t result =</div>
 <div class="line">    <a class="code hl_function" href="group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6">BSPLogWrite</a>(<a class="code hl_enumvalue" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ad7e338c14ea8186eca8d8202eb8edb7a">BSP_LOG_LEVEL_DEBUG</a>, <span class="stringliteral">&quot;motor&quot;</span>, <span class="stringliteral">&quot;speed=%d&quot;</span>, speed);</div>
 <div class="line"><span class="keywordflow">if</span> (result == PENDING) {</div>
 <div class="line">  <span class="comment">// 日志被当前等级正常过滤</span></div>
 <div class="line">}</div>
-<div class="ttc" id="agroup__bsp__log_html_ga3dcb142eb943496e5c5d5dd79f0be5b6"><div class="ttname"><a href="group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6">BSPLogWrite</a></div><div class="ttdeci">err_t BSPLogWrite(bsp_log_level_t level, const char *tag, const char *format,...)</div><div class="ttdoc">按指定等级格式化并提交带标签的日志记录。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00416">bsp_log.c:416</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga3dcb142eb943496e5c5d5dd79f0be5b6"><div class="ttname"><a href="group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6">BSPLogWrite</a></div><div class="ttdeci">err_t BSPLogWrite(bsp_log_level_t level, const char *tag, const char *format,...)</div><div class="ttdoc">按指定等级格式化并提交带标签的日志记录。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00443">bsp_log.c:443</a></div></div>
 </div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md3"></a>
 输出接口</h1>
 <div class="fragment"><div class="line">err_t <a class="code hl_function" href="group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6">BSPLogWrite</a>(<a class="code hl_enumeration" href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a> level,</div>
@@ -156,11 +155,13 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('md_bsp_2log_2b
 <div class="line">                   <span class="keyword">const</span> <span class="keywordtype">char</span> *tag,</div>
 <div class="line">                   <span class="keyword">const</span> <span class="keywordtype">char</span> *format,</div>
 <div class="line">                   va_list args);</div>
-<div class="ttc" id="agroup__bsp__log_html_ga89d112353a5694652830c5f2e82b91ce"><div class="ttname"><a href="group__bsp__log.html#ga89d112353a5694652830c5f2e82b91ce">BSPLogVWrite</a></div><div class="ttdeci">err_t BSPLogVWrite(bsp_log_level_t level, const char *tag, const char *format, va_list args)</div><div class="ttdoc">使用已有参数列表格式化并提交带标签的日志记录。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00349">bsp_log.c:349</a></div></div>
-<div class="ttc" id="agroup__bsp__log_html_gab8cf237ccbf0e84a374c75be30ab2045"><div class="ttname"><a href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a></div><div class="ttdeci">bsp_log_level_t</div><div class="ttdoc">按 TRACE（0）至 FATAL（5）排列日志记录等级。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8h_source.html#l00065">bsp_log.h:65</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga89d112353a5694652830c5f2e82b91ce"><div class="ttname"><a href="group__bsp__log.html#ga89d112353a5694652830c5f2e82b91ce">BSPLogVWrite</a></div><div class="ttdeci">err_t BSPLogVWrite(bsp_log_level_t level, const char *tag, const char *format, va_list args)</div><div class="ttdoc">使用已有参数列表格式化并提交带标签的日志记录。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00376">bsp_log.c:376</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_gab8cf237ccbf0e84a374c75be30ab2045"><div class="ttname"><a href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a></div><div class="ttdeci">bsp_log_level_t</div><div class="ttdoc">按 TRACE（0）至 FATAL（5）排列日志记录等级。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8h_source.html#l00074">bsp_log.h:74</a></div></div>
 </div><!-- fragment --><p>示例：</p>
-<div class="fragment"><div class="line">LOG_INFO(<span class="stringliteral">&quot;motor&quot;</span>, <span class="stringliteral">&quot;speed=%d&quot;</span>, speed);</div>
-<div class="line">LOG_ERROR(<span class="stringliteral">&quot;can&quot;</span>, <span class="stringliteral">&quot;send failed: %d&quot;</span>, status);</div>
+<div class="fragment"><div class="line"><a class="code hl_define" href="group__bsp__log.html#gad85c8c291e6615e4ccaea69b2e5cb97e">LOG_INFO</a>(<span class="stringliteral">&quot;motor&quot;</span>, <span class="stringliteral">&quot;speed=%d&quot;</span>, speed);</div>
+<div class="line"><a class="code hl_define" href="group__bsp__log.html#ga8fe5c9193457537f11eee68bc676a814">LOG_ERROR</a>(<span class="stringliteral">&quot;can&quot;</span>, <span class="stringliteral">&quot;send failed: %d&quot;</span>, status);</div>
+<div class="ttc" id="agroup__bsp__log_html_ga8fe5c9193457537f11eee68bc676a814"><div class="ttname"><a href="group__bsp__log.html#ga8fe5c9193457537f11eee68bc676a814">LOG_ERROR</a></div><div class="ttdeci">#define LOG_ERROR(tag, format,...)</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8h_source.html#l00265">bsp_log.h:265</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_gad85c8c291e6615e4ccaea69b2e5cb97e"><div class="ttname"><a href="group__bsp__log.html#gad85c8c291e6615e4ccaea69b2e5cb97e">LOG_INFO</a></div><div class="ttdeci">#define LOG_INFO(tag, format,...)</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8h_source.html#l00263">bsp_log.h:263</a></div></div>
 </div><!-- fragment --><p>输出格式为：</p>
 <div class="fragment"><div class="line">[INFO][motor] speed=1200\r\n</div>
 <div class="line">[ERROR][can] send failed: -15\r\n</div>
@@ -201,15 +202,15 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('md_bsp_2log_2b
 <p>独立行缓冲区会占用调用任务的栈；栈预算还必须包括 libc 浮点格式化及其调用链。DR16 任务保留 2048 字节栈；其他只有 512 字节栈的任务如需使用格式化日志，应先增加栈并测量运行时余量。日志层不分配堆内存，但 newlib 浮点格式化本身可能分配内存。</p>
 <p>为支持并发 <span class="tt">vsnprintf</span>（尤其是 <span class="tt">f</span>），<span class="tt">FreeRTOSConfig.h</span> 启用 <span class="tt">configUSE_NEWLIB_REENTRANT=1</span>，由内核为每个任务维护独立的 newlib 状态，增加每个任务 TCB 的内存开销。<span class="tt">sysmem.c</span> 提供 <span class="tt">__malloc_lock/unlock</span>，只在 newlib 分配/释放内存期间嵌套挂起调度器，不使用 mutex，不关闭中断，也不包住整个格式化过程。newlib 堆接口仅用于线程上下文。</p>
 <p>普通任务和调度器启动前可以调用格式化日志。ISR、关闭中断、使用 <span class="tt">BASEPRI</span> 的临界区以及调度器挂起期间调用会返回 <span class="tt">STATE_ERR</span>。</p>
-<p><span class="tt"><a class="el" href="group__bsp__log.html#gaa54832e66f9356cb6abd44a98479dbf6" title="标记需要由调用方串行化的接口；除非外部定义，否则展开为空。">NO_THREAD_SAFE_PROMISE</a></span> 是接口注解，只标记必须由调用者保证单线程调用的初始化接口。日志写入和等级读写支持并发。RTT 锁范围内没有格式化操作；本项目 Cortex-M4 的 RTT 默认锁使用 <span class="tt">BASEPRI=0x20</span> 屏蔽相关中断及任务切换。</p>
+<p><span class="tt">NO_THREAD_SAFE_PROMISE</span> 是接口注解，只标记必须由调用者保证单线程调用的初始化接口。日志写入和等级读写支持并发。RTT 锁范围内没有格式化操作；本项目 Cortex-M4 的 RTT 默认锁使用 <span class="tt">BASEPRI=0x20</span> 屏蔽相关中断及任务切换。</p>
 <h1 class="doxsection"><a class="anchor" id="autotoc_md6"></a>
 每任务错误状态</h1>
 <p>FreeRTOS 配置中的 <span class="tt">configNUM_THREAD_LOCAL_STORAGE_POINTERS</span> 设为 1，槽位 0 专供日志库保存当前任务的最后错误。任务 A 和任务 B 的错误状态互不覆盖：</p>
-<div class="fragment"><div class="line">err_t result = LOG_ERROR(<span class="stringliteral">&quot;motor&quot;</span>, <span class="stringliteral">&quot;failed&quot;</span>);</div>
+<div class="fragment"><div class="line">err_t result = <a class="code hl_define" href="group__bsp__log.html#ga8fe5c9193457537f11eee68bc676a814">LOG_ERROR</a>(<span class="stringliteral">&quot;motor&quot;</span>, <span class="stringliteral">&quot;failed&quot;</span>);</div>
 <div class="line"><span class="keywordflow">if</span> (result &lt; 0 &amp;&amp; <a class="code hl_function" href="group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8">BSPLogGetLastError</a>() != OK) {</div>
 <div class="line">  <span class="comment">// 只读取当前任务的错误状态</span></div>
 <div class="line">}</div>
-<div class="ttc" id="agroup__bsp__log_html_ga10046a12de152e4237027fc3b52a13d8"><div class="ttname"><a href="group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8">BSPLogGetLastError</a></div><div class="ttdeci">err_t BSPLogGetLastError(void)</div><div class="ttdoc">读取已保存的启动阶段或当前任务日志状态，不修改该状态。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00338">bsp_log.c:338</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga10046a12de152e4237027fc3b52a13d8"><div class="ttname"><a href="group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8">BSPLogGetLastError</a></div><div class="ttdeci">err_t BSPLogGetLastError(void)</div><div class="ttdoc">读取已保存的启动阶段或当前任务日志状态，不修改该状态。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00365">bsp_log.c:365</a></div></div>
 </div><!-- fragment --><p>规则如下：</p>
 <ul>
 <li><span class="tt">PENDING</span> 不更新错误状态。</li>
@@ -224,8 +225,8 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('md_bsp_2log_2b
 <div class="line">err_t <a class="code hl_function" href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7">BSPLogSetLevel</a>(<a class="code hl_enumeration" href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a> level);</div>
 <div class="line">err_t <a class="code hl_function" href="group__bsp__log.html#ga53595ca0d680bf757bf17a50c13b5c26">BSPLogGetLevel</a>(<a class="code hl_enumeration" href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a> *level);</div>
 <div class="line">err_t <a class="code hl_function" href="group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8">BSPLogGetLastError</a>(<span class="keywordtype">void</span>);</div>
-<div class="ttc" id="agroup__bsp__log_html_ga387f170bcb7cb64383a69c877eb29af7"><div class="ttname"><a href="group__bsp__log.html#ga387f170bcb7cb64383a69c877eb29af7">BSPLogClear</a></div><div class="ttdeci">err_t BSPLogClear(void)</div><div class="ttdoc">通过 RTT 通道 0 提交终端清屏控制序列。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00426">bsp_log.c:426</a></div></div>
-<div class="ttc" id="agroup__bsp__log_html_ga53595ca0d680bf757bf17a50c13b5c26"><div class="ttname"><a href="group__bsp__log.html#ga53595ca0d680bf757bf17a50c13b5c26">BSPLogGetLevel</a></div><div class="ttdeci">err_t BSPLogGetLevel(bsp_log_level_t *level)</div><div class="ttdoc">将共享最低等级读取到调用方提供的存储位置。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00272">bsp_log.c:272</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga387f170bcb7cb64383a69c877eb29af7"><div class="ttname"><a href="group__bsp__log.html#ga387f170bcb7cb64383a69c877eb29af7">BSPLogClear</a></div><div class="ttdeci">err_t BSPLogClear(void)</div><div class="ttdoc">通过 RTT 通道 0 提交终端清屏控制序列。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00453">bsp_log.c:453</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga53595ca0d680bf757bf17a50c13b5c26"><div class="ttname"><a href="group__bsp__log.html#ga53595ca0d680bf757bf17a50c13b5c26">BSPLogGetLevel</a></div><div class="ttdeci">err_t BSPLogGetLevel(bsp_log_level_t *level)</div><div class="ttdoc">将共享最低等级读取到调用方提供的存储位置。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00288">bsp_log.c:288</a></div></div>
 </div><!-- fragment --><p>日志库通过 <span class="tt"><a class="el" href="group__bsp__log.html#ga05a169d4e46e9bdcfee71a8f97eed265" title="轮询 RTT 下行通道 0 并应用完整的日志等级命令。">BSPLogPollLevelCommand()</a></span> 轮询 RTT 下行通道 0，读取上位机发送的数据并调用 <span class="tt"><a class="el" href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7" title="设置后续日志记录使用的共享最低等级。">BSPLogSetLevel()</a></span>。上位机脚本可以直接发送数值字节 <span class="tt">0</span>~<span class="tt">5</span>，也可以发送以换行结尾的 <span class="tt">TRACE</span>、<span class="tt">DEBUG</span>、<span class="tt">INFO</span>、<span class="tt">WARN</span>、<span class="tt">ERROR</span>、<span class="tt">FATAL</span>，以及 <span class="tt">level=debug</span>、<span class="tt">level debug</span>、<span class="tt">log level debug</span> 和 <span class="tt">log_level=debug</span>。文本命令不区分大小写，CR/LF 均可作为结束符；半条命令会等待下一次轮询，超长命令会丢弃到下一个结束符。默认任务每 10 ms 调用一次轮询接口。等级仅保存在 RAM，重启后恢复默认值。</p>
 <p><span class="tt"><a class="el" href="group__bsp__log.html#ga0b863622b6bc986893617c85b16f6d2e" title="将有限浮点数转换为固定三位小数的字符串。">Float2StrN()</a></span> 仍然是独立的浮点字符串工具，不参与日志等级、并发锁或错误状态。其返回值表示字符长度，因此保留 <span class="tt">int</span> 类型：失败返回 -1，成功返回完整结果所需字符数，不含结束符；返回值大于等于容量表示发生截断。</p>
 <p>内部使用 <span class="tt">round()</span> 将数值量化到 0.001，再由整数格式的 <span class="tt">snprintf()</span> 输出，复用标准库的数字转换、长度计算和截断处理。半整数向远离零的方向取整，负零和取整后为零的小负数输出 <span class="tt">0.000</span>；NaN、无穷大以及量化后超出 <span class="tt">[-2^63, 2^63)</span> 的数值返回 -1。调用上下文需满足 libc 的可重入要求。</p>

@@ -1,0 +1,17 @@
+<map id="BSPLogRecordResult" name="BSPLogRecordResult">
+<area shape="rect" id="Node000001" title=" " alt="" coords="383,132,532,159"/>
+<area shape="rect" id="Node000002" href="$group__bsp__log.html#ga387f170bcb7cb64383a69c877eb29af7" title="通过 RTT 通道 0 提交终端清屏控制序列。" alt="" coords="194,5,294,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="430,120,388,83,334,46,295,31,294,26,336,42,391,79,436,121"/>
+<area shape="rect" id="Node000003" href="$group__bsp__log.html#ga53595ca0d680bf757bf17a50c13b5c26" title="将共享最低等级读取到调用方提供的存储位置。" alt="" coords="183,56,304,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="410,126,334,97,299,86,298,81,336,92,415,125"/>
+<area shape="rect" id="Node000004" href="$group__bsp__log.html#ga766e146fe24ee52f68895f22b2ca72e3" title="在调度器启动前初始化 RTT 终端、数据及预留通道。" alt="" coords="200,107,288,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="365,135,288,128,288,122,370,134"/>
+<area shape="rect" id="Node000005" href="$group__bsp__log.html#ga05a169d4e46e9bdcfee71a8f97eed265" title="轮询 RTT 下行通道 0 并应用完整的日志等级命令。" alt="" coords="153,157,335,184"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="365,157,336,162,335,157,370,155"/>
+<area shape="rect" id="Node000006" href="$group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7" title="设置后续日志记录使用的共享最低等级。" alt="" coords="184,208,304,235"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="415,164,336,199,299,210,298,205,334,193,410,166"/>
+<area shape="rect" id="Node000007" href="$group__bsp__log.html#ga89d112353a5694652830c5f2e82b91ce" title="使用已有参数列表格式化并提交带标签的日志记录。" alt="" coords="190,259,298,285"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="435,169,391,212,336,249,299,264,298,258,334,244,388,207,430,171"/>
+<area shape="rect" id="Node000008" href="$group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6" title="按指定等级格式化并提交带标签的日志记录。" alt="" coords="5,259,105,285"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="171,273,105,275,105,269,176,271"/>
+</map>

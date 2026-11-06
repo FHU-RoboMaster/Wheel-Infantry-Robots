@@ -24,15 +24,15 @@
 */
 var NAVTREE =
 [
-  [ "My Project", "index.html", [
-    [ "bsp_log", "md_bsp_2log_2bsp__log.html", [
-      [ "初始化", "md_bsp_2log_2bsp__log.html#autotoc_md1", null ],
-      [ "等级和过滤", "md_bsp_2log_2bsp__log.html#autotoc_md2", null ],
-      [ "输出接口", "md_bsp_2log_2bsp__log.html#autotoc_md3", null ],
-      [ "返回状态", "md_bsp_2log_2bsp__log.html#autotoc_md4", null ],
-      [ "并发规则", "md_bsp_2log_2bsp__log.html#autotoc_md5", null ],
-      [ "每任务错误状态", "md_bsp_2log_2bsp__log.html#autotoc_md6", null ],
-      [ "清屏和工具接口", "md_bsp_2log_2bsp__log.html#autotoc_md7", null ]
+  [ "jie", "index.html", [
+    [ "bsp_log", "md_log_2bsp__log.html", [
+      [ "初始化", "md_log_2bsp__log.html#autotoc_md1", null ],
+      [ "等级和过滤", "md_log_2bsp__log.html#autotoc_md2", null ],
+      [ "输出接口", "md_log_2bsp__log.html#autotoc_md3", null ],
+      [ "返回状态", "md_log_2bsp__log.html#autotoc_md4", null ],
+      [ "并发规则", "md_log_2bsp__log.html#autotoc_md5", null ],
+      [ "每任务错误状态", "md_log_2bsp__log.html#autotoc_md6", null ],
+      [ "清屏和工具接口", "md_log_2bsp__log.html#autotoc_md7", null ]
     ] ],
     [ "专题", "topics.html", "topics" ],
     [ "文件", "files.html", [
@@ -40,6 +40,7 @@ var NAVTREE =
       [ "全局定义", "globals.html", [
         [ "全部", "globals.html", null ],
         [ "函数", "globals_func.html", null ],
+        [ "变量", "globals_vars.html", null ],
         [ "枚举", "globals_enum.html", null ],
         [ "枚举值", "globals_eval.html", null ],
         [ "宏定义", "globals_defs.html", null ]
@@ -50,7 +51,7 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"bsp__log_8c_source.html"
+"bsp__log_8c.html"
 ];
 
 const SYNCONMSG = '点击 关闭 面板同步';

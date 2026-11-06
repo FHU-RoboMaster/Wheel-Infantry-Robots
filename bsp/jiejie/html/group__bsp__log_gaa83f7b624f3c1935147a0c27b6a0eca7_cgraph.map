@@ -1,0 +1,9 @@
+<map id="BSPLogSetLevel" name="BSPLogSetLevel">
+<area shape="rect" id="Node000001" title="设置后续日志记录使用的共享最低等级。" alt="" coords="5,31,126,57"/>
+<area shape="rect" id="Node000002" href="$bsp__log_8c.html#a94f8fa1f8439eb6610487fb951fc5aed" title=" " alt="" coords="174,5,323,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,33,161,30,155,32,127,38"/>
+<area shape="rect" id="Node000004" href="$bsp__log_8c.html#a0b4d5d3268918ead166dfada9bf49607" title="验证日志等级是否在有效范围内。" alt="" coords="175,56,322,83"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="126,50,163,57,157,57,126,55"/>
+<area shape="rect" id="Node000003" href="$bsp__log_8c.html#a2107ad7f4f10665dba36cc26c742ada9" title=" " alt="" coords="371,5,523,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="323,16,358,18,353,19,323,21"/>
+</map>

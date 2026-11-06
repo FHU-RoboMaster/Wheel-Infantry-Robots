@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['初始化_0',['初始化',['../md_bsp_2log_2bsp__log.html#autotoc_md1',1,'']]]
+  ['rtt_20日志_0',['RTT 日志',['../group__bsp__log.html',1,'']]]
 ];

@@ -31,9 +31,12 @@ var menudata={children:[
 {text:"全局定义",url:"globals.html",children:[
 {text:"全部",url:"globals.html",children:[
 {text:"b",url:"globals.html#index_b"},
+{text:"c",url:"globals.html#index_c"},
 {text:"f",url:"globals.html#index_f"},
-{text:"n",url:"globals.html#index_n"}]},
+{text:"l",url:"globals.html#index_l"},
+{text:"s",url:"globals.html#index_s"}]},
 {text:"函数",url:"globals_func.html"},
+{text:"变量",url:"globals_vars.html"},
 {text:"枚举",url:"globals_enum.html"},
 {text:"枚举值",url:"globals_eval.html"},
 {text:"宏定义",url:"globals_defs.html"}]}]}]}

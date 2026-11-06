@@ -1,5 +1,5 @@
-<map id="bsp/log/bsp_log.h" name="bsp/log/bsp_log.h">
-<area shape="rect" id="Node000001" title="声明 RTT 分级日志接口和有限浮点数转换接口。" alt="" coords="218,5,341,32"/>
+<map id="log/bsp_log.h" name="log/bsp_log.h">
+<area shape="rect" id="Node000001" title="声明 RTT 分级日志接口和有限浮点数转换接口。" alt="" coords="230,5,329,32"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,80,74,107"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="238,35,90,80,88,75,237,30"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="97,80,166,107"/>
@@ -11,5 +11,5 @@
 <area shape="rect" id="Node000006" title=" " alt="" coords="423,80,579,107"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="318,30,450,74,445,75,318,35"/>
 <area shape="rect" id="Node000007" title=" " alt="" coords="603,80,700,107"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="342,29,591,78,586,80,341,34"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="330,27,591,78,586,81,329,32"/>
 </map>

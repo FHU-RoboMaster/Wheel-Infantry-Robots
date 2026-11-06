@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>My Project: RTT 日志</title>
+<title>jie: RTT 日志</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,9 +30,8 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">My Project<span id="projectnumber">&#160;1.0.1</span>
+   <div id="projectname">jie
    </div>
-   <div id="projectbrief">log日志库</div>
   </td>
  </tr>
  </tbody>
@@ -130,6 +129,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <tr class="memitem:ga4d215e3008a190d0bdef3f421ccacfcf" id="r_ga4d215e3008a190d0bdef3f421ccacfcf"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ga4d215e3008a190d0bdef3f421ccacfcf">BSP_LOG_CHANNEL_DATA</a>&#160;&#160;&#160;1u</td></tr>
 <tr class="memitem:ga783fc836c52da73c836213d58938e5ad" id="r_ga783fc836c52da73c836213d58938e5ad"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ga783fc836c52da73c836213d58938e5ad">BSP_LOG_CHANNEL_RESERVED</a>&#160;&#160;&#160;2u</td></tr>
 <tr class="memitem:ga3d637375638a05532b7c96b6a4e8473a" id="r_ga3d637375638a05532b7c96b6a4e8473a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ga3d637375638a05532b7c96b6a4e8473a">BSP_LOG_CHANNEL_COMMAND</a>&#160;&#160;&#160;0u</td></tr>
+<tr class="memitem:ga4afbe858deacf12903eb43f89e77e92c" id="r_ga4afbe858deacf12903eb43f89e77e92c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ga4afbe858deacf12903eb43f89e77e92c">BSP_LOG_COMMAND_READ_BUFFER_SIZE</a>&#160;&#160;&#160;8u</td></tr>
 <tr class="memitem:ga79405596869c1eec446247f848113bd9" id="r_ga79405596869c1eec446247f848113bd9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ga79405596869c1eec446247f848113bd9">BSP_LOG_COMMAND_BUFFER_SIZE</a>&#160;&#160;&#160;32u</td></tr>
 <tr class="memitem:ga734162795be0ce929d65f8eac366f997" id="r_ga734162795be0ce929d65f8eac366f997"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ga734162795be0ce929d65f8eac366f997">BSP_LOG_LINE_BUFFER_SIZE</a>&#160;&#160;&#160;512u</td></tr>
 <tr class="memitem:ga39aebeddb91c252dd9a5f5ee653d1039" id="r_ga39aebeddb91c252dd9a5f5ee653d1039"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ga39aebeddb91c252dd9a5f5ee653d1039">BSP_LOG_DATA_BUFFER_SIZE</a>&#160;&#160;&#160;1024u</td></tr>
@@ -138,8 +138,6 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <tr class="memitem:gab9ad21beb329dc35c12cabc295047af9" id="r_gab9ad21beb329dc35c12cabc295047af9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#gab9ad21beb329dc35c12cabc295047af9">BSP_LOG_IPSR_THREAD_MODE</a>&#160;&#160;&#160;0U</td></tr>
 <tr class="memitem:ga0fe0963cbd6c6e7526d739cb40bc90bb" id="r_ga0fe0963cbd6c6e7526d739cb40bc90bb"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ga0fe0963cbd6c6e7526d739cb40bc90bb">BSP_LOG_PRIMASK_UNMASKED</a>&#160;&#160;&#160;0U</td></tr>
 <tr class="memitem:gaa8ee327810e4ecb66be3025c0d29da61" id="r_gaa8ee327810e4ecb66be3025c0d29da61"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#gaa8ee327810e4ecb66be3025c0d29da61">BSP_LOG_BASEPRI_UNMASKED</a>&#160;&#160;&#160;0U</td></tr>
-<tr class="memitem:gaa54832e66f9356cb6abd44a98479dbf6" id="r_gaa54832e66f9356cb6abd44a98479dbf6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#gaa54832e66f9356cb6abd44a98479dbf6">NO_THREAD_SAFE_PROMISE</a></td></tr>
-<tr class="memdesc:gaa54832e66f9356cb6abd44a98479dbf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">标记需要由调用方串行化的接口；除非外部定义，否则展开为空。  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
 枚举</h2></td></tr>
@@ -158,8 +156,8 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 函数</h2></td></tr>
-<tr class="memitem:ga066488cf2dd06fe00afebce86ef15a3c" id="r_ga066488cf2dd06fe00afebce86ef15a3c"><td class="memItemLeft"><a class="el" href="#gaa54832e66f9356cb6abd44a98479dbf6">NO_THREAD_SAFE_PROMISE</a> err_t&#160;</td><td class="memItemRight"><a class="el" href="#ga066488cf2dd06fe00afebce86ef15a3c">BSPLogInit</a> (void)</td></tr>
-<tr class="memdesc:ga066488cf2dd06fe00afebce86ef15a3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">在调度器启动前初始化 RTT 终端、数据及预留通道。  <br /></td></tr>
+<tr class="memitem:ga766e146fe24ee52f68895f22b2ca72e3" id="r_ga766e146fe24ee52f68895f22b2ca72e3"><td class="memItemLeft">err_t&#160;</td><td class="memItemRight"><a class="el" href="#ga766e146fe24ee52f68895f22b2ca72e3">BSPLogInit</a> (void)</td></tr>
+<tr class="memdesc:ga766e146fe24ee52f68895f22b2ca72e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">在调度器启动前初始化 RTT 终端、数据及预留通道。  <br /></td></tr>
 <tr class="memitem:ga3dcb142eb943496e5c5d5dd79f0be5b6" id="r_ga3dcb142eb943496e5c5d5dd79f0be5b6"><td class="memItemLeft">err_t&#160;</td><td class="memItemRight"><a class="el" href="#ga3dcb142eb943496e5c5d5dd79f0be5b6">BSPLogWrite</a> (<a class="el" href="#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a> level, const char *tag, const char *format,...)</td></tr>
 <tr class="memdesc:ga3dcb142eb943496e5c5d5dd79f0be5b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">按指定等级格式化并提交带标签的日志记录。  <br /></td></tr>
 <tr class="memitem:ga89d112353a5694652830c5f2e82b91ce" id="r_ga89d112353a5694652830c5f2e82b91ce"><td class="memItemLeft">err_t&#160;</td><td class="memItemRight"><a class="el" href="#ga89d112353a5694652830c5f2e82b91ce">BSPLogVWrite</a> (<a class="el" href="#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a> level, const char *tag, const char *format, va_list args)</td></tr>
@@ -180,9 +178,16 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <tr class="heading"><td colspan="2"><h2 id="header-member-group" class="groupheader"><a id="member-group" name="member-group"></a>
 日志快捷宏</h2></td></tr>
 <tr><td class="ititle" colspan="2"><p>使用固定等级调用 <a class="el" href="#ga3dcb142eb943496e5c5d5dd79f0be5b6" title="按指定等级格式化并提交带标签的日志记录。">BSPLogWrite()</a>。</p>
-<p>tag 为非 NULL、NUL 结尾的标签，允许空串；format 为非 NULL 的 printf 格式串。 两者仅在调用期间借用，可变参数须与 format 匹配。 启用时返回 <a class="el" href="#ga3dcb142eb943496e5c5d5dd79f0be5b6" title="按指定等级格式化并提交带标签的日志记录。">BSPLogWrite()</a> 的结果；关闭时展开为 ((void)0)。 </p><dl class="section note"><dt>注解</dt><dd>启用时每个参数求值一次，即使记录随后被等级过滤。 关闭时参数不求值，不输出日志，也不更新已保存状态。 需要始终获取返回状态时，请直接调用 <a class="el" href="#ga3dcb142eb943496e5c5d5dd79f0be5b6" title="按指定等级格式化并提交带标签的日志记录。">BSPLogWrite()</a>。 </dd></dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">tag</td><td>为非 NULL、NUL 结尾的标签，允许空串；format 为非 NULL 的 printf 格式串。 两者仅在调用期间借用，可变参数须与 format 匹配。 启用时返回 <a class="el" href="#ga3dcb142eb943496e5c5d5dd79f0be5b6" title="按指定等级格式化并提交带标签的日志记录。">BSPLogWrite()</a> 的结果；关闭时展开为 ((void)0)。 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>注解</dt><dd>启用时每个参数求值一次，即使记录随后被等级过滤。 关闭时参数不求值，不输出日志，也不更新已保存状态。 需要始终获取返回状态时，请直接调用 <a class="el" href="#ga3dcb142eb943496e5c5d5dd79f0be5b6" title="按指定等级格式化并提交带标签的日志记录。">BSPLogWrite()</a>。 </dd></dl>
 <dl class="section warning"><dt>警告</dt><dd>启用时遵守 <a class="el" href="#ga3dcb142eb943496e5c5d5dd79f0be5b6" title="按指定等级格式化并提交带标签的日志记录。">BSPLogWrite()</a> 的上下文、栈空间及格式要求。 </dd></dl>
 </td></tr>
+<tr class="memitem:gaac3b871abe58642e17ede90dfda6ce23" id="r_gaac3b871abe58642e17ede90dfda6ce23"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#gaac3b871abe58642e17ede90dfda6ce23">LOG_TRACE</a>(tag,  format, ...)</td></tr>
 <tr class="memitem:ga1e4d8fbf5cde1810da15db1c751db468" id="r_ga1e4d8fbf5cde1810da15db1c751db468"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ga1e4d8fbf5cde1810da15db1c751db468">LOG_DEBUG</a>(tag,  format, ...)</td></tr>
 <tr class="memitem:gad85c8c291e6615e4ccaea69b2e5cb97e" id="r_gad85c8c291e6615e4ccaea69b2e5cb97e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#gad85c8c291e6615e4ccaea69b2e5cb97e">LOG_INFO</a>(tag,  format, ...)</td></tr>
 <tr class="memitem:ga84a4c23a3d72e43b7d69324cad41619d" id="r_ga84a4c23a3d72e43b7d69324cad41619d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ga84a4c23a3d72e43b7d69324cad41619d">LOG_WARN</a>(tag,  format, ...)</td></tr>
@@ -208,7 +213,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <p>BASEPRI：无优先级屏蔽。 </p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00057">57</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00066">66</a> 行定义.</p>
 
 </div>
 </div>
@@ -225,7 +230,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <p>下行通道：日志等级命令。 </p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00043">43</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00046">46</a> 行定义.</p>
 
 </div>
 </div>
@@ -242,7 +247,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <p>上行通道：JScope 数据。 </p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00041">41</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00044">44</a> 行定义.</p>
 
 </div>
 </div>
@@ -259,7 +264,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <p>上行通道：预留输出。 </p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00042">42</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00045">45</a> 行定义.</p>
 
 </div>
 </div>
@@ -276,7 +281,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <p>上行通道：终端日志。 </p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00040">40</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00043">43</a> 行定义.</p>
 
 </div>
 </div>
@@ -293,7 +298,24 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <p>命令缓冲区容量（字节，包含 NUL）。 </p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00047">47</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00052">52</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ga4afbe858deacf12903eb43f89e77e92c" name="ga4afbe858deacf12903eb43f89e77e92c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4afbe858deacf12903eb43f89e77e92c">&#9670;&#160;</a></span>BSP_LOG_COMMAND_READ_BUFFER_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BSP_LOG_COMMAND_READ_BUFFER_SIZE&#160;&#160;&#160;8u</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>单次轮询从 RTT 下行通道读取的临时块大小（字节）。 </p>
+
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00050">50</a> 行定义.</p>
 
 </div>
 </div>
@@ -310,7 +332,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <p>静态 JScope 上行缓冲区容量（字节）。 </p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00049">49</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00056">56</a> 行定义.</p>
 
 </div>
 </div>
@@ -327,7 +349,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <p>初始最低等级：INFO。 </p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00051">51</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00060">60</a> 行定义.</p>
 
 </div>
 </div>
@@ -342,9 +364,9 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
         </tr>
       </table>
 </div><div class="memdoc">
-<p>编译开关：0 关闭，非零启用；可由外部定义。 </p>
+<p>编译开关：0 \ 关闭，非零启用；由$&lt;$&lt;CONFIG:Debug&gt;:BSP_LOG_ENABLED&gt;定义。 </p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00037">37</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00038">38</a> 行定义.</p>
 
 </div>
 </div>
@@ -361,7 +383,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <p>IPSR：线程模式。 </p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00055">55</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00064">64</a> 行定义.</p>
 
 </div>
 </div>
@@ -378,7 +400,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <p>单次行缓冲区容量（字节，包含 NUL）。 </p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00048">48</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00054">54</a> 行定义.</p>
 
 </div>
 </div>
@@ -395,7 +417,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <p>PRIMASK：未屏蔽中断。 </p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00056">56</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00065">65</a> 行定义.</p>
 
 </div>
 </div>
@@ -412,7 +434,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <p>静态预留上行缓冲区容量（字节）。 </p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00050">50</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00058">58</a> 行定义.</p>
 
 </div>
 </div>
@@ -441,7 +463,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <b>值:</b><div class="fragment"><div class="line">((void)0)</div>
 </div><!-- fragment -->
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00257">257</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00262">262</a> 行定义.</p>
 
 </div>
 </div>
@@ -470,7 +492,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <b>值:</b><div class="fragment"><div class="line">((void)0)</div>
 </div><!-- fragment -->
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00260">260</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00265">265</a> 行定义.</p>
 
 </div>
 </div>
@@ -499,7 +521,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <b>值:</b><div class="fragment"><div class="line">((void)0)</div>
 </div><!-- fragment -->
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00261">261</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00266">266</a> 行定义.</p>
 
 </div>
 </div>
@@ -528,7 +550,36 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <b>值:</b><div class="fragment"><div class="line">((void)0)</div>
 </div><!-- fragment -->
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00258">258</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00263">263</a> 行定义.</p>
+
+</div>
+</div>
+<a id="gaac3b871abe58642e17ede90dfda6ce23" name="gaac3b871abe58642e17ede90dfda6ce23"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaac3b871abe58642e17ede90dfda6ce23">&#9670;&#160;</a></span>LOG_TRACE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LOG_TRACE</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>tag</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>format</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em></em></span>...&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">((void)0)</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00261">261</a> 行定义.</p>
 
 </div>
 </div>
@@ -557,25 +608,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </div><div class="memdoc">
 <b>值:</b><div class="fragment"><div class="line">((void)0)</div>
 </div><!-- fragment -->
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00259">259</a> 行定义.</p>
-
-</div>
-</div>
-<a id="gaa54832e66f9356cb6abd44a98479dbf6" name="gaa54832e66f9356cb6abd44a98479dbf6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaa54832e66f9356cb6abd44a98479dbf6">&#9670;&#160;</a></span>NO_THREAD_SAFE_PROMISE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define NO_THREAD_SAFE_PROMISE</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>标记需要由调用方串行化的接口；除非外部定义，否则展开为空。 </p>
-
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00079">79</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00264">264</a> 行定义.</p>
 
 </div>
 </div>
@@ -611,7 +644,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </td></tr>
 </table>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00065">65</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8h_source.html">bsp_log.h</a> 第 <a class="el" href="bsp__log_8h_source.html#l00074">74</a> 行定义.</p>
 
 </div>
 </div>
@@ -646,7 +679,19 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <dl class="section note"><dt>注解</dt><dd>写入两个空格和 RTT_CTRL_CLEAR，不发送末尾 NUL。 控制序列由主机终端解释，不丢弃 RTT 缓冲数据。 结果写入启动状态或任务状态；ISR 结果不会更新状态。 </dd></dl>
 <dl class="section warning"><dt>警告</dt><dd>拒绝 ISR、中断屏蔽和调度器挂起上下文；通道 0 必须保持 SEGGER_RTT_MODE_NO_BLOCK_SKIP 模式。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00426">426</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00453">453</a> 行定义.</p>
+<div class="dynheader">
+函数调用图:</div>
+<div class="dyncontent">
+<div class="center"><img src="group__bsp__log_ga387f170bcb7cb64383a69c877eb29af7_cgraph.png" border="0" usemap="#agroup__bsp__log_ga387f170bcb7cb64383a69c877eb29af7_cgraph" loading="lazy" alt=""/></div>
+<map name="agroup__bsp__log_ga387f170bcb7cb64383a69c877eb29af7_cgraph" id="agroup__bsp__log_ga387f170bcb7cb64383a69c877eb29af7_cgraph">
+<area shape="rect" title="通过 RTT 通道 0 提交终端清屏控制序列。" alt="" coords="5,5,106,32"/>
+<area shape="rect" href="bsp__log_8c.html#a94f8fa1f8439eb6610487fb951fc5aed" title=" " alt="" coords="154,5,303,32"/>
+<area shape="poly" title=" " alt="" coords="106,16,141,18,136,19,106,21"/>
+<area shape="rect" href="bsp__log_8c.html#a2107ad7f4f10665dba36cc26c742ada9" title=" " alt="" coords="351,5,503,32"/>
+<area shape="poly" title=" " alt="" coords="303,16,338,19,333,19,303,21"/>
+</map>
+</div>
 
 </div>
 </div>
@@ -670,7 +715,17 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <dl class="section note"><dt>注解</dt><dd>调度器启动前读取启动状态，启动后读取任务本地存储槽 0。 新任务初始状态为 OK；被过滤记录保留已保存状态。ISR 查询不访问 TLS。 </dd></dl>
 <dl class="section warning"><dt>警告</dt><dd>FreeRTOS TLS 槽 0 专供本模块使用，不得复用。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00338">338</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00365">365</a> 行定义.</p>
+<div class="dynheader">
+函数调用图:</div>
+<div class="dyncontent">
+<div class="center"><img src="group__bsp__log_ga10046a12de152e4237027fc3b52a13d8_cgraph.png" border="0" usemap="#agroup__bsp__log_ga10046a12de152e4237027fc3b52a13d8_cgraph" loading="lazy" alt=""/></div>
+<map name="agroup__bsp__log_ga10046a12de152e4237027fc3b52a13d8_cgraph" id="agroup__bsp__log_ga10046a12de152e4237027fc3b52a13d8_cgraph">
+<area shape="rect" title="读取已保存的启动阶段或当前任务日志状态，不修改该状态。" alt="" coords="5,5,149,32"/>
+<area shape="rect" href="bsp__log_8c.html#a2107ad7f4f10665dba36cc26c742ada9" title=" " alt="" coords="197,5,349,32"/>
+<area shape="poly" title=" " alt="" coords="149,16,184,19,178,19,149,21"/>
+</map>
+</div>
 
 </div>
 </div>
@@ -706,18 +761,30 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </dl>
 <dl class="section note"><dt>注解</dt><dd>使用原子读取，即使关闭日志也可查询。成功读取保留已保存错误； 除 ISR 外，空指针错误会更新已保存状态。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00272">272</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00288">288</a> 行定义.</p>
+<div class="dynheader">
+函数调用图:</div>
+<div class="dyncontent">
+<div class="center"><img src="group__bsp__log_ga53595ca0d680bf757bf17a50c13b5c26_cgraph.png" border="0" usemap="#agroup__bsp__log_ga53595ca0d680bf757bf17a50c13b5c26_cgraph" loading="lazy" alt=""/></div>
+<map name="agroup__bsp__log_ga53595ca0d680bf757bf17a50c13b5c26_cgraph" id="agroup__bsp__log_ga53595ca0d680bf757bf17a50c13b5c26_cgraph">
+<area shape="rect" title="将共享最低等级读取到调用方提供的存储位置。" alt="" coords="5,5,127,32"/>
+<area shape="rect" href="bsp__log_8c.html#a94f8fa1f8439eb6610487fb951fc5aed" title=" " alt="" coords="175,5,324,32"/>
+<area shape="poly" title=" " alt="" coords="127,16,162,18,157,19,127,21"/>
+<area shape="rect" href="bsp__log_8c.html#a2107ad7f4f10665dba36cc26c742ada9" title=" " alt="" coords="372,5,524,32"/>
+<area shape="poly" title=" " alt="" coords="324,16,359,19,354,19,324,21"/>
+</map>
+</div>
 
 </div>
 </div>
-<a id="ga066488cf2dd06fe00afebce86ef15a3c" name="ga066488cf2dd06fe00afebce86ef15a3c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga066488cf2dd06fe00afebce86ef15a3c">&#9670;&#160;</a></span>BSPLogInit()</h2>
+<a id="ga766e146fe24ee52f68895f22b2ca72e3" name="ga766e146fe24ee52f68895f22b2ca72e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga766e146fe24ee52f68895f22b2ca72e3">&#9670;&#160;</a></span>BSPLogInit()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="#gaa54832e66f9356cb6abd44a98479dbf6">NO_THREAD_SAFE_PROMISE</a> err_t BSPLogInit </td>
+          <td class="memname">err_t BSPLogInit </td>
           <td>(</td>
           <td class="paramtype">void</td>          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -737,9 +804,22 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
   </dd>
 </dl>
 <dl class="section note"><dt>注解</dt><dd>将终端设置为非阻塞整条跳过模式，并将等级设置为 INFO。 重复成功调用会保留缓冲数据和已配置等级。 初始化失败时可在调度器启动前重试。 结果写入启动状态或任务状态；ISR 结果不会更新状态。 </dd></dl>
-<dl class="section warning"><dt>警告</dt><dd>要求在调度器启动前单线程初始化；函数不是线程安全的。 </dd></dl>
+<dl class="section warning"><dt>警告</dt><dd>要求在调度器启动前调用此函数完成初始化。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00218">218</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00234">234</a> 行定义.</p>
+<div class="dynheader">
+函数调用图:</div>
+<div class="dyncontent">
+<div class="center"><img src="group__bsp__log_ga766e146fe24ee52f68895f22b2ca72e3_cgraph.png" border="0" usemap="#agroup__bsp__log_ga766e146fe24ee52f68895f22b2ca72e3_cgraph" loading="lazy" alt=""/></div>
+<map name="agroup__bsp__log_ga766e146fe24ee52f68895f22b2ca72e3_cgraph" id="agroup__bsp__log_ga766e146fe24ee52f68895f22b2ca72e3_cgraph">
+<area shape="rect" title="在调度器启动前初始化 RTT 终端、数据及预留通道。" alt="" coords="5,5,93,32"/>
+<area shape="rect" href="bsp__log_8c.html#a2107ad7f4f10665dba36cc26c742ada9" title=" " alt="" coords="338,5,490,32"/>
+<area shape="poly" title=" " alt="" coords="93,16,323,16,322,21,93,21"/>
+<area shape="rect" href="bsp__log_8c.html#a94f8fa1f8439eb6610487fb951fc5aed" title=" " alt="" coords="141,31,290,57"/>
+<area shape="poly" title=" " alt="" coords="93,23,128,30,123,31,93,28"/>
+<area shape="poly" title=" " alt="" coords="290,32,320,31,325,30,291,37"/>
+</map>
+</div>
 
 </div>
 </div>
@@ -766,23 +846,26 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
     <tr><td class="paramname">PENDING</td><td>没有完整命令可用。 </td></tr>
     <tr><td class="paramname">ARG_ERR</td><td>完整命令非法。 </td></tr>
     <tr><td class="paramname">STATE_ERR</td><td>不在任务上下文。 </td></tr>
-    <tr><td class="paramname">INIT_ERR</td><td>尚未调用 <a class="el" href="#ga066488cf2dd06fe00afebce86ef15a3c" title="在调度器启动前初始化 RTT 终端、数据及预留通道。">BSPLogInit()</a>。 </td></tr>
+    <tr><td class="paramname">INIT_ERR</td><td>尚未调用 <a class="el" href="#ga766e146fe24ee52f68895f22b2ca72e3" title="在调度器启动前初始化 RTT 终端、数据及预留通道。">BSPLogInit()</a>。 </td></tr>
     <tr><td class="paramname">NOT_SUPPORT</td><td>日志已关闭。 </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>注解</dt><dd>支持 0 至 5 的原始等级字节；文本命令不区分大小写，以 CR 或 LF 结束。 文本格式：<span class="tt">0</span> 至 <span class="tt">5</span>、<span class="tt">TRACE</span> 至 <span class="tt">FATAL</span>、<span class="tt">level=&lt;name&gt;</span>、 <span class="tt">level &lt;name&gt;</span> 或 <span class="tt">log level &lt;name&gt;</span>。 不完整输入保留到下次调用；过长行丢弃至下一个结束符。 </dd></dl>
-<dl class="section warning"><dt>警告</dt><dd>应在 <a class="el" href="#ga066488cf2dd06fe00afebce86ef15a3c" title="在调度器启动前初始化 RTT 终端、数据及预留通道。">BSPLogInit()</a> 后由单个线程周期调用。 </dd></dl>
+<dl class="section note"><dt>注解</dt><dd>支持 0 至 5 的原始等级字节；文本命令不区分大小写，以 CR 或 LF 结束。 文本格式：<span class="tt">0</span> 至 <span class="tt">5</span>、<span class="tt">TRACE</span> 至 <span class="tt">FATAL</span>、<span class="tt">level=&lt;name&gt;</span>、 <span class="tt">level &lt;name&gt;</span> 或 <span class="tt">log level &lt;name&gt;</span>。 不完整输入保留到下次调用；过长行丢弃至下一个结束符。 每次 RTT 读取块大小由 BSP_LOG_COMMAND_READ_BUFFER_SIZE 配置，默认 为 8 字节；该值只影响单次读取的栈占用和吞吐折中，不限制命令长度。 </dd></dl>
+<dl class="section warning"><dt>警告</dt><dd>应在 <a class="el" href="#ga766e146fe24ee52f68895f22b2ca72e3" title="在调度器启动前初始化 RTT 终端、数据及预留通道。">BSPLogInit()</a> 后由单个线程周期调用。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00281">281</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00297">297</a> 行定义.</p>
 <div class="dynheader">
 函数调用图:</div>
 <div class="dyncontent">
 <div class="center"><img src="group__bsp__log_ga05a169d4e46e9bdcfee71a8f97eed265_cgraph.png" border="0" usemap="#agroup__bsp__log_ga05a169d4e46e9bdcfee71a8f97eed265_cgraph" loading="lazy" alt=""/></div>
 <map name="agroup__bsp__log_ga05a169d4e46e9bdcfee71a8f97eed265_cgraph" id="agroup__bsp__log_ga05a169d4e46e9bdcfee71a8f97eed265_cgraph">
 <area shape="rect" title="轮询 RTT 下行通道 0 并应用完整的日志等级命令。" alt="" coords="5,5,188,32"/>
-<area shape="rect" href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7" title="设置后续日志记录使用的共享最低等级。" alt="" coords="236,5,356,32"/>
-<area shape="poly" title=" " alt="" coords="188,16,223,19,217,19,188,21"/>
+<area shape="rect" href="bsp__log_8c.html#a2107ad7f4f10665dba36cc26c742ada9" title=" " alt="" coords="433,5,585,32"/>
+<area shape="poly" title=" " alt="" coords="188,16,419,16,417,21,188,21"/>
+<area shape="rect" href="bsp__log_8c.html#a94f8fa1f8439eb6610487fb951fc5aed" title=" " alt="" coords="236,31,385,57"/>
+<area shape="poly" title=" " alt="" coords="188,27,222,33,217,33,188,32"/>
+<area shape="poly" title=" " alt="" coords="385,32,415,31,420,30,386,37"/>
 </map>
 </div>
 
@@ -820,15 +903,19 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </dl>
 <dl class="section note"><dt>注解</dt><dd>使用原子写入，即使关闭日志也可配置；非法输入保留原等级。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00263">263</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00279">279</a> 行定义.</p>
 <div class="dynheader">
-这是这个函数的调用关系图:</div>
+函数调用图:</div>
 <div class="dyncontent">
-<div class="center"><img src="group__bsp__log_gaa83f7b624f3c1935147a0c27b6a0eca7_icgraph.png" border="0" usemap="#agroup__bsp__log_gaa83f7b624f3c1935147a0c27b6a0eca7_icgraph" loading="lazy" alt=""/></div>
-<map name="agroup__bsp__log_gaa83f7b624f3c1935147a0c27b6a0eca7_icgraph" id="agroup__bsp__log_gaa83f7b624f3c1935147a0c27b6a0eca7_icgraph">
-<area shape="rect" title="设置后续日志记录使用的共享最低等级。" alt="" coords="236,5,356,32"/>
-<area shape="rect" href="group__bsp__log.html#ga05a169d4e46e9bdcfee71a8f97eed265" title="轮询 RTT 下行通道 0 并应用完整的日志等级命令。" alt="" coords="5,5,188,32"/>
-<area shape="poly" title=" " alt="" coords="218,19,188,21,188,16,223,19"/>
+<div class="center"><img src="group__bsp__log_gaa83f7b624f3c1935147a0c27b6a0eca7_cgraph.png" border="0" usemap="#agroup__bsp__log_gaa83f7b624f3c1935147a0c27b6a0eca7_cgraph" loading="lazy" alt=""/></div>
+<map name="agroup__bsp__log_gaa83f7b624f3c1935147a0c27b6a0eca7_cgraph" id="agroup__bsp__log_gaa83f7b624f3c1935147a0c27b6a0eca7_cgraph">
+<area shape="rect" title="设置后续日志记录使用的共享最低等级。" alt="" coords="5,31,126,57"/>
+<area shape="rect" href="bsp__log_8c.html#a94f8fa1f8439eb6610487fb951fc5aed" title=" " alt="" coords="174,5,323,32"/>
+<area shape="poly" title=" " alt="" coords="126,33,161,30,155,32,127,38"/>
+<area shape="rect" href="bsp__log_8c.html#a0b4d5d3268918ead166dfada9bf49607" title="验证日志等级是否在有效范围内。" alt="" coords="175,56,322,83"/>
+<area shape="poly" title=" " alt="" coords="126,50,163,57,157,57,126,55"/>
+<area shape="rect" href="bsp__log_8c.html#a2107ad7f4f10665dba36cc26c742ada9" title=" " alt="" coords="371,5,523,32"/>
+<area shape="poly" title=" " alt="" coords="323,16,358,18,353,19,323,21"/>
 </map>
 </div>
 
@@ -877,7 +964,21 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <dl class="section note"><dt>注解</dt><dd>输出格式、过滤顺序、栈需求和状态保存规则与 <a class="el" href="#ga3dcb142eb943496e5c5d5dd79f0be5b6" title="按指定等级格式化并提交带标签的日志记录。">BSPLogWrite()</a> 相同。 函数返回后不保留 tag、format 或 args。 </dd></dl>
 <dl class="section warning"><dt>警告</dt><dd>未被过滤的写入拒绝 ISR、中断屏蔽和调度器挂起上下文；通道 0 必须保持 SEGGER_RTT_MODE_NO_BLOCK_SKIP 模式。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00349">349</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00376">376</a> 行定义.</p>
+<div class="dynheader">
+函数调用图:</div>
+<div class="dyncontent">
+<div class="center"><img src="group__bsp__log_ga89d112353a5694652830c5f2e82b91ce_cgraph.png" border="0" usemap="#agroup__bsp__log_ga89d112353a5694652830c5f2e82b91ce_cgraph" loading="lazy" alt=""/></div>
+<map name="agroup__bsp__log_ga89d112353a5694652830c5f2e82b91ce_cgraph" id="agroup__bsp__log_ga89d112353a5694652830c5f2e82b91ce_cgraph">
+<area shape="rect" title="使用已有参数列表格式化并提交带标签的日志记录。" alt="" coords="5,31,114,57"/>
+<area shape="rect" href="bsp__log_8c.html#a94f8fa1f8439eb6610487fb951fc5aed" title=" " alt="" coords="162,5,311,32"/>
+<area shape="poly" title=" " alt="" coords="113,34,149,31,144,32,115,39"/>
+<area shape="rect" href="bsp__log_8c.html#a0b4d5d3268918ead166dfada9bf49607" title="验证日志等级是否在有效范围内。" alt="" coords="163,56,310,83"/>
+<area shape="poly" title=" " alt="" coords="114,49,150,56,145,57,114,54"/>
+<area shape="rect" href="bsp__log_8c.html#a2107ad7f4f10665dba36cc26c742ada9" title=" " alt="" coords="359,5,511,32"/>
+<area shape="poly" title=" " alt="" coords="311,16,346,18,341,19,311,21"/>
+</map>
+</div>
 <div class="dynheader">
 这是这个函数的调用关系图:</div>
 <div class="dyncontent">
@@ -949,15 +1050,21 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <dl class="section note"><dt>注解</dt><dd>使用私有栈缓冲区，并通过 RTT 内部锁执行一次写入。 记录格式为“[LEVEL][tag] 正文”，末尾为 CRLF，最多提交 511 字节。 过滤在参数和初始化检查之后、上下文检查之前执行。 PENDING 直接跳过记录，不入队且不改变已保存错误状态。 其他结果更新启动状态或当前任务状态；ISR 结果不会更新状态。 </dd></dl>
 <dl class="section warning"><dt>警告</dt><dd>未被过滤的写入拒绝 ISR、中断屏蔽和调度器挂起上下文。 512 字节行缓冲区及 libc 格式化需要调用方提供足够栈空间。 格式化参数必须与 format 匹配；libc 格式化可能分配内存。 初始化后通道 0 必须保持 SEGGER_RTT_MODE_NO_BLOCK_SKIP 模式。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00416">416</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00443">443</a> 行定义.</p>
 <div class="dynheader">
 函数调用图:</div>
 <div class="dyncontent">
 <div class="center"><img src="group__bsp__log_ga3dcb142eb943496e5c5d5dd79f0be5b6_cgraph.png" border="0" usemap="#agroup__bsp__log_ga3dcb142eb943496e5c5d5dd79f0be5b6_cgraph" loading="lazy" alt=""/></div>
 <map name="agroup__bsp__log_ga3dcb142eb943496e5c5d5dd79f0be5b6_cgraph" id="agroup__bsp__log_ga3dcb142eb943496e5c5d5dd79f0be5b6_cgraph">
-<area shape="rect" title="按指定等级格式化并提交带标签的日志记录。" alt="" coords="5,5,105,32"/>
-<area shape="rect" href="group__bsp__log.html#ga89d112353a5694652830c5f2e82b91ce" title="使用已有参数列表格式化并提交带标签的日志记录。" alt="" coords="153,5,261,32"/>
-<area shape="poly" title=" " alt="" coords="105,16,140,18,135,19,105,21"/>
+<area shape="rect" title="按指定等级格式化并提交带标签的日志记录。" alt="" coords="5,31,105,57"/>
+<area shape="rect" href="group__bsp__log.html#ga89d112353a5694652830c5f2e82b91ce" title="使用已有参数列表格式化并提交带标签的日志记录。" alt="" coords="153,31,261,57"/>
+<area shape="poly" title=" " alt="" coords="105,41,140,43,135,45,105,47"/>
+<area shape="rect" href="bsp__log_8c.html#a94f8fa1f8439eb6610487fb951fc5aed" title=" " alt="" coords="309,5,458,32"/>
+<area shape="poly" title=" " alt="" coords="261,34,296,31,291,32,262,39"/>
+<area shape="rect" href="bsp__log_8c.html#a0b4d5d3268918ead166dfada9bf49607" title="验证日志等级是否在有效范围内。" alt="" coords="310,56,457,83"/>
+<area shape="poly" title=" " alt="" coords="261,49,298,57,292,57,261,54"/>
+<area shape="rect" href="bsp__log_8c.html#a2107ad7f4f10665dba36cc26c742ada9" title=" " alt="" coords="506,5,659,32"/>
+<area shape="poly" title=" " alt="" coords="458,16,493,18,488,19,459,21"/>
 </map>
 </div>
 
@@ -1000,7 +1107,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <dl class="section note"><dt>注解</dt><dd>以 0.001 精度取整，中点向远离零方向舍入，取整后的零输出为 0.000。 size 大于 0 且 str 非 NULL 时，即使失败，缓冲区也以 NUL 结尾。 整数部分按 32 位十进制分组以支持 newlib-nano；不读取或修改日志错误状态。 </dd></dl>
 <dl class="section warning"><dt>警告</dt><dd>要求 str 指向至少 size 字节的可写缓冲区，调用上下文满足 libc 格式化要求。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00442">442</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00469">469</a> 行定义.</p>
 
 </div>
 </div>

@@ -1,0 +1,5 @@
+<map id="BSPLogGetLastError" name="BSPLogGetLastError">
+<area shape="rect" id="Node000001" title="读取已保存的启动阶段或当前任务日志状态，不修改该状态。" alt="" coords="5,5,149,32"/>
+<area shape="rect" id="Node000002" href="$bsp__log_8c.html#a2107ad7f4f10665dba36cc26c742ada9" title=" " alt="" coords="197,5,349,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,16,184,19,178,19,149,21"/>
+</map>

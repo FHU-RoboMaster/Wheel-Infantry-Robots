@@ -1,0 +1,9 @@
+<map id="BSPLogVWrite" name="BSPLogVWrite">
+<area shape="rect" id="Node000001" title="使用已有参数列表格式化并提交带标签的日志记录。" alt="" coords="5,31,114,57"/>
+<area shape="rect" id="Node000002" href="$bsp__log_8c.html#a94f8fa1f8439eb6610487fb951fc5aed" title=" " alt="" coords="162,5,311,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,34,149,31,144,32,115,39"/>
+<area shape="rect" id="Node000004" href="$bsp__log_8c.html#a0b4d5d3268918ead166dfada9bf49607" title="验证日志等级是否在有效范围内。" alt="" coords="163,56,310,83"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="114,49,150,56,145,57,114,54"/>
+<area shape="rect" id="Node000003" href="$bsp__log_8c.html#a2107ad7f4f10665dba36cc26c742ada9" title=" " alt="" coords="359,5,511,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="311,16,346,18,341,19,311,21"/>
+</map>

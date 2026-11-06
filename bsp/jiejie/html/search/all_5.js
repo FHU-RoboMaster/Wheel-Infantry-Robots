@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['并发规则_0',['并发规则',['../md_bsp_2log_2bsp__log.html#autotoc_md5',1,'']]]
+  ['startup_5ferror_0',['startup_error',['../bsp__log_8c.html#a82a10a8017966f8cd4e39919b91a42d3',1,'bsp_log.c']]]
 ];

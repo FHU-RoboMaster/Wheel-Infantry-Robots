@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>My Project: 全局定义</title>
+<title>jie: 全局定义</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,9 +30,8 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">My Project<span id="projectnumber">&#160;1.0.1</span>
+   <div id="projectname">jie
    </div>
-   <div id="projectbrief">log日志库</div>
   </td>
  </tr>
  </tbody>
@@ -116,8 +115,8 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('globals.html',
 </div>
 
 <div class="contents">
-<div class="textblock">这里列出了所有文档化的函数、变量、宏、枚举和类型定义等，并附带其详细说明:</div><br/>
-<div class="qindex"><a class="qindex" href="#index_b">B</a><div class="alphasepar"></div><a class="qindex" href="#index_f">F</a><div class="alphasepar"></div><a class="qindex" href="#index_n">N</a></div>
+<div class="textblock">这里列出了所有函数、变量、宏、枚举和类型定义等，并附带其所属的文件:</div><br/>
+<div class="qindex"><a class="qindex" href="#index_b">B</a><div class="alphasepar"></div><a class="qindex" href="#index_c">C</a><div class="alphasepar"></div><a class="qindex" href="#index_f">F</a><div class="alphasepar"></div><a class="qindex" href="#index_l">L</a><div class="alphasepar"></div><a class="qindex" href="#index_s">S</a></div>
 
 
 <h3 class="doxsection"><a id="index_b" name="index_b"></a>- b -</h3><ul>
@@ -127,6 +126,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('globals.html',
 <li>BSP_LOG_CHANNEL_RESERVED&#160;:&#160;<a class="el" href="group__bsp__log.html#ga783fc836c52da73c836213d58938e5ad">bsp_log.h</a></li>
 <li>BSP_LOG_CHANNEL_TERMINAL&#160;:&#160;<a class="el" href="group__bsp__log.html#gae98bf98bc309a9b92615da3359d8e2c7">bsp_log.h</a></li>
 <li>BSP_LOG_COMMAND_BUFFER_SIZE&#160;:&#160;<a class="el" href="group__bsp__log.html#ga79405596869c1eec446247f848113bd9">bsp_log.h</a></li>
+<li>BSP_LOG_COMMAND_READ_BUFFER_SIZE&#160;:&#160;<a class="el" href="group__bsp__log.html#ga4afbe858deacf12903eb43f89e77e92c">bsp_log.h</a></li>
 <li>BSP_LOG_DATA_BUFFER_SIZE&#160;:&#160;<a class="el" href="group__bsp__log.html#ga39aebeddb91c252dd9a5f5ee653d1039">bsp_log.h</a></li>
 <li>BSP_LOG_DEFAULT_LEVEL&#160;:&#160;<a class="el" href="group__bsp__log.html#ga8d908a4fb5bb5dd6b46418c2179ebc68">bsp_log.h</a></li>
 <li>BSP_LOG_ENABLED&#160;:&#160;<a class="el" href="group__bsp__log.html#ga789a618795c6ca85f4e228a5419cec08">bsp_log.h</a></li>
@@ -142,24 +142,43 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('globals.html',
 <li>BSP_LOG_LINE_BUFFER_SIZE&#160;:&#160;<a class="el" href="group__bsp__log.html#ga734162795be0ce929d65f8eac366f997">bsp_log.h</a></li>
 <li>BSP_LOG_PRIMASK_UNMASKED&#160;:&#160;<a class="el" href="group__bsp__log.html#ga0fe0963cbd6c6e7526d739cb40bc90bb">bsp_log.h</a></li>
 <li>BSP_LOG_RESERVED_BUFFER_SIZE&#160;:&#160;<a class="el" href="group__bsp__log.html#ga8262f1b6ff4d033321ce57b9dbe3aa5f">bsp_log.h</a></li>
-<li>BSPLogClear()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga387f170bcb7cb64383a69c877eb29af7">bsp_log.h</a></li>
-<li>BSPLogGetLastError()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8">bsp_log.h</a></li>
-<li>BSPLogGetLevel()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga53595ca0d680bf757bf17a50c13b5c26">bsp_log.h</a></li>
-<li>BSPLogInit()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga066488cf2dd06fe00afebce86ef15a3c">bsp_log.h</a></li>
-<li>BSPLogPollLevelCommand()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga05a169d4e46e9bdcfee71a8f97eed265">bsp_log.h</a></li>
-<li>BSPLogSetLevel()&#160;:&#160;<a class="el" href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7">bsp_log.h</a></li>
-<li>BSPLogVWrite()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga89d112353a5694652830c5f2e82b91ce">bsp_log.h</a></li>
-<li>BSPLogWrite()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6">bsp_log.h</a></li>
+<li>BSP_LOG_TLS_ERROR_INDEX&#160;:&#160;<a class="el" href="bsp__log_8c.html#a07f81fd844e8b5fd4f8150504556ee83">bsp_log.c</a></li>
+<li>BSPLogClear()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga387f170bcb7cb64383a69c877eb29af7">bsp_log.c</a>, <a class="el" href="group__bsp__log.html#ga387f170bcb7cb64383a69c877eb29af7">bsp_log.h</a></li>
+<li>BSPLogGetLastError()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8">bsp_log.c</a>, <a class="el" href="group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8">bsp_log.h</a></li>
+<li>BSPLogGetLevel()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga53595ca0d680bf757bf17a50c13b5c26">bsp_log.c</a>, <a class="el" href="group__bsp__log.html#ga53595ca0d680bf757bf17a50c13b5c26">bsp_log.h</a></li>
+<li>BSPLogInit()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga766e146fe24ee52f68895f22b2ca72e3">bsp_log.c</a>, <a class="el" href="group__bsp__log.html#ga766e146fe24ee52f68895f22b2ca72e3">bsp_log.h</a></li>
+<li>BSPLogInThreadMode()&#160;:&#160;<a class="el" href="bsp__log_8c.html#a2107ad7f4f10665dba36cc26c742ada9">bsp_log.c</a></li>
+<li>BSPLogPollLevelCommand()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga05a169d4e46e9bdcfee71a8f97eed265">bsp_log.c</a>, <a class="el" href="group__bsp__log.html#ga05a169d4e46e9bdcfee71a8f97eed265">bsp_log.h</a></li>
+<li>BSPLogRecordResult()&#160;:&#160;<a class="el" href="bsp__log_8c.html#a94f8fa1f8439eb6610487fb951fc5aed">bsp_log.c</a></li>
+<li>BSPLogSetLevel()&#160;:&#160;<a class="el" href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7">bsp_log.c</a>, <a class="el" href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7">bsp_log.h</a></li>
+<li>BSPLogValidateLevel()&#160;:&#160;<a class="el" href="bsp__log_8c.html#a0b4d5d3268918ead166dfada9bf49607">bsp_log.c</a></li>
+<li>BSPLogVWrite()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga89d112353a5694652830c5f2e82b91ce">bsp_log.c</a>, <a class="el" href="group__bsp__log.html#ga89d112353a5694652830c5f2e82b91ce">bsp_log.h</a></li>
+<li>BSPLogWrite()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6">bsp_log.c</a>, <a class="el" href="group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6">bsp_log.h</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_c" name="index_c"></a>- c -</h3><ul>
+<li>current_level&#160;:&#160;<a class="el" href="bsp__log_8c.html#ab5ebd15e4df9041b3dbcfb7b8827e2ee">bsp_log.c</a></li>
 </ul>
 
 
 <h3 class="doxsection"><a id="index_f" name="index_f"></a>- f -</h3><ul>
-<li>Float2StrN()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga0b863622b6bc986893617c85b16f6d2e">bsp_log.h</a></li>
+<li>Float2StrN()&#160;:&#160;<a class="el" href="group__bsp__log.html#ga0b863622b6bc986893617c85b16f6d2e">bsp_log.c</a>, <a class="el" href="group__bsp__log.html#ga0b863622b6bc986893617c85b16f6d2e">bsp_log.h</a></li>
 </ul>
 
 
-<h3 class="doxsection"><a id="index_n" name="index_n"></a>- n -</h3><ul>
-<li>NO_THREAD_SAFE_PROMISE&#160;:&#160;<a class="el" href="group__bsp__log.html#gaa54832e66f9356cb6abd44a98479dbf6">bsp_log.h</a></li>
+<h3 class="doxsection"><a id="index_l" name="index_l"></a>- l -</h3><ul>
+<li>LOG_DEBUG&#160;:&#160;<a class="el" href="group__bsp__log.html#ga1e4d8fbf5cde1810da15db1c751db468">bsp_log.h</a></li>
+<li>LOG_ERROR&#160;:&#160;<a class="el" href="group__bsp__log.html#ga8fe5c9193457537f11eee68bc676a814">bsp_log.h</a></li>
+<li>LOG_FATAL&#160;:&#160;<a class="el" href="group__bsp__log.html#ga088a2e2d28abcc489a76643dc6d74dbe">bsp_log.h</a></li>
+<li>LOG_INFO&#160;:&#160;<a class="el" href="group__bsp__log.html#gad85c8c291e6615e4ccaea69b2e5cb97e">bsp_log.h</a></li>
+<li>LOG_TRACE&#160;:&#160;<a class="el" href="group__bsp__log.html#gaac3b871abe58642e17ede90dfda6ce23">bsp_log.h</a></li>
+<li>LOG_WARN&#160;:&#160;<a class="el" href="group__bsp__log.html#ga84a4c23a3d72e43b7d69324cad41619d">bsp_log.h</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_s" name="index_s"></a>- s -</h3><ul>
+<li>startup_error&#160;:&#160;<a class="el" href="bsp__log_8c.html#a82a10a8017966f8cd4e39919b91a42d3">bsp_log.c</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
