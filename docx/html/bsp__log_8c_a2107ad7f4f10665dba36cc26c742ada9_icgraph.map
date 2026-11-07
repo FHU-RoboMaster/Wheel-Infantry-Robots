@@ -1,0 +1,20 @@
+<map id="BSPLogInThreadMode" name="BSPLogInThreadMode">
+<area shape="rect" id="Node000001" title=" " alt="" coords="433,56,585,83"/>
+<area shape="rect" id="Node000002" href="$group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8" title="读取已保存的启动阶段或当前任务日志状态，不修改该状态。" alt="" coords="239,5,382,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="437,52,366,35,365,30,442,51"/>
+<area shape="rect" id="Node000003" href="$group__bsp__log.html#ga766e146fe24ee52f68895f22b2ca72e3" title="固定小数输出的精度、缩放系数及整数分组参数。" alt="" coords="53,31,140,57"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="416,66,141,49,140,44,419,62"/>
+<area shape="rect" id="Node000004" href="$bsp__log_8c.html#a94f8fa1f8439eb6610487fb951fc5aed" title=" " alt="" coords="236,132,385,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="455,90,349,134,347,129,460,88"/>
+<area shape="poly" id="edge6_Node000004_Node000003" title=" " alt="" coords="276,123,235,97,187,72,141,56,140,51,189,67,238,93,281,122"/>
+<area shape="rect" id="Node000005" href="$group__bsp__log.html#ga387f170bcb7cb64383a69c877eb29af7" title="通过 RTT 通道 0 提交终端清屏控制序列。" alt="" coords="46,81,147,108"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="234,129,148,109,147,104,238,126"/>
+<area shape="rect" id="Node000006" href="$group__bsp__log.html#ga53595ca0d680bf757bf17a50c13b5c26" title="将共享最低等级读取到调用方提供的存储位置。" alt="" coords="36,132,157,159"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="218,147,158,148,157,143,222,144"/>
+<area shape="rect" id="Node000007" href="$group__bsp__log.html#ga05a169d4e46e9bdcfee71a8f97eed265" title="轮询 RTT 下行通道 0 并应用完整的日志等级命令。" alt="" coords="5,183,188,209"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="234,164,157,185,155,180,238,161"/>
+<area shape="rect" id="Node000008" href="$group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7" title="设置后续日志记录使用的共享最低等级。" alt="" coords="36,233,157,260"/>
+<area shape="poly" id="edge8_Node000004_Node000008" title=" " alt="" coords="281,167,238,198,189,224,158,235,156,230,187,219,235,193,276,169"/>
+<area shape="rect" id="Node000009" href="$group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6" title="按指定等级格式化并提交带标签的日志记录。" alt="" coords="47,284,146,311"/>
+<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="293,170,249,224,221,251,189,274,147,291,146,286,186,270,217,247,246,221,289,173"/>
+</map>

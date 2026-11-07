@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>bsp_lpg: bsp/log/bsp_log.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">bsp_lpg<span id="projectnumber">&#160;1.0.1</span>
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="搜索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('bsp__log_8h_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">bsp_log.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="bsp__log_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#ifndef _BSP_LOG_H</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#define _BSP_LOG_H</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;stddef.h&gt;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;SEGGER_RTT.h&quot;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;SEGGER_RTT_Conf.h&quot;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;comp_cmd.h&quot;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment">/* 编译开关与 RTT 通道配置 */</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#ifndef BSP_LOG_ENABLED</span></div>
+<div class="foldopen" id="foldopen00038" data-start="" data-end="">
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga789a618795c6ca85f4e228a5419cec08">   38</a></span><span class="preprocessor">#define BSP_LOG_ENABLED   \</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">  0 </span></div>
+</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="group__bsp__log.html#gae98bf98bc309a9b92615da3359d8e2c7">   43</a></span><span class="preprocessor">#define BSP_LOG_CHANNEL_TERMINAL 0u </span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga4d215e3008a190d0bdef3f421ccacfcf">   44</a></span><span class="preprocessor">#define BSP_LOG_CHANNEL_DATA 1u     </span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga783fc836c52da73c836213d58938e5ad">   45</a></span><span class="preprocessor">#define BSP_LOG_CHANNEL_RESERVED 2u </span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga3d637375638a05532b7c96b6a4e8473a">   46</a></span><span class="preprocessor">#define BSP_LOG_CHANNEL_COMMAND 0u  </span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">/* 缓冲区容量与默认等级 */</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="foldopen" id="foldopen00050" data-start="" data-end="">
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga79405596869c1eec446247f848113bd9">   50</a></span><span class="preprocessor">#define BSP_LOG_COMMAND_BUFFER_SIZE \</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">  32u </span><span class="preprocessor"></span></div>
+</div>
+<div class="foldopen" id="foldopen00052" data-start="" data-end="">
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga39aebeddb91c252dd9a5f5ee653d1039">   52</a></span><span class="preprocessor">#define BSP_LOG_DATA_BUFFER_SIZE \</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">  1024u </span><span class="preprocessor"></span></div>
+</div>
+<div class="foldopen" id="foldopen00054" data-start="" data-end="">
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga8262f1b6ff4d033321ce57b9dbe3aa5f">   54</a></span><span class="preprocessor">#define BSP_LOG_RESERVED_BUFFER_SIZE \</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">  256u </span><span class="preprocessor"></span></div>
+</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga8d908a4fb5bb5dd6b46418c2179ebc68">   56</a></span><span class="preprocessor">#define BSP_LOG_DEFAULT_LEVEL BSP_LOG_LEVEL_INFO </span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">/* Cortex-M 上下文判定值 */</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="group__bsp__log.html#gab9ad21beb329dc35c12cabc295047af9">   60</a></span><span class="preprocessor">#define BSP_LOG_IPSR_THREAD_MODE 0U </span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga0fe0963cbd6c6e7526d739cb40bc90bb">   61</a></span><span class="preprocessor">#define BSP_LOG_PRIMASK_UNMASKED 0U </span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="group__bsp__log.html#gaa8ee327810e4ecb66be3025c0d29da61">   62</a></span><span class="preprocessor">#define BSP_LOG_BASEPRI_UNMASKED 0U </span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="comment">/*float -&gt; string*/</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="group__bsp__log.html#gae7000064e963dba71df65744f8dcce32">   65</a></span><span class="preprocessor">#define FRACTION_DIGITS 3      </span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga230a31b5fdb12e8781fb639a968d441a">   66</a></span><span class="preprocessor">#define FRACTION_SCALE 1000    </span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga550784f340ed0228cc6f6da0225ca971">   67</a></span><span class="preprocessor">#define INTEGER_GROUP_DIGITS 9 </span><span class="preprocessor"></span></div>
+<div class="foldopen" id="foldopen00068" data-start="" data-end="">
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga6e08fa02f99c6a4bbb0057d1e7636b5a">   68</a></span><span class="preprocessor">#define INTEGER_GROUP_BASE \</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">  1000000000 </span><span class="preprocessor"></span></div>
+</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="comment">/* 日志等级与接口标记 */</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="foldopen" id="foldopen00078" data-start="{" data-end="};">
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">   78</a></span><span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045aec2c24e30416f9986988640ceadea528">   79</a></span>  <a class="code hl_enumvalue" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045aec2c24e30416f9986988640ceadea528">BSP_LOG_LEVEL_TRACE</a> = 0, </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ad7e338c14ea8186eca8d8202eb8edb7a">   80</a></span>  <a class="code hl_enumvalue" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ad7e338c14ea8186eca8d8202eb8edb7a">BSP_LOG_LEVEL_DEBUG</a>,     </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ae90f7e016759efc4a9a7ba1c5907ced5">   81</a></span>  <a class="code hl_enumvalue" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ae90f7e016759efc4a9a7ba1c5907ced5">BSP_LOG_LEVEL_INFO</a>,      </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045a4c15a73bf32b8828728d86850cf0875d">   82</a></span>  <a class="code hl_enumvalue" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045a4c15a73bf32b8828728d86850cf0875d">BSP_LOG_LEVEL_WARN</a>,      </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045a0e08db53877e020ee71dff432eacfc90">   83</a></span>  <a class="code hl_enumvalue" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045a0e08db53877e020ee71dff432eacfc90">BSP_LOG_LEVEL_ERROR</a>,     </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ad42ce2c2a6c63bb5529113bc0ce29d3d">   84</a></span>  <a class="code hl_enumvalue" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ad42ce2c2a6c63bb5529113bc0ce29d3d">BSP_LOG_LEVEL_FATAL</a>,     </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045a4ac508b49f030df8492d330234e6db9b">   85</a></span>  <a class="code hl_enumvalue" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045a4ac508b49f030df8492d330234e6db9b">BSP_LOG_LEVEL_COUNT</a>      </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>} <a class="code hl_enumeration" href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a>;</div>
+</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span></div>
+<div class="foldopen" id="foldopen00092" data-start="{" data-end="};">
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="structbsp__log__event__t.html">   92</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="structbsp__log__event__t.html#af21bf73c8086254386c0318a9c399cd1">   93</a></span>  <a class="code hl_enumeration" href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a> <a class="code hl_variable" href="structbsp__log__event__t.html#af21bf73c8086254386c0318a9c399cd1">level</a>; </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="structbsp__log__event__t.html#a6c2820336727d93574a5e6cce8180fa2">   94</a></span>  <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="structbsp__log__event__t.html#a6c2820336727d93574a5e6cce8180fa2">tag</a>;       </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="structbsp__log__event__t.html#a6bd2bb5fcc7628a640958994a22f997c">   95</a></span>  <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="structbsp__log__event__t.html#a6bd2bb5fcc7628a640958994a22f997c">format</a>;    </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>} <a class="code hl_struct" href="structbsp__log__event__t.html">bsp_log_event_t</a>;</div>
+</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="comment">/* 初始化与日志输出 */</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>err_t <a class="code hl_function" href="group__bsp__log.html#ga766e146fe24ee52f68895f22b2ca72e3">BSPLogInit</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>err_t <a class="code hl_function" href="group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6">BSPLogWrite</a>(<a class="code hl_enumeration" href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a> level, <span class="keyword">const</span> <span class="keywordtype">char</span>* tag, <span class="keyword">const</span> <span class="keywordtype">char</span>* format,</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>                  ...);</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span><span class="comment">/* 终端控制 */</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span></div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>err_t <a class="code hl_function" href="group__bsp__log.html#ga387f170bcb7cb64383a69c877eb29af7">BSPLogClear</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span><span class="comment">/* 等级控制与状态查询 */</span></div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span></div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>err_t <a class="code hl_function" href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7">BSPLogSetLevel</a>(<a class="code hl_enumeration" href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a> level);</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span></div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>err_t <a class="code hl_function" href="group__bsp__log.html#ga53595ca0d680bf757bf17a50c13b5c26">BSPLogGetLevel</a>(<a class="code hl_enumeration" href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a>* level);</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span></div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>err_t <a class="code hl_function" href="group__bsp__log.html#ga05a169d4e46e9bdcfee71a8f97eed265">BSPLogPollLevelCommand</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span></div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>err_t <a class="code hl_function" href="group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8">BSPLogGetLastError</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span></div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span><span class="preprocessor">#if BSP_LOG_ENABLED</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span><span class="preprocessor">#define LOG_TRACE(...) BSPLogWrite(BSP_LOG_LEVEL_TRACE, __VA_ARGS__)</span></div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span></div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span><span class="preprocessor">#define LOG_DEBUG(...) BSPLogWrite(BSP_LOG_LEVEL_DEBUG, __VA_ARGS__)</span></div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span></div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span><span class="preprocessor">#define LOG_INFO(...) BSPLogWrite(BSP_LOG_LEVEL_INFO, __VA_ARGS__)</span></div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span></div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span><span class="preprocessor">#define LOG_WARN(...) BSPLogWrite(BSP_LOG_LEVEL_WARN, __VA_ARGS__)</span></div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span></div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span><span class="preprocessor">#define LOG_ERROR(...) BSPLogWrite(BSP_LOG_LEVEL_ERROR, __VA_ARGS__)</span></div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span></div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span><span class="preprocessor">#define LOG_FATAL(...) BSPLogWrite(BSP_LOG_LEVEL_FATAL, __VA_ARGS__)</span></div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga58c994180e09d2f6400133b19b1d7036">  267</a></span><span class="preprocessor">#define LOG_TRACE(...) ((void)0)</span></div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga754b3d074e0af4ad3c7b918dd77ecb2d">  268</a></span><span class="preprocessor">#define LOG_DEBUG(...) ((void)0)</span></div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga378e28bfcb78d17285210d6bbb70a083">  269</a></span><span class="preprocessor">#define LOG_INFO(...) ((void)0)</span></div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno"><a class="line" href="group__bsp__log.html#gadd82efa459e0af380b68522c29b9fd44">  270</a></span><span class="preprocessor">#define LOG_WARN(...) ((void)0)</span></div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno"><a class="line" href="group__bsp__log.html#gad4a9117ce894e3319e903142347a0f63">  271</a></span><span class="preprocessor">#define LOG_ERROR(...) ((void)0)</span></div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno"><a class="line" href="group__bsp__log.html#ga89cecd05aeaafc715ebc091cf74d10fe">  272</a></span><span class="preprocessor">#define LOG_FATAL(...) ((void)0)</span></div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span></div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> </div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span><span class="comment">/* 数值转换（独立于日志开关及错误状态） */</span></div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span></div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span><span class="keywordtype">int</span> <a class="code hl_function" href="group__bsp__log.html#ga0b863622b6bc986893617c85b16f6d2e">Float2StrN</a>(<span class="keywordtype">char</span>* str, <span class="keywordtype">size_t</span> size, <span class="keywordtype">float</span> va);</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span></div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span> </div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span><span class="preprocessor">#endif </span><span class="comment">/* _BSP_LOG_H */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="agroup__bsp__log_html_ga05a169d4e46e9bdcfee71a8f97eed265"><div class="ttname"><a href="group__bsp__log.html#ga05a169d4e46e9bdcfee71a8f97eed265">BSPLogPollLevelCommand</a></div><div class="ttdeci">err_t BSPLogPollLevelCommand(void)</div><div class="ttdoc">轮询 RTT 下行通道 0 并应用完整的日志等级命令。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00215">bsp_log.c:215</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga0b863622b6bc986893617c85b16f6d2e"><div class="ttname"><a href="group__bsp__log.html#ga0b863622b6bc986893617c85b16f6d2e">Float2StrN</a></div><div class="ttdeci">int Float2StrN(char *str, size_t size, float va)</div><div class="ttdoc">将有限浮点数转换为固定三位小数的字符串。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00263">bsp_log.c:263</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga10046a12de152e4237027fc3b52a13d8"><div class="ttname"><a href="group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8">BSPLogGetLastError</a></div><div class="ttdeci">err_t BSPLogGetLastError(void)</div><div class="ttdoc">读取已保存的启动阶段或当前任务日志状态，不修改该状态。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00250">bsp_log.c:250</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga387f170bcb7cb64383a69c877eb29af7"><div class="ttname"><a href="group__bsp__log.html#ga387f170bcb7cb64383a69c877eb29af7">BSPLogClear</a></div><div class="ttdeci">err_t BSPLogClear(void)</div><div class="ttdoc">通过 RTT 通道 0 提交终端清屏控制序列。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00171">bsp_log.c:171</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga3dcb142eb943496e5c5d5dd79f0be5b6"><div class="ttname"><a href="group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6">BSPLogWrite</a></div><div class="ttdeci">err_t BSPLogWrite(bsp_log_level_t level, const char *tag, const char *format,...)</div><div class="ttdoc">按指定等级格式化并提交带标签的日志记录。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00120">bsp_log.c:120</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga53595ca0d680bf757bf17a50c13b5c26"><div class="ttname"><a href="group__bsp__log.html#ga53595ca0d680bf757bf17a50c13b5c26">BSPLogGetLevel</a></div><div class="ttdeci">err_t BSPLogGetLevel(bsp_log_level_t *level)</div><div class="ttdoc">将共享最低等级读取到调用方提供的存储位置。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00206">bsp_log.c:206</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga766e146fe24ee52f68895f22b2ca72e3"><div class="ttname"><a href="group__bsp__log.html#ga766e146fe24ee52f68895f22b2ca72e3">BSPLogInit</a></div><div class="ttdeci">err_t BSPLogInit(void)</div><div class="ttdoc">固定小数输出的精度、缩放系数及整数分组参数。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00074">bsp_log.c:74</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_gaa83f7b624f3c1935147a0c27b6a0eca7"><div class="ttname"><a href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7">BSPLogSetLevel</a></div><div class="ttdeci">err_t BSPLogSetLevel(bsp_log_level_t level)</div><div class="ttdoc">设置后续日志记录使用的共享最低等级。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00197">bsp_log.c:197</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_gab8cf237ccbf0e84a374c75be30ab2045"><div class="ttname"><a href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a></div><div class="ttdeci">bsp_log_level_t</div><div class="ttdoc">按 TRACE（0）至 FATAL（5）排列日志记录等级。</div><div class="ttdef"><b>定义</b> <a href="#l00078">bsp_log.h:78</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ggab8cf237ccbf0e84a374c75be30ab2045a0e08db53877e020ee71dff432eacfc90"><div class="ttname"><a href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045a0e08db53877e020ee71dff432eacfc90">BSP_LOG_LEVEL_ERROR</a></div><div class="ttdeci">@ BSP_LOG_LEVEL_ERROR</div><div class="ttdef"><b>定义</b> <a href="#l00083">bsp_log.h:83</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ggab8cf237ccbf0e84a374c75be30ab2045a4ac508b49f030df8492d330234e6db9b"><div class="ttname"><a href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045a4ac508b49f030df8492d330234e6db9b">BSP_LOG_LEVEL_COUNT</a></div><div class="ttdeci">@ BSP_LOG_LEVEL_COUNT</div><div class="ttdef"><b>定义</b> <a href="#l00085">bsp_log.h:85</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ggab8cf237ccbf0e84a374c75be30ab2045a4c15a73bf32b8828728d86850cf0875d"><div class="ttname"><a href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045a4c15a73bf32b8828728d86850cf0875d">BSP_LOG_LEVEL_WARN</a></div><div class="ttdeci">@ BSP_LOG_LEVEL_WARN</div><div class="ttdef"><b>定义</b> <a href="#l00082">bsp_log.h:82</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ggab8cf237ccbf0e84a374c75be30ab2045ad42ce2c2a6c63bb5529113bc0ce29d3d"><div class="ttname"><a href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ad42ce2c2a6c63bb5529113bc0ce29d3d">BSP_LOG_LEVEL_FATAL</a></div><div class="ttdeci">@ BSP_LOG_LEVEL_FATAL</div><div class="ttdef"><b>定义</b> <a href="#l00084">bsp_log.h:84</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ggab8cf237ccbf0e84a374c75be30ab2045ad7e338c14ea8186eca8d8202eb8edb7a"><div class="ttname"><a href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ad7e338c14ea8186eca8d8202eb8edb7a">BSP_LOG_LEVEL_DEBUG</a></div><div class="ttdeci">@ BSP_LOG_LEVEL_DEBUG</div><div class="ttdef"><b>定义</b> <a href="#l00080">bsp_log.h:80</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ggab8cf237ccbf0e84a374c75be30ab2045ae90f7e016759efc4a9a7ba1c5907ced5"><div class="ttname"><a href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ae90f7e016759efc4a9a7ba1c5907ced5">BSP_LOG_LEVEL_INFO</a></div><div class="ttdeci">@ BSP_LOG_LEVEL_INFO</div><div class="ttdef"><b>定义</b> <a href="#l00081">bsp_log.h:81</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ggab8cf237ccbf0e84a374c75be30ab2045aec2c24e30416f9986988640ceadea528"><div class="ttname"><a href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045aec2c24e30416f9986988640ceadea528">BSP_LOG_LEVEL_TRACE</a></div><div class="ttdeci">@ BSP_LOG_LEVEL_TRACE</div><div class="ttdef"><b>定义</b> <a href="#l00079">bsp_log.h:79</a></div></div>
+<div class="ttc" id="astructbsp__log__event__t_html"><div class="ttname"><a href="structbsp__log__event__t.html">bsp_log_event_t</a></div><div class="ttdoc">日志事件结构体。</div><div class="ttdef"><b>定义</b> <a href="#l00092">bsp_log.h:92</a></div></div>
+<div class="ttc" id="astructbsp__log__event__t_html_a6bd2bb5fcc7628a640958994a22f997c"><div class="ttname"><a href="structbsp__log__event__t.html#a6bd2bb5fcc7628a640958994a22f997c">bsp_log_event_t::format</a></div><div class="ttdeci">const char * format</div><div class="ttdef"><b>定义</b> <a href="#l00095">bsp_log.h:95</a></div></div>
+<div class="ttc" id="astructbsp__log__event__t_html_a6c2820336727d93574a5e6cce8180fa2"><div class="ttname"><a href="structbsp__log__event__t.html#a6c2820336727d93574a5e6cce8180fa2">bsp_log_event_t::tag</a></div><div class="ttdeci">const char * tag</div><div class="ttdef"><b>定义</b> <a href="#l00094">bsp_log.h:94</a></div></div>
+<div class="ttc" id="astructbsp__log__event__t_html_af21bf73c8086254386c0318a9c399cd1"><div class="ttname"><a href="structbsp__log__event__t.html#af21bf73c8086254386c0318a9c399cd1">bsp_log_event_t::level</a></div><div class="ttdeci">bsp_log_level_t level</div><div class="ttdef"><b>定义</b> <a href="#l00093">bsp_log.h:93</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_3c5459f7c179b79c90e2565474bb2856.html">bsp</a></li><li class="navelem"><a href="dir_9e745644685ef468e28be8035ef49b50.html">log</a></li><li class="navelem"><a href="bsp__log_8h.html">bsp_log.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+</body>
+</html>

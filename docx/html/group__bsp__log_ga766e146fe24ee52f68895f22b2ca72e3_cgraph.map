@@ -1,0 +1,8 @@
+<map id="BSPLogInit" name="BSPLogInit">
+<area shape="rect" id="Node000001" title="固定小数输出的精度、缩放系数及整数分组参数。" alt="" coords="5,5,93,32"/>
+<area shape="rect" id="Node000002" href="$bsp__log_8c.html#a2107ad7f4f10665dba36cc26c742ada9" title=" " alt="" coords="338,5,490,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,16,323,16,322,21,93,21"/>
+<area shape="rect" id="Node000003" href="$bsp__log_8c.html#a94f8fa1f8439eb6610487fb951fc5aed" title=" " alt="" coords="141,31,290,57"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="93,23,128,30,123,31,93,28"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="290,32,320,31,325,30,291,37"/>
+</map>
