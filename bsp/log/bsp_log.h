@@ -114,8 +114,6 @@ err_t BSPLogInit(void);
  * @brief 按指定等级格式化并提交带标签的日志记录。
  *
  * @param[in] level 日志等级，范围为 TRACE（0）至 FATAL（5）。
- * @param[in] file 借用的非空源文件名，通常由宏传入 __FILE__。
- * @param[in] line 源代码行号，通常由宏传入 __LINE__。
  * @param[in] tag 借用的非空、NUL 结尾标签；允许为空串，在调用期间有效。
  * @param[in] format 借用的非空 RTT 原生格式串，在调用期间有效。
  * @param[in] ... 按 format 要求的顺序和类型提供格式化参数。
@@ -123,7 +121,7 @@ err_t BSPLogInit(void);
  * @retval OK 记录提交成功。
  * @retval PENDING 记录被等级过滤。
  * @retval ARG_ERR 日志等级非法。
- * @retval PTR_NULL file、tag 或 format 为空。
+ * @retval PTR_NULL tag 或 format 为空。
  * @retval INIT_ERR 日志尚未初始化。
  * @retval STATE_ERR 上下文被拒绝或释放日志互斥锁失败。
  * @retval BUSY 日志互斥锁忙，本条记录跳过且未输出。
@@ -131,7 +129,7 @@ err_t BSPLogInit(void);
  * @retval NOT_SUPPORT 日志已关闭。
  * @note 通过日志事件调用 RTT printf/vprintf，不再使用日志层行缓冲区。
  *       函数内部仅维护一份正文参数列表，在输出结束后执行 va_end。
- *       记录格式为“[LEVEL][tag] file:line: 正文”，末尾为 CRLF。
+ *       记录格式为“[LEVEL][tag] 正文”，末尾为 CRLF。
  *       任务阶段用静态互斥锁串行化前缀、正文和换行；启动阶段不获取互斥锁。
  *       获取锁不等待；释放失败优先返回 STATE_ERR，即使传输也发生错误。
  *       过滤在参数和初始化检查之后、上下文检查之前执行。
@@ -144,8 +142,8 @@ err_t BSPLogInit(void);
  * 或释放锁失败时可能已输出部分记录。 初始化后通道 0 必须保持
  * SEGGER_RTT_MODE_NO_BLOCK_SKIP 模式。
  */
-err_t BSPLogWrite(bsp_log_level_t level, const char* file, int line,
-                  const char* tag, const char* format, ...);
+err_t BSPLogWrite(bsp_log_level_t level, const char* tag,
+                  const char* format, ...);
 
 /* 终端控制 */
 
@@ -226,7 +224,7 @@ err_t BSPLogGetLastError(void);
 
 /**
  * @name 日志快捷宏
- * @brief 使用固定等级及调用位置的 __FILE__、__LINE__ 调用 BSPLogWrite()。
+ * @brief 使用固定等级调用 BSPLogWrite()。
  *
  * @param[in] ... 首参数为非 NULL、NUL 结尾的 tag，允许空串；第二个参数为
  * 非 NULL 的 RTT 原生格式串，后续参数须与格式串匹配。启用时返回
@@ -240,27 +238,27 @@ err_t BSPLogGetLastError(void);
 #if BSP_LOG_ENABLED
 /** @brief 提交 TRACE 记录；详细信息。 */
 #define LOG_TRACE(...) \
-  BSPLogWrite(BSP_LOG_LEVEL_TRACE, __FILE__, __LINE__, __VA_ARGS__)
+  BSPLogWrite(BSP_LOG_LEVEL_TRACE, __VA_ARGS__)
 
 /** @brief 提交 DEBUG 记录；调试信息。 */
 #define LOG_DEBUG(...) \
-  BSPLogWrite(BSP_LOG_LEVEL_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
+  BSPLogWrite(BSP_LOG_LEVEL_DEBUG, __VA_ARGS__)
 
 /** @brief 提交 INFO 记录；正常运行信息。 */
 #define LOG_INFO(...) \
-  BSPLogWrite(BSP_LOG_LEVEL_INFO, __FILE__, __LINE__, __VA_ARGS__)
+  BSPLogWrite(BSP_LOG_LEVEL_INFO, __VA_ARGS__)
 
 /** @brief 提交 WARN 记录；警告信息。 */
 #define LOG_WARN(...) \
-  BSPLogWrite(BSP_LOG_LEVEL_WARN, __FILE__, __LINE__, __VA_ARGS__)
+  BSPLogWrite(BSP_LOG_LEVEL_WARN, __VA_ARGS__)
 
 /** @brief 提交 ERROR 记录；错误信息。 */
 #define LOG_ERROR(...) \
-  BSPLogWrite(BSP_LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
+  BSPLogWrite(BSP_LOG_LEVEL_ERROR, __VA_ARGS__)
 
 /** @brief 提交 FATAL 记录；严重错误。 */
 #define LOG_FATAL(...) \
-  BSPLogWrite(BSP_LOG_LEVEL_FATAL, __FILE__, __LINE__, __VA_ARGS__)
+  BSPLogWrite(BSP_LOG_LEVEL_FATAL, __VA_ARGS__)
 #else
 #define LOG_TRACE(...) ((void)0)
 #define LOG_DEBUG(...) ((void)0)

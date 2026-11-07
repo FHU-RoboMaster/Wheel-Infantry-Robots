@@ -34,8 +34,6 @@ _Static_assert(OK == 0, "A new task's NULL TLS slot must represent OK");
 /* 事件只在一次同步输出期间有效；输出回调不保留字符串指针。 */
 typedef struct {
   bsp_log_level_t level;
-  const char *file;
-  int line;
   const char *tag;
   const char *format;
 } bsp_log_event_t;
@@ -131,13 +129,11 @@ err_t BSPLogInit(void) {
 #endif
 }
 
-err_t BSPLogWrite(bsp_log_level_t level, const char *file, int line,
-                  const char *tag, const char *format, ...) {
+err_t BSPLogWrite(bsp_log_level_t level, const char *tag,
+                  const char *format, ...) {
 #if BSP_LOG_ENABLED
   const bsp_log_event_t event = {
       .level = level,
-      .file = file,
-      .line = line,
       .tag = tag,
       .format = format,
   };
@@ -148,7 +144,7 @@ err_t BSPLogWrite(bsp_log_level_t level, const char *file, int line,
   if (BSPLogValidateLevel(level) != OK) {
     return BSPLogRecordResult(ARG_ERR);
   }
-  if (file == NULL || tag == NULL || format == NULL) {
+  if (tag == NULL || format == NULL) {
     return BSPLogRecordResult(PTR_NULL);
   }
   if (!log_initialized) {
@@ -178,8 +174,6 @@ err_t BSPLogWrite(bsp_log_level_t level, const char *file, int line,
 #else
   /* 日志关闭时，直接调用接口仍返回明确状态；LOG_* 宏则完全不求值参数。 */
   RM_UNUSED(level);
-  RM_UNUSED(file);
-  RM_UNUSED(line);
   RM_UNUSED(tag);
   RM_UNUSED(format);
   return BSPLogRecordResult(NOT_SUPPORT);
@@ -427,8 +421,8 @@ static err_t BSPLogWriteRaw(const char *data, size_t size) {
 static err_t BSPLogTerminalCallback(const bsp_log_event_t *event, va_list *args) {
   static const char line_end[] = "\r\n";
   if (SEGGER_RTT_printf(BSP_LOG_CHANNEL_TERMINAL,
-                        "[%s][%s] %s:%d: ", BSPLogLevelName(event->level),
-                        event->tag, event->file, event->line) < 0) {
+                        "[%s][%s] ", BSPLogLevelName(event->level),
+                        event->tag) < 0) {
     return NO_BUFF;
   }
   if (SEGGER_RTT_vprintf(BSP_LOG_CHANNEL_TERMINAL, event->format, args) < 0) {
