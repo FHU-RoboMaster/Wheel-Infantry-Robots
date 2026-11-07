@@ -10,7 +10,7 @@
 err_t STM32PWM_Init(STM32PWM_t* self, TIM_HandleTypeDef* tim_handle,
                     uint32_t channel) {
   if (self == NULL) {
-    LOG_ERROR("PWM", "Init failed: object is NULL");
+    LOG_ERROR("PWM", "初始化失败：对象为空");
     return PTR_NULL;
   }
 
@@ -23,12 +23,12 @@ err_t STM32PWM_Init(STM32PWM_t* self, TIM_HandleTypeDef* tim_handle,
   ASSERT(self->tim_handle_ != NULL);
   if (self->tim_handle_ == NULL) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("PWM", "Init failed: timer handle is NULL");
+    LOG_ERROR("PWM", "初始化失败：定时器句柄为空");
     return self->last_error_;
   }
 
   self->last_error_ = OK;
-  LOG_INFO("PWM", "Initialized channel=%lu", (unsigned long)channel);
+  LOG_DEBUG("PWM", "初始化完成 通道=%u", (unsigned)channel);
   return self->last_error_;
 }
 
@@ -36,14 +36,14 @@ err_t STM32PWM_Init(STM32PWM_t* self, TIM_HandleTypeDef* tim_handle,
 //! HAL 启动失败时保持 started_ 为 false，并把错误码记录为 FAILED。
 err_t STM32PWM_Start(STM32PWM_t* self) {
   if (self == NULL) {
-    LOG_ERROR("PWM", "Start failed: object is NULL");
+    LOG_ERROR("PWM", "启动失败：对象为空");
     return PTR_NULL;
   }
 
   ASSERT(self->tim_handle_ != NULL);
   if (self->tim_handle_ == NULL) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("PWM", "Start failed: timer handle is NULL");
+    LOG_ERROR("PWM", "启动失败：定时器句柄为空");
     return self->last_error_;
   }
 
@@ -53,35 +53,40 @@ err_t STM32PWM_Start(STM32PWM_t* self) {
   if (status != HAL_OK) {
     self->started_ = false;
     self->last_error_ = FAILED;
-    LOG_ERROR("PWM", "Start failed: HAL status=%d", (int)status);
+    LOG_ERROR("PWM", "启动失败 HAL状态=%d", (int)status);
     return self->last_error_;
   }
 
   self->started_ = true;
   self->last_error_ = OK;
-  LOG_INFO("PWM", "Started channel=%lu", (unsigned long)self->channel_);
+  LOG_DEBUG("PWM", "启动完成 通道=%u", (unsigned)self->channel_);
   return self->last_error_;
 }
 
 //! 设置 PWM 占空比。
 //! 先根据 ARR 计算比较值，再写入对应通道 CCR 寄存器。
 err_t STM32PWM_SetDutyCycle(STM32PWM_t* self, float duty_cycle) {
+#if BSP_LOG_ENABLED
+  char duty_text[32];
+#endif
   if (self == NULL) {
-    LOG_ERROR("PWM", "Set duty failed: object is NULL");
+    LOG_ERROR("PWM", "设置占空比失败：对象为空");
     return PTR_NULL;
   }
 
   ASSERT(self->tim_handle_ != NULL);
   if (self->tim_handle_ == NULL) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("PWM", "Set duty failed: timer handle is NULL");
+    LOG_ERROR("PWM", "设置占空比失败：定时器句柄为空");
     return self->last_error_;
   }
 
   ASSERT((duty_cycle >= 0.0f) && (duty_cycle <= 1.0f));
   if ((duty_cycle < 0.0f) || (duty_cycle > 1.0f)) {
     self->last_error_ = OUT_OF_RANGE;
-    LOG_WARN("PWM", "Duty cycle out of range: %.3f", (double)duty_cycle);
+    LOG_WARN("PWM", "占空比超出范围 数值=%s",
+             Float2StrN(duty_text, sizeof(duty_text), duty_cycle) >= 0
+                 ? duty_text : "<无效数值>");
     return self->last_error_;
   }
 
@@ -92,9 +97,10 @@ err_t STM32PWM_SetDutyCycle(STM32PWM_t* self, float duty_cycle) {
 
   self->duty_cycle_ = duty_cycle;
   self->last_error_ = OK;
-  LOG_DEBUG("PWM", "Duty channel=%lu value=%.3f pulse=%lu",
-            (unsigned long)self->channel_, (double)duty_cycle,
-            (unsigned long)pulse);
+  LOG_DEBUG("PWM", "设置占空比 通道=%u 占空比=%s 脉冲计数=%u",
+            (unsigned)self->channel_,
+            Float2StrN(duty_text, sizeof(duty_text), duty_cycle) >= 0
+                ? duty_text : "<无效数值>", (unsigned)pulse);
   return self->last_error_;
 }
 
@@ -102,14 +108,14 @@ err_t STM32PWM_SetDutyCycle(STM32PWM_t* self, float duty_cycle) {
 //! HAL 停止失败时不强行改 started_，由调用方根据错误码处理。
 err_t STM32PWM_Stop(STM32PWM_t* self) {
   if (self == NULL) {
-    LOG_ERROR("PWM", "Stop failed: object is NULL");
+    LOG_ERROR("PWM", "停止失败：对象为空");
     return PTR_NULL;
   }
 
   ASSERT(self->tim_handle_ != NULL);
   if (self->tim_handle_ == NULL) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("PWM", "Stop failed: timer handle is NULL");
+    LOG_ERROR("PWM", "停止失败：定时器句柄为空");
     return self->last_error_;
   }
 
@@ -118,13 +124,13 @@ err_t STM32PWM_Stop(STM32PWM_t* self) {
   VERIFY(status == HAL_OK);
   if (status != HAL_OK) {
     self->last_error_ = FAILED;
-    LOG_ERROR("PWM", "Stop failed: HAL status=%d", (int)status);
+    LOG_ERROR("PWM", "停止失败 HAL状态=%d", (int)status);
     return self->last_error_;
   }
 
   self->started_ = false;
   self->last_error_ = OK;
-  LOG_INFO("PWM", "Stopped channel=%lu", (unsigned long)self->channel_);
+  LOG_DEBUG("PWM", "停止完成 通道=%u", (unsigned)self->channel_);
   return self->last_error_;
 }
 

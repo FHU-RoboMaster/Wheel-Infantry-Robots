@@ -35,7 +35,7 @@ static pid_device_t shoot_pid_devices[3];
  * @return OK 或错误码
  */
 err_t shoot_control_init(void) {
-  LOG_INFO("发射计算", "开始初始化发射 CAN 总线和电机");
+  LOG_DEBUG("发射计算", "开始初始化发射 CAN 总线和电机");
   /* 获取 CAN1 的 BSP 对象（假设 CAN1 用于发射机构，与云台同总线）
    * CAN2 上底盘已占用 0x200 控制组的 1-4 号电机，发射机构不能复用同组 ID */
   ASSERT(CAN1 != NULL);
@@ -55,10 +55,10 @@ err_t shoot_control_init(void) {
 
   /* 初始化发射机构总线 */
   shoot_bus_init_result = dj_motor_bus_init(&shoot_bus, can1);
-  VERIFY(shoot_bus_init_result == OK);
   if (shoot_bus_init_result != OK) {
     LOG_ERROR("发射计算", "发射 CAN 总线初始化失败，错误码=%d",
               (int)shoot_bus_init_result);
+    VERIFY(shoot_bus_init_result == OK);
     return shoot_bus_init_result;
   }
 
@@ -71,34 +71,34 @@ err_t shoot_control_init(void) {
   shoot_init_result[0] =
       dj_motor_init(&shoot_motors[0], &shoot_bus, DJ_MOTOR_M3508, 7,
                     false); /* 左摩擦轮 = 1 号 */
-  VERIFY(shoot_init_result[0] == OK);
   if (shoot_init_result[0] != OK) {
     LOG_ERROR("发射计算", "左摩擦轮初始化失败，错误码=%d",
               (int)shoot_init_result[0]);
+    VERIFY(shoot_init_result[0] == OK);
     return shoot_init_result[0];
   }
 
   shoot_init_result[1] =
       dj_motor_init(&shoot_motors[1], &shoot_bus, DJ_MOTOR_M3508, 8,
                     false); /* 右摩擦轮 = 2 号 */
-  VERIFY(shoot_init_result[1] == OK);
   if (shoot_init_result[1] != OK) {
     LOG_ERROR("发射计算", "右摩擦轮初始化失败，错误码=%d",
               (int)shoot_init_result[1]);
+    VERIFY(shoot_init_result[1] == OK);
     return shoot_init_result[1];
   }
 
   shoot_init_result[2] =
       dj_motor_init(&shoot_motors[2], &shoot_bus, DJ_MOTOR_M2006, 3,
                     false); /* 拨弹电机 = 3 号 */
-  VERIFY(shoot_init_result[2] == OK);
   if (shoot_init_result[2] != OK) {
     LOG_ERROR("发射计算", "拨弹电机初始化失败，错误码=%d",
               (int)shoot_init_result[2]);
+    VERIFY(shoot_init_result[2] == OK);
     return shoot_init_result[2];
   }
 
-  LOG_INFO("发射计算", "发射 CAN 和三台电机初始化完成");
+  LOG_DEBUG("发射计算", "发射 CAN 和三台电机初始化完成");
   return OK;
 }
 
@@ -136,7 +136,7 @@ void shoot_speed_pid_init(void) {
       pid_device_init(&shoot_pid_devices[2], &shoot_motors[2],
                       PID_DEVICE_POSITIONAL, &pid_speed[2], &pid_location);
   VERIFY(pid_init_result[2] == OK);
-  LOG_INFO("发射计算", "发射机构速度环和位置环 PID 初始化完成");
+  LOG_DEBUG("发射计算", "发射机构速度环和位置环 PID 初始化完成");
 }
 
 /**
@@ -198,8 +198,12 @@ static void shoot_single_mode(void) {
     shoot_single_target_deg = feedback.position_deg;
     circle_add(&shoot_single_target_deg, 30.0f, 360.0f);
     shoot_single_target_valid = true;
-    LOG_DEBUG("发射计算", "单发目标角度已锁存：%.2f 度",
-              (double)shoot_single_target_deg);
+#if BSP_LOG_ENABLED
+    char target_text[32];
+#endif
+    LOG_DEBUG("发射计算", "单发目标角度已锁存：%s 度",
+              Float2StrN(target_text, sizeof(target_text), shoot_single_target_deg) >= 0
+                  ? target_text : "<invalid>");
   }
 
   /* 摩擦轮已经持续运行，拨弹电机执行一次固定角度动作。 */
@@ -225,7 +229,12 @@ static void shoot_single_mode(void) {
   ASSERT(isfinite(angle_error));
   if (angle_error < 3.0f && angle_error > -3.0f) {
     shoot_single_done = true;
-    LOG_INFO("发射计算", "单发拨弹完成，角度误差=%.2f 度", (double)angle_error);
+#if BSP_LOG_ENABLED
+    char error_text[32];
+#endif
+    LOG_DEBUG("发射计算", "单发拨弹完成，角度误差=%s 度",
+              Float2StrN(error_text, sizeof(error_text), angle_error) >= 0
+                  ? error_text : "<invalid>");
   }
 }
 

@@ -97,7 +97,7 @@ err_t STM32UART_Init(STM32UART_t* self, UART_HandleTypeDef* uart_handle,
                      BSP_UART_RawData_t dma_buff_rx,
                      STM32UART_RxCallback_t callback) {
   if (self == NULL) {
-    LOG_ERROR("UART", "RX init failed: object is NULL");
+    LOG_ERROR("UART", "接收初始化失败：对象为空");
     return PTR_NULL;
   }
 
@@ -112,28 +112,28 @@ err_t STM32UART_Init(STM32UART_t* self, UART_HandleTypeDef* uart_handle,
   ASSERT(self->uart_handle_ != NULL);
   if (self->uart_handle_ == NULL) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("UART", "RX init failed: HAL handle is NULL");
+    LOG_ERROR("UART", "接收初始化失败：HAL句柄为空");
     return self->last_error_;
   }
 
   ASSERT(BSP_UART_is_valid_id(self->id_));
   if (!BSP_UART_is_valid_id(self->id_)) {
     self->last_error_ = NOT_FOUND;
-    LOG_ERROR("UART", "RX init failed: unsupported UART instance");
+    LOG_ERROR("UART", "接收初始化失败：不支持的UART外设");
     return self->last_error_;
   }
 
   ASSERT(self->dma_buff_rx_.addr_ != NULL);
   if (self->dma_buff_rx_.addr_ == NULL) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("UART", "RX init failed: DMA buffer is NULL");
+    LOG_ERROR("UART", "接收初始化失败：DMA缓冲区地址为空");
     return self->last_error_;
   }
 
   ASSERT(self->dma_buff_rx_.size_ > 0U);
   if (self->dma_buff_rx_.size_ == 0U) {
     self->last_error_ = SIZE_ERR;
-    LOG_ERROR("UART", "RX init failed: DMA buffer is empty");
+    LOG_ERROR("UART", "接收初始化失败：DMA缓冲区长度为零");
     return self->last_error_;
   }
 
@@ -142,14 +142,14 @@ err_t STM32UART_Init(STM32UART_t* self, UART_HandleTypeDef* uart_handle,
   if ((stm32_uart_map[self->id_] != NULL) &&
       (stm32_uart_map[self->id_] != self)) {
     self->last_error_ = BUSY;
-    LOG_ERROR("UART", "RX init failed: UART%u already registered",
+    LOG_ERROR("UART", "接收初始化失败：串口逻辑编号=%u 已被其他对象注册",
               (unsigned)self->id_);
     return self->last_error_;
   }
 
   stm32_uart_map[self->id_] = self;
   self->last_error_ = OK;
-  LOG_INFO("UART", "RX initialized UART%u buffer=%u", (unsigned)self->id_,
+  LOG_DEBUG("UART", "接收初始化完成 串口逻辑编号=%u 缓冲区=%u字节", (unsigned)self->id_,
            (unsigned)self->dma_buff_rx_.size_);
   return self->last_error_;
 }
@@ -160,20 +160,20 @@ err_t STM32UART_Init(STM32UART_t* self, UART_HandleTypeDef* uart_handle,
 //! 指向的缓冲区在整个接收期间有效。
 err_t STM32UART_SetRxDMA(STM32UART_t* self) {
   if (self == NULL) {
-    LOG_ERROR("UART", "RX DMA setup failed: object is NULL");
+    LOG_ERROR("UART", "接收DMA配置失败：对象为空");
     return PTR_NULL;
   }
 
   ASSERT(self->uart_handle_ != NULL);
   if (self->uart_handle_ == NULL) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("UART", "RX DMA setup failed: HAL handle is NULL");
+    LOG_ERROR("UART", "接收DMA配置失败：HAL句柄为空");
     return self->last_error_;
   }
 
   if ((self->uart_handle_->Init.Mode & UART_MODE_RX) != UART_MODE_RX) {
     self->last_error_ = NOT_SUPPORT;
-    LOG_ERROR("UART", "RX DMA setup failed: UART RX mode disabled");
+    LOG_ERROR("UART", "接收DMA配置失败：串口未启用接收模式");
     return self->last_error_;
   }
 
@@ -200,7 +200,7 @@ err_t STM32UART_SetRxDMA(STM32UART_t* self) {
   VERIFY(dma_status == HAL_OK);
   if (dma_status != HAL_OK) {
     self->last_error_ = INIT_ERR;
-    LOG_ERROR("UART", "RX DMA init failed: HAL status=%d", (int)dma_status);
+    LOG_ERROR("UART", "接收DMA初始化失败 HAL状态=%d", (int)dma_status);
     return self->last_error_;
   }
 
@@ -210,13 +210,13 @@ err_t STM32UART_SetRxDMA(STM32UART_t* self) {
   VERIFY(rx_status == HAL_OK);
   if (rx_status != HAL_OK) {
     self->last_error_ = INIT_ERR;
-    LOG_ERROR("UART", "ReceiveToIdle DMA start failed: HAL status=%d",
+    LOG_ERROR("UART", "DMA空闲线接收启动失败 HAL状态=%d",
               (int)rx_status);
     return self->last_error_;
   }
 
   self->last_error_ = OK;
-  LOG_INFO("UART", "RX DMA started UART%u buffer=%u", (unsigned)self->id_,
+  LOG_DEBUG("UART", "接收DMA启动完成 串口逻辑编号=%u 缓冲区=%u字节", (unsigned)self->id_,
            (unsigned)self->dma_buff_rx_.size_);
   return self->last_error_;
 }
@@ -230,7 +230,7 @@ void STM32UART_SetRxCallback(STM32UART_t* self,
   }
 
   self->rx_callback_ = callback;
-  LOG_DEBUG("UART", "RX callback %s", callback == NULL ? "cleared" : "set");
+  LOG_DEBUG("UART", "接收回调%s", callback == NULL ? "已清除" : "已设置");
 }
 
 //! 获取单缓冲 RX 最近一次错误码。
@@ -379,7 +379,7 @@ err_t STM32UARTFrameTx_Init(STM32UARTFrameTx_t* self,
                             BSP_UART_RawData_t dma_buff_1,
                             STM32UART_TxCompleteCallback_t callback) {
   if (self == NULL) {
-    LOG_ERROR("UART", "Frame TX init failed: object is NULL");
+    LOG_ERROR("UART", "变长帧发送初始化失败：对象为空");
     return PTR_NULL;
   }
 
@@ -389,7 +389,7 @@ err_t STM32UARTFrameTx_Init(STM32UARTFrameTx_t* self,
   if (BSP_UART_is_valid_id(id) && (stm32_uart_frame_tx_map[id] == self) &&
       (self->tx_busy_ || (self->pending_size_ != 0U))) {
     self->last_error_ = BUSY;
-    LOG_WARN("UART", "Frame TX init rejected: UART%u is busy", (unsigned)id);
+    LOG_WARN("UART", "拒绝变长帧发送初始化：串口逻辑编号=%u 正忙", (unsigned)id);
     return self->last_error_;
   }
 
@@ -409,14 +409,14 @@ err_t STM32UARTFrameTx_Init(STM32UARTFrameTx_t* self,
   ASSERT(self->uart_handle_ != NULL);
   if (self->uart_handle_ == NULL) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("UART", "Frame TX init failed: HAL handle is NULL");
+    LOG_ERROR("UART", "变长帧发送初始化失败：HAL句柄为空");
     return self->last_error_;
   }
 
   ASSERT(BSP_UART_is_valid_id(self->id_));
   if (!BSP_UART_is_valid_id(self->id_)) {
     self->last_error_ = NOT_FOUND;
-    LOG_ERROR("UART", "Frame TX init failed: unsupported UART instance");
+    LOG_ERROR("UART", "变长帧发送初始化失败：不支持的UART外设");
     return self->last_error_;
   }
 
@@ -435,13 +435,13 @@ err_t STM32UARTFrameTx_Init(STM32UARTFrameTx_t* self,
   ASSERT(STM32_UART_TX_ValidBuffers(dma_buff_0, dma_buff_1));
   if (!STM32_UART_TX_ValidBuffers(dma_buff_0, dma_buff_1)) {
     self->last_error_ = SIZE_ERR;
-    LOG_ERROR("UART", "Frame TX init failed: invalid DMA buffers");
+    LOG_ERROR("UART", "变长帧发送初始化失败：DMA缓冲区无效");
     return self->last_error_;
   }
 
   if (stm32_uart_double_buf_tx_map[self->id_] != NULL) {
     self->last_error_ = BUSY;
-    LOG_WARN("UART", "Frame TX init rejected: DBM already uses UART%u",
+    LOG_WARN("UART", "拒绝变长帧发送初始化：串口逻辑编号=%u 已被双缓冲发送占用",
              (unsigned)self->id_);
     return self->last_error_;
   }
@@ -451,14 +451,14 @@ err_t STM32UARTFrameTx_Init(STM32UARTFrameTx_t* self,
   if ((stm32_uart_frame_tx_map[self->id_] != NULL) &&
       (stm32_uart_frame_tx_map[self->id_] != self)) {
     self->last_error_ = BUSY;
-    LOG_WARN("UART", "Frame TX init rejected: UART%u already registered",
+    LOG_WARN("UART", "拒绝变长帧发送初始化：串口逻辑编号=%u 已被其他对象注册",
              (unsigned)self->id_);
     return self->last_error_;
   }
 
   stm32_uart_frame_tx_map[self->id_] = self;
   self->last_error_ = OK;
-  LOG_INFO("UART", "Frame TX initialized UART%u buffer=%u", (unsigned)self->id_,
+  LOG_DEBUG("UART", "变长帧发送初始化完成 串口逻辑编号=%u 缓冲区=%u字节", (unsigned)self->id_,
            (unsigned)self->dma_buff_0_.size_);
   return self->last_error_;
 }
@@ -468,7 +468,7 @@ err_t STM32UARTFrameTx_Init(STM32UARTFrameTx_t* self,
 //! 数据。
 err_t STM32UARTFrameTx_SetTxDMA(STM32UARTFrameTx_t* self) {
   if (self == NULL) {
-    LOG_ERROR("UART", "Frame TX DMA setup failed: object is NULL");
+    LOG_ERROR("UART", "变长帧发送DMA配置失败：对象为空");
     return PTR_NULL;
   }
 
@@ -502,7 +502,7 @@ err_t STM32UARTFrameTx_SetTxDMA(STM32UARTFrameTx_t* self) {
   VERIFY(dma_status == HAL_OK);
   if (dma_status != HAL_OK) {
     self->last_error_ = INIT_ERR;
-    LOG_ERROR("UART", "Frame TX DMA init failed: HAL status=%d",
+    LOG_ERROR("UART", "变长帧发送DMA初始化失败 HAL状态=%d",
               (int)dma_status);
     return self->last_error_;
   }
@@ -513,7 +513,7 @@ err_t STM32UARTFrameTx_SetTxDMA(STM32UARTFrameTx_t* self) {
 
   self->dma_ready_ = true;
   self->last_error_ = OK;
-  LOG_INFO("UART", "Frame TX DMA ready UART%u", (unsigned)self->id_);
+  LOG_DEBUG("UART", "变长帧发送DMA就绪 串口逻辑编号=%u", (unsigned)self->id_);
   return self->last_error_;
 }
 
@@ -524,7 +524,7 @@ err_t STM32UARTFrameTx_SetTxDMA(STM32UARTFrameTx_t* self) {
 err_t STM32UARTFrameTx_Write(STM32UARTFrameTx_t* self, const uint8_t* data,
                              size_t size) {
   if (self == NULL) {
-    LOG_ERROR("UART", "Frame TX write failed: object is NULL");
+    LOG_ERROR("UART", "变长帧写入失败：对象为空");
     return PTR_NULL;
   }
 
@@ -555,7 +555,7 @@ err_t STM32UARTFrameTx_Write(STM32UARTFrameTx_t* self, const uint8_t* data,
     }
     self->last_error_ = err;
     STM32_UART_TX_Unlock(primask);
-    LOG_DEBUG("UART", "Frame TX write deferred UART%u size=%u err=%d",
+    LOG_DEBUG("UART", "变长帧写入暂缓 串口逻辑编号=%u 长度=%u字节 错误码=%d",
               (unsigned)self->id_, (unsigned)size, (int)err);
     return err;
   }
@@ -576,10 +576,10 @@ err_t STM32UARTFrameTx_Write(STM32UARTFrameTx_t* self, const uint8_t* data,
   self->last_error_ = err;
   STM32_UART_TX_Unlock(primask);
   if (err == OK) {
-    LOG_TRACE("UART", "Frame TX accepted UART%u size=%u", (unsigned)self->id_,
+    LOG_TRACE("UART", "变长帧发送已提交 串口逻辑编号=%u 长度=%u字节", (unsigned)self->id_,
               (unsigned)size);
   } else {
-    LOG_WARN("UART", "Frame TX failed UART%u size=%u err=%d",
+    LOG_WARN("UART", "变长帧发送失败 串口逻辑编号=%u 长度=%u字节 错误码=%d",
              (unsigned)self->id_, (unsigned)size, (int)err);
   }
   return err;
@@ -717,32 +717,32 @@ err_t STM32UARTDoubleBufTx_Init(STM32UARTDoubleBufTx_t* self,
                                 BSP_UART_RawData_t dma_buff_1,
                                 STM32UART_TxRefillCallback_t callback) {
   if (self == NULL) {
-    LOG_ERROR("UART", "DBM init failed: object is NULL");
+    LOG_ERROR("UART", "双缓冲发送初始化失败：对象为空");
     return PTR_NULL;
   }
   if ((uart_handle == NULL) || (dma_buff_0.addr_ == NULL) ||
       (dma_buff_1.addr_ == NULL)) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("UART", "DBM init failed: invalid handle or buffer");
+    LOG_ERROR("UART", "双缓冲发送初始化失败：句柄或缓冲区为空");
     return self->last_error_;
   }
 
   const BSP_UART_t id = BSP_UART_get_id(uart_handle->Instance);
   if (!BSP_UART_is_valid_id(id)) {
     self->last_error_ = NOT_FOUND;
-    LOG_ERROR("UART", "DBM init failed: unsupported UART instance");
+    LOG_ERROR("UART", "双缓冲发送初始化失败：不支持的UART外设");
     return self->last_error_;
   }
   if (!STM32_UART_TX_ValidBuffers(dma_buff_0, dma_buff_1)) {
     self->last_error_ = SIZE_ERR;
-    LOG_ERROR("UART", "DBM init failed: invalid DMA buffers");
+    LOG_ERROR("UART", "双缓冲发送初始化失败：DMA缓冲区无效");
     return self->last_error_;
   }
   if ((stm32_uart_frame_tx_map[id] != NULL) ||
       ((stm32_uart_double_buf_tx_map[id] != NULL) &&
        ((stm32_uart_double_buf_tx_map[id] != self) || self->tx_busy_))) {
     self->last_error_ = BUSY;
-    LOG_WARN("UART", "DBM init rejected: UART%u is busy", (unsigned)id);
+    LOG_WARN("UART", "拒绝双缓冲发送初始化：串口逻辑编号=%u 正忙", (unsigned)id);
     return self->last_error_;
   }
 
@@ -756,7 +756,7 @@ err_t STM32UARTDoubleBufTx_Init(STM32UARTDoubleBufTx_t* self,
   self->dma_ready_ = false;
   stm32_uart_double_buf_tx_map[id] = self;
   self->last_error_ = OK;
-  LOG_INFO("UART", "DBM initialized UART%u page=%u", (unsigned)id,
+  LOG_DEBUG("UART", "双缓冲发送初始化完成 串口逻辑编号=%u 每页=%u字节", (unsigned)id,
            (unsigned)self->dma_buff_0_.size_);
   return self->last_error_;
 }
@@ -765,7 +765,7 @@ err_t STM32UARTDoubleBufTx_Init(STM32UARTDoubleBufTx_t* self,
 //! 硬件 DBM 强制循环，M0/M1 共用同一个页长；配置后保持停止，Flush 再启动。
 err_t STM32UARTDoubleBufTx_SetTxDMA(STM32UARTDoubleBufTx_t* self) {
   if (self == NULL) {
-    LOG_ERROR("UART", "DBM DMA setup failed: object is NULL");
+    LOG_ERROR("UART", "双缓冲发送DMA配置失败：对象为空");
     return PTR_NULL;
   }
   UART_HandleTypeDef* huart = self->uart_handle_;
@@ -831,7 +831,7 @@ err_t STM32UARTDoubleBufTx_SetTxDMA(STM32UARTDoubleBufTx_t* self) {
   self->active_buf_ = 0U;
   self->dma_ready_ = true;
   self->last_error_ = OK;
-  LOG_INFO("UART", "DBM DMA ready UART%u page=%u", (unsigned)self->id_,
+  LOG_DEBUG("UART", "双缓冲发送DMA就绪 串口逻辑编号=%u 每页=%u字节", (unsigned)self->id_,
            (unsigned)self->dma_buff_0_.size_);
   return self->last_error_;
 }
@@ -840,7 +840,7 @@ err_t STM32UARTDoubleBufTx_SetTxDMA(STM32UARTDoubleBufTx_t* self) {
 err_t STM32UARTDoubleBufTx_Write(STM32UARTDoubleBufTx_t* self,
                                  const uint8_t* data, size_t size) {
   if (self == NULL) {
-    LOG_ERROR("UART", "DBM write failed: object is NULL");
+    LOG_ERROR("UART", "双缓冲发送写入失败：对象为空");
     return PTR_NULL;
   }
   if (data == NULL) {
@@ -864,10 +864,10 @@ err_t STM32UARTDoubleBufTx_Write(STM32UARTDoubleBufTx_t* self,
   self->last_error_ = err;
   STM32_UART_TX_Unlock(primask);
   if (err == OK) {
-    LOG_TRACE("UART", "DBM TX started UART%u page=%u", (unsigned)self->id_,
+    LOG_TRACE("UART", "双缓冲发送已启动 串口逻辑编号=%u 每页=%u字节", (unsigned)self->id_,
               (unsigned)size);
   } else {
-    LOG_WARN("UART", "DBM TX failed UART%u page=%u err=%d", (unsigned)self->id_,
+    LOG_WARN("UART", "双缓冲发送失败 串口逻辑编号=%u 每页=%u字节 错误码=%d", (unsigned)self->id_,
              (unsigned)size, (int)err);
   }
   return err;
@@ -918,7 +918,7 @@ err_t STM32UARTDoubleBufTx_Flush(STM32UARTDoubleBufTx_t* self) {
 //! 显式停止连续流。停止不是页边界操作，不保证最后一页完整。
 err_t STM32UARTDoubleBufTx_Stop(STM32UARTDoubleBufTx_t* self) {
   if (self == NULL) {
-    LOG_ERROR("UART", "DBM stop failed: object is NULL");
+    LOG_ERROR("UART", "双缓冲发送停止失败：对象为空");
     return PTR_NULL;
   }
   if ((__get_IPSR() != 0U) || (__get_PRIMASK() != 0U) ||
@@ -950,7 +950,7 @@ err_t STM32UARTDoubleBufTx_Stop(STM32UARTDoubleBufTx_t* self) {
     self->tx_busy_ = false;
     huart->gState = HAL_UART_STATE_READY;
     self->last_error_ = (status == HAL_TIMEOUT) ? TIMEOUT : FAILED;
-    LOG_ERROR("UART", "DBM stop failed UART%u: HAL status=%d",
+    LOG_ERROR("UART", "双缓冲发送停止失败 串口逻辑编号=%u HAL状态=%d",
               (unsigned)self->id_, (int)status);
     return self->last_error_;
   }
@@ -959,7 +959,7 @@ err_t STM32UARTDoubleBufTx_Stop(STM32UARTDoubleBufTx_t* self) {
   self->tx_busy_ = false;
   self->dma_ready_ = true;
   self->last_error_ = OK;
-  LOG_INFO("UART", "DBM stopped UART%u", (unsigned)self->id_);
+  LOG_DEBUG("UART", "双缓冲发送已停止 串口逻辑编号=%u", (unsigned)self->id_);
   return self->last_error_;
 }
 

@@ -17,11 +17,17 @@
 #include "pid_location.h"
 
 /* DR16 task owns the decoded command and updates it periodically. */
-extern DR16_t* dr16;
+extern DR16_t *dr16;
 
 /* 底盘电机总线与实例 */
 dj_motor_bus_t chassis_bus;
 dj_motor_t chassis_motors[4];
+static const uint8_t chassis_motor_ids[4] = {4U, 3U, 2U, 1U};
+
+#if BSP_LOG_ENABLED
+static const char *const chassis_wheel_names[4] = {"左前", "右前", "左后",
+                                                   "右后"};
+#endif
 
 /* 速度环 PID 实例 */
 static PIDInstance pid_speed[4];
@@ -35,34 +41,76 @@ static chassis_control_state_t chassis_control_state_;
 static float motor_target_speed[4];
 static float torque_ff_current[4];
 
+/** 在 VERIFY 停机前记录轮位和控制目标，仅在故障路径格式化浮点数。 */
+static void chassis_log_motor_failure(uint8_t motor_index,
+                                      const char *operation, err_t result,
+                                      float target_rpm, float feedforward) {
+#if BSP_LOG_ENABLED
+  char target_text[32];
+  char feedforward_text[32];
+  LOG_FATAL(
+      "底盘计算", "CAN2 %s失败 wheel=%s motor=%u err=%d rpm=%s ff=%s",
+      operation, chassis_wheel_names[motor_index],
+      (unsigned)chassis_motor_ids[motor_index], (int)result,
+      Float2StrN(target_text, sizeof(target_text), target_rpm) >= 0
+          ? target_text
+          : "<invalid>",
+      Float2StrN(feedforward_text, sizeof(feedforward_text), feedforward) >= 0
+          ? feedforward_text
+          : "<invalid>");
+#else
+  RM_UNUSED(motor_index);
+  RM_UNUSED(operation);
+  RM_UNUSED(result);
+  RM_UNUSED(target_rpm);
+  RM_UNUSED(feedforward);
+#endif
+}
+
+/** 两种运动模式共用故障检查，保留实际错误码，每次仅执行一次控制调用。 */
+static void chassis_apply_speed(uint8_t motor_index, const char *operation) {
+  const float target_rpm = motor_target_speed[motor_index];
+  const float feedforward = torque_ff_current[motor_index];
+  const err_t result =
+      isfinite(target_rpm) && isfinite(feedforward)
+          ? pid_device_control_speed(&chassis_pid_devices[motor_index],
+                                     target_rpm, feedforward)
+          : ARG_ERR;
+  if (result != OK) {
+    chassis_log_motor_failure(motor_index, operation, result, target_rpm,
+                              feedforward);
+    VERIFY(result == OK);
+  }
+}
+
 /**
  * @brief 初始化底盘 CAN 总线与四个 M3508 电机
  * @return OK 或错误码
  */
 err_t chassis_control_init(void) {
-  LOG_INFO("底盘计算", "开始初始化底盘 CAN 总线和电机");
+  LOG_DEBUG("底盘计算", "开始初始化底盘 CAN 总线和电机");
   /* 获取 CAN2 的 BSP 对象（假设 CAN2 用于底盘） */
   ASSERT(CAN2 != NULL);
   BSP_CAN_t can_id = BSP_CAN_get_id(CAN2);
-  ASSERT(can_id != BSP_CAN_ID_ERROR);
   if (can_id == BSP_CAN_ID_ERROR) {
-    LOG_ERROR("底盘计算", "未找到 CAN2 对象");
+    LOG_FATAL("底盘计算", "CAN2 查找BSP对象失败 err=%d", (int)NOT_FOUND);
+    ASSERT(can_id != BSP_CAN_ID_ERROR);
     return NOT_FOUND;
   }
 
-  STM32CAN_t* can2 = STM32CAN_GetInstance(can_id);
-  ASSERT(can2 != NULL);
+  STM32CAN_t *can2 = STM32CAN_GetInstance(can_id);
   if (can2 == NULL) {
-    LOG_ERROR("底盘计算", "CAN2 控制块为空");
+    LOG_FATAL("底盘计算", "CAN2 获取控制块失败 err=%d", (int)PTR_NULL);
+    ASSERT(can2 != NULL);
     return PTR_NULL;
   }
 
   /* 初始化底盘总线 */
   chassis_bus_init_result = dj_motor_bus_init(&chassis_bus, can2);
-  VERIFY(chassis_bus_init_result == OK);
   if (chassis_bus_init_result != OK) {
-    LOG_ERROR("底盘计算", "底盘 CAN 总线初始化失败，错误码=%d",
+    LOG_FATAL("底盘计算", "CAN2 总线初始化失败 err=%d",
               (int)chassis_bus_init_result);
+    VERIFY(chassis_bus_init_result == OK);
     return chassis_bus_init_result;
   }
 
@@ -73,51 +121,51 @@ err_t chassis_control_init(void) {
    *   左后轮 RL = 2 号电机
    *   右后轮 RR = 1 号电机
    * reversed 参数根据实际机械安装方向设置 */
-  chassis_init_result[0] =
-      dj_motor_init(&chassis_motors[CHASSIS_MOTOR_FL], &chassis_bus,
-                    DJ_MOTOR_M3508, 4, false); /* 左前轮 = 4 号 */
-  VERIFY(chassis_init_result[0] == OK);
+  chassis_init_result[0] = dj_motor_init(
+      &chassis_motors[CHASSIS_MOTOR_FL], &chassis_bus, DJ_MOTOR_M3508,
+      chassis_motor_ids[CHASSIS_MOTOR_FL], false); /* 左前轮 = 4 号 */
   if (chassis_init_result[0] != OK) {
-    LOG_ERROR("底盘计算", "左前电机初始化失败，错误码=%d",
+    LOG_FATAL("底盘计算", "CAN2 电机初始化失败 wheel=左前 motor=4 err=%d",
               (int)chassis_init_result[0]);
+    VERIFY(chassis_init_result[0] == OK);
     return chassis_init_result[0];
   }
 
-  chassis_init_result[1] =
-      dj_motor_init(&chassis_motors[CHASSIS_MOTOR_FR], &chassis_bus,
-                    DJ_MOTOR_M3508, 3, false); /* 右前轮 = 3 号 */
-  VERIFY(chassis_init_result[1] == OK);
+  chassis_init_result[1] = dj_motor_init(
+      &chassis_motors[CHASSIS_MOTOR_FR], &chassis_bus, DJ_MOTOR_M3508,
+      chassis_motor_ids[CHASSIS_MOTOR_FR], false); /* 右前轮 = 3 号 */
   if (chassis_init_result[1] != OK) {
-    LOG_ERROR("底盘计算", "右前电机初始化失败，错误码=%d",
+    LOG_FATAL("底盘计算", "CAN2 电机初始化失败 wheel=右前 motor=3 err=%d",
               (int)chassis_init_result[1]);
+    VERIFY(chassis_init_result[1] == OK);
     return chassis_init_result[1];
   }
 
-  chassis_init_result[2] =
-      dj_motor_init(&chassis_motors[CHASSIS_MOTOR_RL], &chassis_bus,
-                    DJ_MOTOR_M3508, 2, false); /* 左后轮 = 2 号 */
-  VERIFY(chassis_init_result[2] == OK);
+  chassis_init_result[2] = dj_motor_init(
+      &chassis_motors[CHASSIS_MOTOR_RL], &chassis_bus, DJ_MOTOR_M3508,
+      chassis_motor_ids[CHASSIS_MOTOR_RL], false); /* 左后轮 = 2 号 */
   if (chassis_init_result[2] != OK) {
-    LOG_ERROR("底盘计算", "左后电机初始化失败，错误码=%d",
+    LOG_FATAL("底盘计算", "CAN2 电机初始化失败 wheel=左后 motor=2 err=%d",
               (int)chassis_init_result[2]);
+    VERIFY(chassis_init_result[2] == OK);
     return chassis_init_result[2];
   }
 
-  chassis_init_result[3] =
-      dj_motor_init(&chassis_motors[CHASSIS_MOTOR_RR], &chassis_bus,
-                    DJ_MOTOR_M3508, 1, false); /* 右后轮 = 1 号 */
-  VERIFY(chassis_init_result[3] == OK);
+  chassis_init_result[3] = dj_motor_init(
+      &chassis_motors[CHASSIS_MOTOR_RR], &chassis_bus, DJ_MOTOR_M3508,
+      chassis_motor_ids[CHASSIS_MOTOR_RR], false); /* 右后轮 = 1 号 */
   if (chassis_init_result[3] != OK) {
-    LOG_ERROR("底盘计算", "右后电机初始化失败，错误码=%d",
+    LOG_FATAL("底盘计算", "CAN2 电机初始化失败 wheel=右后 motor=1 err=%d",
               (int)chassis_init_result[3]);
+    VERIFY(chassis_init_result[3] == OK);
     return chassis_init_result[3];
   }
 
-  LOG_INFO("底盘计算", "底盘 CAN 和四个电机初始化完成");
+  LOG_DEBUG("底盘计算", "底盘 CAN 和四个电机初始化完成");
   return OK;
 }
 
-static void chassis_speed_pid_init_single(PIDInstance* pid, float kp, float ki,
+static void chassis_speed_pid_init_single(PIDInstance *pid, float kp, float ki,
                                           float kd, float max_out) {
   ASSERT(pid != NULL);
   ASSERT(isfinite(kp) && isfinite(ki) && isfinite(kd));
@@ -139,13 +187,20 @@ void chassis_speed_pid_init(void) {
                                 12000.0f);
 
   for (uint8_t i = 0; i < 4; ++i) {
-    VERIFY(pid_device_init(&chassis_pid_devices[i], &chassis_motors[i],
-                           PID_DEVICE_POSITIONAL, &pid_speed[i], NULL) == OK);
+    const err_t result =
+        pid_device_init(&chassis_pid_devices[i], &chassis_motors[i],
+                        PID_DEVICE_POSITIONAL, &pid_speed[i], NULL);
+    if (result != OK) {
+      LOG_FATAL("底盘计算", "CAN2 PID绑定失败 wheel=%s motor=%u err=%d",
+                chassis_wheel_names[i], (unsigned)chassis_motor_ids[i],
+                (int)result);
+      VERIFY(result == OK);
+    }
   }
-  LOG_INFO("底盘计算", "四个底盘速度环 PID 初始化完成");
+  LOG_DEBUG("底盘计算", "四个底盘速度环 PID 初始化完成");
 }
 
-pid_device_t* chassis_get_pid_device(uint8_t motor_index) {
+pid_device_t *chassis_get_pid_device(uint8_t motor_index) {
   return motor_index < 4 ? &chassis_pid_devices[motor_index] : NULL;
 }
 
@@ -155,12 +210,30 @@ static void chassis_stop(void) {
   chassis_control_state_.command.wz = 0.0f;
 
   /* 使用 zero_and_flush 安全停机（推荐的停机方式） */
-  VERIFY(dj_motor_zero_and_flush(&chassis_bus, DJ_MOTOR_GROUP_200) == OK);
+  const err_t result =
+      dj_motor_zero_and_flush(&chassis_bus, DJ_MOTOR_GROUP_200);
+  if (result != OK) {
+    LOG_FATAL("底盘计算", "CAN2 发送停机零电流失败 group=0x200 err=%d",
+              (int)result);
+    VERIFY(result == OK);
+  }
 }
 
 static void chassis_control(void) {
+  if (dr16 == NULL) {
+    LOG_FATAL("底盘计算", "正常模式遥控器对象为空 err=%d", (int)PTR_NULL);
+  }
   ASSERT(dr16 != NULL);
-  const cmd_rc_t* command = &dr16->dr16_cmd;
+  const cmd_rc_t *command = &dr16->dr16_cmd;
+  if (!isfinite(command->ch.l.x) || !isfinite(command->ch.l.y) ||
+      !isfinite(command->ch.r.x)) {
+    LOG_FATAL(
+        "底盘计算",
+        "正常模式遥控输入非法 err=%d lx_finite=%u ly_finite=%u rx_finite=%u",
+        (int)ARG_ERR, (unsigned)isfinite(command->ch.l.x),
+        (unsigned)isfinite(command->ch.l.y),
+        (unsigned)isfinite(command->ch.r.x));
+  }
   ASSERT(isfinite(command->ch.l.x) && isfinite(command->ch.l.y) &&
          isfinite(command->ch.r.x));
 
@@ -176,8 +249,8 @@ static void chassis_control(void) {
    *   注意：这里保留当前遥控器通道的实际方向反号，
    *   只把它统一映射到机器人底盘坐标系。
    */
-  chassis_control_state_.command.vx = -command->ch.l.y * 3000.0f;  // +X：前
-  chassis_control_state_.command.vy = -command->ch.l.x * 3000.0f;  // +Y：左
+  chassis_control_state_.command.vx = -command->ch.l.y * 3000.0f; // +X：前
+  chassis_control_state_.command.vy = -command->ch.l.x * 3000.0f; // +Y：左
   chassis_control_state_.command.wz = command->ch.r.x * 3000.0f;  // +wz：顺时针
 
   /*
@@ -205,10 +278,7 @@ static void chassis_control(void) {
 
   /* 执行速度环 PID 控制（写齐后自动发送 CAN 帧） */
   for (uint8_t i = 0; i < 4; i++) {
-    ASSERT(isfinite(motor_target_speed[i]) && isfinite(torque_ff_current[i]));
-    VERIFY(pid_device_control_speed(&chassis_pid_devices[i],
-                                    motor_target_speed[i],
-                                    torque_ff_current[i]) == OK);
+    chassis_apply_speed(i, "正常模式速度控制");
   }
 }
 
@@ -226,8 +296,17 @@ static void chassis_control(void) {
  *   wz = 固定小陀螺速度
  */
 static void chassis_small_gyro_control(void) {
+  if (dr16 == NULL) {
+    LOG_FATAL("底盘计算", "小陀螺模式遥控器对象为空 err=%d", (int)PTR_NULL);
+  }
   ASSERT(dr16 != NULL);
-  const cmd_rc_t* command = &dr16->dr16_cmd;
+  const cmd_rc_t *command = &dr16->dr16_cmd;
+  if (!isfinite(command->ch.l.x) || !isfinite(command->ch.l.y)) {
+    LOG_FATAL("底盘计算",
+              "小陀螺模式遥控输入非法 err=%d lx_finite=%u ly_finite=%u",
+              (int)ARG_ERR, (unsigned)isfinite(command->ch.l.x),
+              (unsigned)isfinite(command->ch.l.y));
+  }
   ASSERT(isfinite(command->ch.l.x) && isfinite(command->ch.l.y));
 
   chassis_dynamics_feedforward(torque_ff_current);
@@ -251,10 +330,7 @@ static void chassis_small_gyro_control(void) {
       chassis_control_state_.command.wz, motor_target_speed);
 
   for (uint8_t i = 0; i < 4; i++) {
-    ASSERT(isfinite(motor_target_speed[i]) && isfinite(torque_ff_current[i]));
-    VERIFY(pid_device_control_speed(&chassis_pid_devices[i],
-                                    motor_target_speed[i],
-                                    torque_ff_current[i]) == OK);
+    chassis_apply_speed(i, "小陀螺模式速度控制");
   }
 }
 
@@ -265,7 +341,8 @@ void Chassis_Mode(void) {
   if ((dr16 == NULL) || !dr16->online_) {
     mode = 0U;
     if (mode != last_mode) {
-      LOG_WARN("底盘计算", "遥控器离线，底盘进入停止模式");
+      LOG_WARN("底盘计算", "遥控器%s，底盘进入停止模式",
+               dr16 == NULL ? "对象为空" : "离线");
       last_mode = mode;
     }
     chassis_stop();
@@ -288,9 +365,14 @@ void Chassis_Mode(void) {
     }
     chassis_small_gyro_control();
   } else {
-    mode = 3U;
+    mode = dr16->dr16_cmd.sw_l == CMD_SW_UP ? 3U : 4U;
     if (mode != last_mode) {
-      LOG_WARN("底盘计算", "档位异常或处于 UP，底盘停止");
+      if (dr16->dr16_cmd.sw_l == CMD_SW_UP) {
+        LOG_INFO("底盘计算", "左拨杆处于 UP，底盘进入停止模式");
+      } else {
+        LOG_WARN("底盘计算", "左拨杆档位非法 sw_l=%u，底盘停止",
+                 (unsigned)dr16->dr16_cmd.sw_l);
+      }
       last_mode = mode;
     }
     /* UP 或异常状态：安全停止 */

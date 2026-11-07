@@ -52,7 +52,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+/* Debugger-visible log initialization result, retained across later log calls. */
+volatile err_t bsp_log_init_result = PENDING;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -109,7 +110,7 @@ int main(void)
   MX_RNG_Init();
   MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
-  (void)BSPLogInit();
+  bsp_log_init_result = BSPLogInit();
   can_device_Init();
   DWT_Init(168);
   /* USER CODE END 2 */

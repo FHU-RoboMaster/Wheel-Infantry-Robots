@@ -68,7 +68,7 @@ err_t STM32USB_Init(STM32USB_t* self, USBD_HandleTypeDef* usb_handle,
                     STM32USB_RxCallback_t rx_callback,
                     STM32USB_TxCompleteCallback_t tx_callback) {
   if (self == NULL) {
-    LOG_ERROR("USB", "Init failed: object is NULL");
+    LOG_ERROR("USB", "初始化失败：对象为空");
     return PTR_NULL;
   }
 
@@ -82,14 +82,14 @@ err_t STM32USB_Init(STM32USB_t* self, USBD_HandleTypeDef* usb_handle,
   ASSERT(self->usb_handle_ != NULL);
   if (self->usb_handle_ == NULL) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("USB", "Init failed: device handle is NULL");
+    LOG_ERROR("USB", "初始化失败：设备句柄为空");
     return self->last_error_;
   }
 
   ASSERT(BSP_USB_is_valid_id(self->id_));
   if (!BSP_USB_is_valid_id(self->id_)) {
     self->last_error_ = NOT_FOUND;
-    LOG_ERROR("USB", "Init failed: unsupported USB device");
+    LOG_ERROR("USB", "初始化失败：不支持的USB设备");
     return self->last_error_;
   }
 
@@ -98,13 +98,13 @@ err_t STM32USB_Init(STM32USB_t* self, USBD_HandleTypeDef* usb_handle,
   if ((stm32_usb_map[self->id_] != NULL) &&
       (stm32_usb_map[self->id_] != self)) {
     self->last_error_ = BUSY;
-    LOG_ERROR("USB", "Init failed: USB device already registered");
+    LOG_ERROR("USB", "初始化失败：USB设备已被其他对象注册");
     return self->last_error_;
   }
 
   stm32_usb_map[self->id_] = self;
   self->last_error_ = OK;
-  LOG_INFO("USB", "CDC device initialized");
+  LOG_DEBUG("USB", "CDC设备初始化完成");
   return self->last_error_;
 }
 
@@ -125,28 +125,28 @@ bool STM32USB_IsConfigured(const STM32USB_t* self) {
 //! 发送前复制到 UserTxBufferFS，避免调用方栈上临时数据在 USB IN 完成前失效。
 err_t STM32USB_Write(STM32USB_t* self, const uint8_t* data, size_t size) {
   if (self == NULL) {
-    LOG_ERROR("USB", "Write failed: object is NULL");
+    LOG_ERROR("USB", "发送写入失败：对象为空");
     return PTR_NULL;
   }
 
   ASSERT(data != NULL);
   if (data == NULL) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("USB", "Write failed: data is NULL");
+    LOG_ERROR("USB", "发送写入失败：数据地址为空");
     return self->last_error_;
   }
 
   ASSERT(size > 0U);
   if (size == 0U) {
     self->last_error_ = SIZE_ERR;
-    LOG_ERROR("USB", "Write failed: empty payload");
+    LOG_ERROR("USB", "发送写入失败：数据长度为零");
     return self->last_error_;
   }
 
   ASSERT(size <= APP_TX_DATA_SIZE);
   if (size > APP_TX_DATA_SIZE) {
     self->last_error_ = OUT_OF_RANGE;
-    LOG_ERROR("USB", "Write failed: size=%u exceeds buffer=%u", (unsigned)size,
+    LOG_ERROR("USB", "发送写入失败：数据长度=%u字节 超出缓冲区容量=%u字节", (unsigned)size,
               (unsigned)APP_TX_DATA_SIZE);
     return self->last_error_;
   }
@@ -154,13 +154,13 @@ err_t STM32USB_Write(STM32USB_t* self, const uint8_t* data, size_t size) {
   ASSERT(self->usb_handle_ != NULL);
   if (self->usb_handle_ == NULL) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("USB", "Write failed: device handle is NULL");
+    LOG_ERROR("USB", "发送写入失败：设备句柄为空");
     return self->last_error_;
   }
 
   if (!STM32USB_IsConfigured(self)) {
     self->last_error_ = STATE_ERR;
-    LOG_WARN("USB", "Write rejected: device is not configured");
+    LOG_WARN("USB", "拒绝发送写入：设备尚未完成USB枚举配置");
     return self->last_error_;
   }
 
@@ -169,13 +169,13 @@ err_t STM32USB_Write(STM32USB_t* self, const uint8_t* data, size_t size) {
   ASSERT(cdc != NULL);
   if (cdc == NULL) {
     self->last_error_ = STATE_ERR;
-    LOG_ERROR("USB", "Write failed: CDC class data is NULL");
+    LOG_ERROR("USB", "发送写入失败：CDC类数据为空");
     return self->last_error_;
   }
 
   if (cdc->TxState != 0U) {
     self->last_error_ = BUSY;
-    LOG_DEBUG("USB", "Write deferred: TX busy");
+    LOG_DEBUG("USB", "发送写入暂缓：发送通道正忙");
     return self->last_error_;
   }
 
@@ -186,7 +186,7 @@ err_t STM32USB_Write(STM32USB_t* self, const uint8_t* data, size_t size) {
   VERIFY(status == USBD_OK);
   if (status != USBD_OK) {
     self->last_error_ = BSP_USB_status_to_error(status);
-    LOG_ERROR("USB", "Set TX buffer failed: status=%u", (unsigned)status);
+    LOG_ERROR("USB", "设置发送缓冲区失败 USB状态=%u", (unsigned)status);
     return self->last_error_;
   }
 
@@ -194,9 +194,9 @@ err_t STM32USB_Write(STM32USB_t* self, const uint8_t* data, size_t size) {
   VERIFY(status == USBD_OK);
   self->last_error_ = BSP_USB_status_to_error(status);
   if (self->last_error_ == OK) {
-    LOG_DEBUG("USB", "TX started: size=%u", (unsigned)size);
+    LOG_DEBUG("USB", "发送已启动 长度=%u字节", (unsigned)size);
   } else {
-    LOG_ERROR("USB", "TX start failed: status=%u", (unsigned)status);
+    LOG_ERROR("USB", "发送启动失败 USB状态=%u", (unsigned)status);
   }
   return self->last_error_;
 }
@@ -208,7 +208,7 @@ void STM32USB_SetRxCallback(STM32USB_t* self, STM32USB_RxCallback_t callback) {
   }
 
   self->rx_callback_ = callback;
-  LOG_DEBUG("USB", "RX callback %s", callback == NULL ? "cleared" : "set");
+  LOG_DEBUG("USB", "接收回调%s", callback == NULL ? "已清除" : "已设置");
 }
 
 //! 更新 USB CDC TX 完成回调。
@@ -219,7 +219,7 @@ void STM32USB_SetTxCompleteCallback(STM32USB_t* self,
   }
 
   self->tx_callback_ = callback;
-  LOG_DEBUG("USB", "TX callback %s", callback == NULL ? "cleared" : "set");
+  LOG_DEBUG("USB", "发送回调%s", callback == NULL ? "已清除" : "已设置");
 }
 
 //! 读取最近一次错误码。

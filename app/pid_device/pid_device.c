@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <stddef.h>
+#include <stdatomic.h>
 
 #include "bsp_log.h"
 #include "comp_utils.h"
@@ -20,8 +21,10 @@ static float pid_device_calculate_incremental(void* pid, float target,
   return PID_Calculate_jie((PIDInstance_jie*)pid, target, actual);
 }
 
-/* 每类 CAN 故障只报告一次，避免控制任务在 2 ms 周期内刷屏。 */
-static uint32_t pid_device_can_fault_reported;
+/* 每类 CAN 故障成功报告后才去重，发送失败时保留后续报告机会。 */
+#if BSP_LOG_ENABLED
+static _Atomic uint32_t pid_device_can_fault_reported;
+#endif
 
 /**
  * @brief 将电机控制失败转换为可直接定位硬件的中文日志。
@@ -32,6 +35,7 @@ static void pid_device_log_failure(const pid_device_t* device,
                                    const char* operation, bool transmission,
                                    err_t result, float target_rpm,
                                    float feedforward) {
+#if BSP_LOG_ENABLED
   if ((device == NULL) || (device->motor == NULL) ||
       (device->motor->bus == NULL) || (device->motor->bus->can == NULL)) {
     return;
@@ -39,21 +43,33 @@ static void pid_device_log_failure(const pid_device_t* device,
 
   const unsigned can_number = (unsigned)device->motor->bus->can->id_ + 1U;
   const unsigned motor_id = (unsigned)device->motor->device_id;
-  RM_UNUSED(motor_id);
   const unsigned fault_bit = (can_number - 1U) * 2U + (transmission ? 1U : 0U);
   if ((fault_bit < 32U) &&
-      ((pid_device_can_fault_reported & (1UL << fault_bit)) != 0UL)) {
+      ((atomic_load_explicit(&pid_device_can_fault_reported, memory_order_relaxed) &
+        (1UL << fault_bit)) != 0UL)) {
     return;
   }
-  if (fault_bit < 32U) {
-    pid_device_can_fault_reported |= (1UL << fault_bit);
-  }
 
-  LOG_FATAL("电机控制",
-            "CAN%u %s失败：电机ID=%u，错误码=%d，目标转速=%.1f，前馈=%.1f；"
-            "可能 CAN 线断开、终端电阻或供电异常，请狠狠踢硬件屁股",
-            can_number, operation, motor_id, (int)result, (double)target_rpm,
-            (double)feedforward);
+  char target_text[32];
+  char feedforward_text[32];
+  const err_t log_result = LOG_FATAL("电机控制",
+            "CAN%u %s失败 motor=%u err=%d rpm=%s ff=%s",
+            can_number, operation, motor_id, (int)result,
+            Float2StrN(target_text, sizeof(target_text), target_rpm) >= 0
+                ? target_text : "<invalid>",
+            Float2StrN(feedforward_text, sizeof(feedforward_text), feedforward) >= 0
+                ? feedforward_text : "<invalid>");
+  if (log_result == OK && fault_bit < 32U) {
+    atomic_fetch_or_explicit(&pid_device_can_fault_reported, 1UL << fault_bit,
+                             memory_order_relaxed);
+  }
+#else
+  RM_UNUSED(device);
+  RM_UNUSED(operation);
+  RM_UNUSED(result);
+  RM_UNUSED(target_rpm);
+  RM_UNUSED(feedforward);
+#endif
 }
 
 /** 绑定电机和速度/位置 PID 实例，选择底层算法适配器。 */

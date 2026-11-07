@@ -25,7 +25,7 @@ volatile err_t shoot_status = PENDING;
 void shoot_task(void* argument) {
   RM_UNUSED(argument);
 
-  LOG_INFO("发射任务", "任务开始初始化发射控制");
+  LOG_DEBUG("发射任务", "任务开始初始化发射控制");
   /* CAN2 及发射电机已由 main.c 完成注册和启动。 */
   shoot_status = OK;
 

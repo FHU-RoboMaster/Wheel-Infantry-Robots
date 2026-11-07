@@ -16,7 +16,7 @@ I6X_t* i6x = NULL;
 void i6x_task(void* argument) {
   RM_UNUSED(argument);
 
-  LOG_INFO("I6X任务", "任务开始初始化遥控器");
+  LOG_DEBUG("I6X任务", "任务开始初始化遥控器");
   static I6X_t i6x_instance;  // 静态存储，保证任务整个生命周期内有效。
   err_t status = I6X_Init(&i6x_instance, &huart4);
   i6x = &i6x_instance;

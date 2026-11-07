@@ -85,7 +85,7 @@ static void BSP_IIC_dispatch_callback(I2C_HandleTypeDef* hi2c,
 //! 初始化 IIC BSP 控制块。
 err_t STM32IIC_Init(STM32IIC_t* self, I2C_HandleTypeDef* iic_handle) {
   if (self == NULL) {
-    LOG_ERROR("IIC", "Init failed: object is NULL");
+    LOG_ERROR("IIC", "初始化失败：对象为空");
     return PTR_NULL;
   }
 
@@ -98,14 +98,14 @@ err_t STM32IIC_Init(STM32IIC_t* self, I2C_HandleTypeDef* iic_handle) {
   ASSERT(self->iic_handle_ != NULL);
   if (self->iic_handle_ == NULL) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("IIC", "Init failed: HAL handle is NULL");
+    LOG_ERROR("IIC", "初始化失败：HAL句柄为空");
     return self->last_error_;
   }
 
   ASSERT(BSP_IIC_is_valid_id(self->id_));
   if (!BSP_IIC_is_valid_id(self->id_)) {
     self->last_error_ = NOT_FOUND;
-    LOG_ERROR("IIC", "Init failed: unsupported I2C instance");
+    LOG_ERROR("IIC", "初始化失败：不支持的I2C外设");
     return self->last_error_;
   }
 
@@ -114,14 +114,14 @@ err_t STM32IIC_Init(STM32IIC_t* self, I2C_HandleTypeDef* iic_handle) {
   if ((stm32_iic_map[self->id_] != NULL) &&
       (stm32_iic_map[self->id_] != self)) {
     self->last_error_ = BUSY;
-    LOG_ERROR("IIC", "Init failed: I2C%u already registered",
+    LOG_ERROR("IIC", "初始化失败：I2C逻辑编号=%u 已被其他对象注册",
               (unsigned)self->id_);
     return self->last_error_;
   }
 
   stm32_iic_map[self->id_] = self;
   self->last_error_ = OK;
-  LOG_INFO("IIC", "Initialized I2C%u", (unsigned)self->id_);
+  LOG_DEBUG("IIC", "初始化完成 I2C逻辑编号=%u", (unsigned)self->id_);
   return self->last_error_;
 }
 
@@ -138,27 +138,27 @@ I2C_HandleTypeDef* STM32IIC_GetHandle(const STM32IIC_t* self) {
 err_t STM32IIC_RegisterCallback(STM32IIC_t* self, BSP_IIC_Callback_t type,
                                 STM32IIC_Callback_t callback) {
   if (self == NULL) {
-    LOG_ERROR("IIC", "Register callback failed: object is NULL");
+    LOG_ERROR("IIC", "注册回调失败：对象为空");
     return PTR_NULL;
   }
 
   ASSERT(BSP_IIC_is_valid_callback(type));
   if (!BSP_IIC_is_valid_callback(type)) {
     self->last_error_ = OUT_OF_RANGE;
-    LOG_ERROR("IIC", "Register callback failed: type=%u", (unsigned)type);
+    LOG_ERROR("IIC", "注册回调失败：回调类型无效 类型=%u", (unsigned)type);
     return self->last_error_;
   }
 
   ASSERT(callback != NULL);
   if (callback == NULL) {
     self->last_error_ = PTR_NULL;
-    LOG_ERROR("IIC", "Register callback failed: callback is NULL");
+    LOG_ERROR("IIC", "注册回调失败：回调为空");
     return self->last_error_;
   }
 
   self->callbacks_[type] = callback;
   self->last_error_ = OK;
-  LOG_DEBUG("IIC", "Callback registered type=%u", (unsigned)type);
+  LOG_DEBUG("IIC", "回调注册完成 类型=%u", (unsigned)type);
   return self->last_error_;
 }
 
@@ -171,13 +171,13 @@ void STM32IIC_SetCallback(STM32IIC_t* self, BSP_IIC_Callback_t type,
 
   if (!BSP_IIC_is_valid_callback(type)) {
     self->last_error_ = OUT_OF_RANGE;
-    LOG_ERROR("IIC", "Set callback failed: type=%u", (unsigned)type);
+    LOG_ERROR("IIC", "设置回调失败：回调类型无效 类型=%u", (unsigned)type);
     return;
   }
 
   self->callbacks_[type] = callback;
   self->last_error_ = OK;
-  LOG_DEBUG("IIC", "Callback %s type=%u", callback == NULL ? "cleared" : "set",
+  LOG_DEBUG("IIC", "回调%s 类型=%u", callback == NULL ? "已清除" : "已设置",
             (unsigned)type);
 }
 

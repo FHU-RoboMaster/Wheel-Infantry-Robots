@@ -12,7 +12,7 @@ IMU485_t* imu_485_device = NULL;
 void imu_485_task(void* argument) {
   RM_UNUSED(argument);
 
-  LOG_INFO("IMU485任务", "任务开始初始化串口 IMU");
+  LOG_DEBUG("IMU485任务", "任务开始初始化串口 IMU");
   static IMU485_t instance;
   err_t status = imu_485_init(&instance, &huart5);
   imu_485_device = &instance;

@@ -25,7 +25,7 @@ volatile err_t chassis_status = PENDING;
 void chassis_task(void* argument) {
   RM_UNUSED(argument);
 
-  LOG_INFO("底盘任务", "任务开始初始化底盘控制");
+  LOG_DEBUG("底盘任务", "任务开始初始化底盘控制");
   /* CAN2 及底盘电机已由 main.c 完成注册和启动。 */
   chassis_status = OK;
 

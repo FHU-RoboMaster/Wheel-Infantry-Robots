@@ -9,7 +9,7 @@
 
 void imu_can_task(void* argument) {
   RM_UNUSED(argument);
-  LOG_INFO("IMUCAN任务", "任务开始检查 CAN IMU");
+  LOG_DEBUG("IMUCAN任务", "任务开始检查 CAN IMU");
   IMUCAN_t* imu = can_device_get_imu();
   if (imu == NULL) {
     LOG_ERROR("IMUCAN任务", "CAN IMU 对象为空，任务退出");

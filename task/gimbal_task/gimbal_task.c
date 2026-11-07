@@ -25,7 +25,7 @@ volatile err_t gimbal_status = PENDING;
 void gimbal_task(void* argument) {
   RM_UNUSED(argument);
 
-  LOG_INFO("云台任务", "任务开始初始化云台控制");
+  LOG_DEBUG("云台任务", "任务开始初始化云台控制");
   /* CAN2 及云台电机已由 main.c 完成注册和启动。 */
   gimbal_status = OK;
 

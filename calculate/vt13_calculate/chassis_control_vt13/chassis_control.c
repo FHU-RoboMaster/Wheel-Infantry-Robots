@@ -39,7 +39,7 @@ static float torque_ff_current[4];
  * @return OK 或错误码
  */
 err_t chassis_control_init(void) {
-  LOG_INFO("底盘计算", "开始初始化 VT13 底盘 CAN 总线和电机");
+  LOG_DEBUG("底盘计算", "开始初始化 VT13 底盘 CAN 总线和电机");
   /* 获取 CAN2 的 BSP 对象（假设 CAN2 用于底盘） */
   BSP_CAN_t can_id = BSP_CAN_get_id(CAN2);
   if (can_id == BSP_CAN_ID_ERROR) {
@@ -104,7 +104,7 @@ err_t chassis_control_init(void) {
     return chassis_init_result[3];
   }
 
-  LOG_INFO("底盘计算", "VT13 底盘 CAN 和四个电机初始化完成");
+  LOG_DEBUG("底盘计算", "VT13 底盘 CAN 和四个电机初始化完成");
   return OK;
 }
 
@@ -125,7 +125,7 @@ void chassis_speed_pid_init(void) {
                                 12000.0f);
   chassis_speed_pid_init_single(&pid_speed[CHASSIS_MOTOR_RR], 14.0f, 2.0f, 0.0f,
                                 12000.0f);
-  LOG_INFO("底盘计算", "VT13 底盘速度环 PID 初始化完成");
+  LOG_DEBUG("底盘计算", "VT13 底盘速度环 PID 初始化完成");
 }
 
 static void chassis_motor_pid_control_speed(uint8_t motor_index,

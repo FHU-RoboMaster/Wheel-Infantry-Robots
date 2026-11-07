@@ -34,7 +34,7 @@ static PIDInstance_jie pid_location;
  * @return OK 或错误码
  */
 err_t shoot_control_init(void) {
-  LOG_INFO("发射计算", "开始初始化 VT13 发射 CAN 总线和电机");
+  LOG_DEBUG("发射计算", "开始初始化 VT13 发射 CAN 总线和电机");
   /* 获取 CAN1 的 BSP 对象（假设 CAN1 用于发射机构，与云台同总线）
    * CAN2 上底盘已占用 0x200 控制组的 1-4 号电机，发射机构不能复用同组 ID */
   BSP_CAN_t can_id = BSP_CAN_get_id(CAN1);
@@ -90,7 +90,7 @@ err_t shoot_control_init(void) {
     return shoot_init_result[2];
   }
 
-  LOG_INFO("发射计算", "VT13 发射 CAN 和三台电机初始化完成");
+  LOG_DEBUG("发射计算", "VT13 发射 CAN 和三台电机初始化完成");
   return OK;
 }
 
@@ -115,7 +115,7 @@ void shoot_speed_pid_init(void) {
       &pid_location, 8.0f, 0.0f, 0.0f, 0.0002f, 3000.0f, 1000.0f, 0.0f,
       PID_INC_INTEGRAL_LIMIT | PID_INC_DERIVATIVE_ON_MEASUREMENT |
           PID_INC_OUTPUT_FILTER | PID_INC_DERIVATIVE_FILTER);
-  LOG_INFO("发射计算", "VT13 发射 PID 初始化完成");
+  LOG_DEBUG("发射计算", "VT13 发射 PID 初始化完成");
 }
 void dj_motor_pid_control_location(uint8_t motor_id, float target_angle) {
   dj_motor_feedback_t feedback;

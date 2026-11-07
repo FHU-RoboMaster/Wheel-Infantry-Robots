@@ -38,6 +38,19 @@ ASSERT(ptr != NULL);        /* Release:表达式完全不执行,整体忽略 */
 VERIFY(HAL_CAN_Start(hcan) == HAL_OK);  /* Release:HAL 调用仍执行,只忽略结果检查 */
 ```
 
+`verify_failed()` 先将本次启动的首个断言保存到全局 `verify_failure`，再尝试一次
+`LOG_FATAL`，最后保持死循环。嵌套或后续断言不会覆盖首个现场，也不会重复打印。
+在调试器中查看：
+
+- `verify_failure.captured`：现场已保存；即使日志失败也为 true。
+- `file` / `line`：完整文件路径和原始行号；RTT 文本只显示短文件名。
+- `ipsr` / `primask` / `basepri`：调用时的异常号和中断屏蔽状态。
+- `log_result`：本次断言日志的实际返回值，`OK=0`、`NO_BUFF=-11`、`BUSY=-15`、
+  `STATE_ERR=-4`；调用尚未返回时为 `PENDING=1`，关闭日志时为 `NOT_SUPPORT=-7`。
+
+现场保存在普通 RAM，复位后重新初始化，不保证跨复位保留。日志仍受上下文检查和
+非阻塞传输限制；保留现场不表示故障文本一定已显示，也不表示已完成电机安全停机。
+
 ### 其他常用宏
 
 ```c

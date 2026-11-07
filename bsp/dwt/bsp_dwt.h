@@ -18,12 +18,18 @@ typedef struct {
 
 //! 计算一段代码的执行耗时，单位为秒。
 //! dt 由调用方提供，用于保存耗时；code 为待测代码块。
-#define TIME_ELAPSE(dt, code)                \
-  do {                                       \
-    float tstart = DWT_GetTimeline_s();      \
-    code;                                    \
-    dt = DWT_GetTimeline_s() - tstart;       \
-    (void)LOG_INFO("DWT", #dt " = %f s", dt); \
+//! 日志以三位小数的毫秒字符串输出，dt 本身仍保存秒。
+#define TIME_ELAPSE(dt, code)                                             \
+  do {                                                                    \
+    float tstart = DWT_GetTimeline_s();                                    \
+    code;                                                                 \
+    dt = DWT_GetTimeline_s() - tstart;                                     \
+    char elapsed_text[32];                                                \
+    (void)elapsed_text;                                                    \
+    (void)LOG_INFO("DWT", #dt " 耗时=%s毫秒",                                 \
+                  Float2StrN(elapsed_text, sizeof(elapsed_text),           \
+                             (dt) * 1000.0f) >= 0                         \
+                      ? elapsed_text : "<无效数值>");                     \
   } while (0)
 
 // ==================== DWT 公开接口 ====================
