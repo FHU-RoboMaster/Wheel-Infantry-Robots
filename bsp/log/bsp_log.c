@@ -2,6 +2,7 @@
 
 #include <inttypes.h>
 #include <math.h>
+#include <stdarg.h>
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -30,14 +31,13 @@ _Static_assert(OK == 0, "A new task's NULL TLS slot must represent OK");
 /* ==================== 内部类型 ==================== */
 
 #if BSP_LOG_ENABLED
-/* 事件只在一次同步输出期间有效；输出回调不保留指针或参数列表。 */
+/* 事件只在一次同步输出期间有效；输出回调不保留字符串指针。 */
 typedef struct {
   bsp_log_level_t level;
   const char *file;
   int line;
   const char *tag;
   const char *format;
-  va_list args;
 } bsp_log_event_t;
 #endif
 
@@ -74,7 +74,7 @@ static const char *BSPLogLevelName(bsp_log_level_t level);
 static err_t BSPLogLock(void);
 static err_t BSPLogUnlock(void);
 static err_t BSPLogWriteRaw(const char *data, size_t size);
-static err_t BSPLogTerminalCallback(bsp_log_event_t *event);
+static err_t BSPLogTerminalCallback(const bsp_log_event_t *event, va_list *args);
 static bool BSPLogMatchIgnoreCase(const char *value, const char *pattern,
                                   bool exact_match);
 static char *BSPLogTrimCommand(char *command);
@@ -97,21 +97,18 @@ err_t BSPLogInit(void) {
     return BSPLogRecordResult(OK);
   }
 
-  /* 在重复初始化检查之后才重置 RTT 控制块。 */
   SEGGER_RTT_Init();
-  /* 显式选择非阻塞整条跳过模式，避免依赖 RTT 默认配置。 */
+
   if (SEGGER_RTT_SetFlagsUpBuffer(BSP_LOG_CHANNEL_TERMINAL,
                                   SEGGER_RTT_MODE_NO_BLOCK_SKIP) < 0) {
     return BSPLogRecordResult(INIT_ERR);
   }
-  /* 保留数据通道 1 原有的 JScope 格式描述。 */
   result = (SEGGER_RTT_ConfigUpBuffer(BSP_LOG_CHANNEL_DATA, "JScope_t4f4f4f4",
                                       data_buffer, sizeof(data_buffer),
                                       SEGGER_RTT_MODE_NO_BLOCK_SKIP) < 0)
                ? INIT_ERR
                : OK;
   if (result == OK) {
-    /* 预留通道 2 与终端文本通道 0 使用不同缓冲区。 */
     result = (SEGGER_RTT_ConfigUpBuffer(
                   BSP_LOG_CHANNEL_RESERVED, "Reserved", reserved_buffer,
                   sizeof(reserved_buffer), SEGGER_RTT_MODE_NO_BLOCK_SKIP) < 0)
@@ -123,7 +120,7 @@ err_t BSPLogInit(void) {
     if (log_mutex == NULL) {
       return BSPLogRecordResult(INIT_ERR);
     }
-    /* 所有通道配置成功后，才发布默认等级和可用状态。 */
+    /* 所有通道配置成功后，原子发布默认等级和可用状态。 */
     atomic_store_explicit(&current_level, BSP_LOG_DEFAULT_LEVEL,
                           memory_order_release);
     log_initialized = true;
@@ -136,24 +133,15 @@ err_t BSPLogInit(void) {
 
 err_t BSPLogWrite(bsp_log_level_t level, const char *file, int line,
                   const char *tag, const char *format, ...) {
-  err_t result;
-  va_list args;
-  va_start(args, format);
-  result = BSPLogVWrite(level, file, line, tag, format, args);
-  va_end(args);
-  return result;
-}
-
-err_t BSPLogVWrite(bsp_log_level_t level, const char *file, int line,
-                   const char *tag, const char *format, va_list args) {
 #if BSP_LOG_ENABLED
-  bsp_log_event_t event = {
+  const bsp_log_event_t event = {
       .level = level,
       .file = file,
       .line = line,
       .tag = tag,
       .format = format,
   };
+  va_list args;
   err_t result;
   err_t unlock_result;
 
@@ -181,11 +169,10 @@ err_t BSPLogVWrite(bsp_log_level_t level, const char *file, int line,
     return BSPLogRecordResult(result);
   }
 
-  /* 与参考库为每个回调建立独立参数列表的做法一致。
-   * 这里复制调用者的 va_list，所有输出结果都先清理，再统一记录状态。 */
-  va_copy(event.args, args);
-  result = BSPLogTerminalCallback(&event);
-  va_end(event.args);
+  /* 正文可变参数只建立一次，所有输出结果都先清理参数列表，再释放锁。 */
+  va_start(args, format);
+  result = BSPLogTerminalCallback(&event, &args);
+  va_end(args);
   unlock_result = BSPLogUnlock();
   return BSPLogRecordResult(unlock_result != OK ? unlock_result : result);
 #else
@@ -195,7 +182,6 @@ err_t BSPLogVWrite(bsp_log_level_t level, const char *file, int line,
   RM_UNUSED(line);
   RM_UNUSED(tag);
   RM_UNUSED(format);
-  RM_UNUSED(args);
   return BSPLogRecordResult(NOT_SUPPORT);
 #endif
 }
@@ -293,46 +279,47 @@ err_t BSPLogGetLastError(void) {
 /* ==================== 公共工具：数值转换 ==================== */
 
 int Float2StrN(char *str, size_t size, float va) {
-  double rounded;
-  uint64_t magnitude;
-  uint64_t integer;
-  uint32_t fraction;
-  int result;
+  /** @brief 缩放取整结果的边界，允许范围为 [-2^63, 2^63)。
+   * @note 使用精确的二进制常量，避免 INT64_MAX 转为 double 后向上舍入。
+   */
+  static const double scaled_integer_limit = 0x1p63;
+  double scaled_rounded;     /**< 按 FRACTION_SCALE 缩放并取整后的有符号值。 */
+  uint64_t scaled_magnitude; /**< 缩放取整结果的绝对值，单位为 1/FRACTION_SCALE。 */
+  uint64_t integer_part;     /**< 拆分得到的整数部分，尚未按十进制分组。 */
+  uint32_t fraction_part;    /**< 小数部分的整数编码，范围为 [0, FRACTION_SCALE)。 */
+  const char *sign;          /**< 负值输出 "-"；非负值及取整后的零输出空串。 */
+  int result;               /**< snprintf 所需字符数（不含 NUL）；负值表示格式化失败。 */
 
-  if ((str == NULL) || (size == 0u) || !isfinite(va)) {
-    if ((str != NULL) && (size != 0u)) {
-      str[0] = '\0';
-    }
+  if (str == NULL || size == 0u) {
+    return -1;
+  }
+  str[0] = '\0';
+  if (!isfinite(va)) {
     return -1;
   }
 
-  /* 保留三位小数，中点向远离零的方向取整。避免直接使用 %.3f，
-   * 以保留现有的边界舍入和零值符号规则。 */
-  rounded = round((double)va * 1000.0);
-
-  /* INT64_MAX 转为 double 后会成为 2^63，因此使用精确的二进制边界检查。
-   * 先验证有符号范围，避免有风险的 double 到 int64_t 转换；
-   * 通过检查后，绝对值可安全存入 uint64_t。 */
-  if (rounded < -0x1p63 || rounded >= 0x1p63) {
-    str[0] = '\0';
+  /* 先缩放取整（中点远离零），再检查转换范围。 */
+  scaled_rounded = round((double)va * FRACTION_SCALE);
+  if (scaled_rounded < -scaled_integer_limit ||
+      scaled_rounded >= scaled_integer_limit) {
     return -1;
   }
 
-  /* 仅对严格小于零的取整结果输出负号，取整后为零时输出 0.000。
-   * 将整数按十亿拆为 uint32_t 分组，兼容不支持 long long 格式的 newlib-nano。
-   * 存在高位分组时，低位补齐九位，小数补齐三位；由 snprintf 完成
-   * 十进制转换、截断、NUL 终止和完整所需长度的计算。 */
-  magnitude = (uint64_t)fabs(rounded);
-  integer = magnitude / 1000u;
-  fraction = (uint32_t)(magnitude % 1000u);
-  if (integer < 1000000000u) {
-    result = snprintf(str, size, "%s%" PRIu32 ".%03" PRIu32,
-                      rounded < 0.0 ? "-" : "", (uint32_t)integer, fraction);
+  scaled_magnitude = (uint64_t)fabs(scaled_rounded);
+  integer_part = scaled_magnitude / FRACTION_SCALE;
+  fraction_part = (uint32_t)(scaled_magnitude % FRACTION_SCALE);
+  sign = scaled_rounded < 0.0 ? "-" : ""; /* 取整为零时统一输出正零。 */
+
+  /* 分组输出 32 位整数，兼容不支持 long long 的 newlib-nano。 */
+  if (integer_part < INTEGER_GROUP_BASE) {
+    result = snprintf(str, size, "%s%" PRIu32 ".%0*" PRIu32, sign,
+                      (uint32_t)integer_part, FRACTION_DIGITS, fraction_part);
   } else {
-    result =
-        snprintf(str, size, "%s%" PRIu32 "%09" PRIu32 ".%03" PRIu32,
-                 rounded < 0.0 ? "-" : "", (uint32_t)(integer / 1000000000u),
-                 (uint32_t)(integer % 1000000000u), fraction);
+    result = snprintf(str, size, "%s%" PRIu32 "%0*" PRIu32 ".%0*" PRIu32, sign,
+                      (uint32_t)(integer_part / INTEGER_GROUP_BASE),
+                      INTEGER_GROUP_DIGITS,
+                      (uint32_t)(integer_part % INTEGER_GROUP_BASE),
+                      FRACTION_DIGITS, fraction_part);
   }
   if (result < 0) {
     str[0] = '\0';
@@ -432,19 +419,19 @@ static err_t BSPLogWriteRaw(const char *data, size_t size) {
 
 /**
  * @brief 使用 RTT 原生格式化接口发送已通过检查的日志事件。
- * @param[in,out] event 仅在本次调用期间有效的事件，消耗其私有参数列表。
+ * @param[in] event 仅在本次调用期间有效的日志元数据。
+ * @param[in,out] args 借用的正文参数列表；本回调消耗它，由调用者执行 va_end。
  * @return OK 或 NO_BUFF；由分发入口记录错误状态。
  * @note 调用者持有日志互斥锁；RTT 空间不足时可能已发送部分记录。
  */
-static err_t BSPLogTerminalCallback(bsp_log_event_t *event) {
+static err_t BSPLogTerminalCallback(const bsp_log_event_t *event, va_list *args) {
   static const char line_end[] = "\r\n";
   if (SEGGER_RTT_printf(BSP_LOG_CHANNEL_TERMINAL,
                         "[%s][%s] %s:%d: ", BSPLogLevelName(event->level),
                         event->tag, event->file, event->line) < 0) {
     return NO_BUFF;
   }
-  if (SEGGER_RTT_vprintf(BSP_LOG_CHANNEL_TERMINAL, event->format,
-                         &event->args) < 0) {
+  if (SEGGER_RTT_vprintf(BSP_LOG_CHANNEL_TERMINAL, event->format, args) < 0) {
     return NO_BUFF;
   }
   return BSPLogWriteRaw(line_end, sizeof(line_end) - 1u);

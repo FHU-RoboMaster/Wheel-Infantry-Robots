@@ -17,14 +17,14 @@
  *
  * @par 状态保存约定
  * 除查询接口另有说明外，操作结果保存在启动状态或当前任务状态中；OK 清除旧错误，
- * PENDING 保留旧状态。ISR 调用不更新状态，本模块独占配置指定的 FreeRTOS TLS 槽位。
+ * PENDING 保留旧状态。ISR 调用不更新状态，本模块独占配置指定的 FreeRTOS TLS
+ * 槽位。
  * @{
  */
 
 #ifndef _BSP_LOG_H
 #define _BSP_LOG_H
 
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -61,12 +61,20 @@
 #define BSP_LOG_PRIMASK_UNMASKED 0U /**< PRIMASK：未屏蔽中断。 */
 #define BSP_LOG_BASEPRI_UNMASKED 0U /**< BASEPRI：无优先级屏蔽。 */
 
+/*float -> string*/
+#define FRACTION_DIGITS 3      /**< 小数位数，也是小数部分补零输出的宽度。 */
+#define FRACTION_SCALE 1000    /**< 定点缩放系数，等于 10^FRACTION_DIGITS。 */
+#define INTEGER_GROUP_DIGITS 9 /**< 整数低位分组补零输出的宽度。 */
+#define INTEGER_GROUP_BASE \
+  1000000000 /**< 整数分组基数，等于 10^INTEGER_GROUP_DIGITS。 */
+
 /* 日志等级与接口标记 */
 
 /**
  * @brief 按 TRACE（0）至 FATAL（5）排列日志记录等级。
  * @details 为记录和共享最低等级过滤器提供等级定义；COUNT 是哨兵值。
  */
+
 typedef enum {
   BSP_LOG_LEVEL_TRACE = 0, /**< 跟踪（0）。 */
   BSP_LOG_LEVEL_DEBUG,     /**< 调试（1）。 */
@@ -76,6 +84,13 @@ typedef enum {
   BSP_LOG_LEVEL_FATAL,     /**< 致命（5），不会停止运行。 */
   BSP_LOG_LEVEL_COUNT      /**< 等级数量，不是有效日志等级。 */
 } bsp_log_level_t;
+
+/**
+ * @brief 固定小数输出的精度、缩放系数及整数分组参数。
+ * @details 缩放系数等于 10 的小数位数次方，分组基数等于 10 的分组位数次方。
+ *          分组后分别使用 uint32_t 输出，兼容 newlib-nano 的整数格式化。
+ * @note 修改位数时必须同步调整对应的缩放系数或分组基数。
+ */
 
 /* 初始化与日志输出 */
 
@@ -115,6 +130,7 @@ err_t BSPLogInit(void);
  * @retval NO_BUFF RTT 空间不足。
  * @retval NOT_SUPPORT 日志已关闭。
  * @note 通过日志事件调用 RTT printf/vprintf，不再使用日志层行缓冲区。
+ *       函数内部仅维护一份正文参数列表，在输出结束后执行 va_end。
  *       记录格式为“[LEVEL][tag] file:line: 正文”，末尾为 CRLF。
  *       任务阶段用静态互斥锁串行化前缀、正文和换行；启动阶段不获取互斥锁。
  *       获取锁不等待；释放失败优先返回 STATE_ERR，即使传输也发生错误。
@@ -124,29 +140,12 @@ err_t BSPLogInit(void);
  * @warning 未被过滤的写入拒绝 ISR、中断屏蔽和调度器挂起上下文。
  *          原生 RTT 格式支持 d/u/x/X/c/s/p/%%，不支持浮点和标准长度修饰符语义。
  *          浮点数应先用 Float2StrN() 转换，再通过 %s 输出。
- *          RTT 写入和日志加锁均不等待；NO_BUFF 或释放锁失败时可能已输出部分记录。
- *          初始化后通道 0 必须保持 SEGGER_RTT_MODE_NO_BLOCK_SKIP 模式。
+ *          RTT 写入和日志加锁均不等待；NO_BUFF
+ * 或释放锁失败时可能已输出部分记录。 初始化后通道 0 必须保持
+ * SEGGER_RTT_MODE_NO_BLOCK_SKIP 模式。
  */
 err_t BSPLogWrite(bsp_log_level_t level, const char* file, int line,
                   const char* tag, const char* format, ...);
-
-/**
- * @brief 使用已有参数列表格式化并提交带标签的日志记录。
- *
- * @param[in] level 日志等级，范围为 TRACE（0）至 FATAL（5）。
- * @param[in] file 借用的非空源文件名，通常由宏传入 __FILE__。
- * @param[in] line 源代码行号，通常由宏传入 __LINE__。
- * @param[in] tag 借用的非空、NUL 结尾标签；允许为空串，在调用期间有效。
- * @param[in] format 借用的非空 RTT 原生格式串，在调用期间有效。
- * @param[in] args 已初始化的参数列表；内部使用 va_copy，不消耗调用者的列表。
- * @return 与 BSPLogWrite() 相同，详见其返回值说明。
- * @note 输出格式、过滤顺序、栈需求和状态保存规则与 BSPLogWrite() 相同。
- *       函数返回后不保留 file、tag、format 或 args；调用者仍负责 va_end(args)。
- * @warning 未被过滤的写入拒绝 ISR、中断屏蔽和调度器挂起上下文；通道 0 必须保持
- *          SEGGER_RTT_MODE_NO_BLOCK_SKIP 模式。
- */
-err_t BSPLogVWrite(bsp_log_level_t level, const char* file, int line,
-                   const char* tag, const char* format, va_list args);
 
 /* 终端控制 */
 
@@ -218,8 +217,10 @@ err_t BSPLogPollLevelCommand(void);
  * @return 线程模式下返回已保存的 err_t 状态；ISR 中返回 STATE_ERR。
  * @note 调度器启动前读取启动状态，启动后读取当前任务的 TLS 槽位。
  *       新任务初始状态为 OK；被过滤记录保留已保存状态。ISR 查询不访问 TLS。
- *       槽位由 FreeRTOSConfig.h 的 configBSP_LOG_TLS_ERROR_INDEX 配置，默认是 0。
- * @warning 该槽位由本模块独占；configNUM_THREAD_LOCAL_STORAGE_POINTERS 必须大于槽位编号。
+ *       槽位由 FreeRTOSConfig.h 的 configBSP_LOG_TLS_ERROR_INDEX 配置，默认是
+ * 0。
+ * @warning 该槽位由本模块独占；configNUM_THREAD_LOCAL_STORAGE_POINTERS
+ * 必须大于槽位编号。
  */
 err_t BSPLogGetLastError(void);
 
