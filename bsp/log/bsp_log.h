@@ -17,7 +17,7 @@
  *
  * @par 状态保存约定
  * 除查询接口另有说明外，操作结果保存在启动状态或当前任务状态中；OK 清除旧错误，
- * PENDING 保留旧状态。ISR 调用不更新状态，FreeRTOS TLS 槽位 0 由本模块独占。
+ * PENDING 保留旧状态。ISR 调用不更新状态，本模块独占配置指定的 FreeRTOS TLS 槽位。
  * @{
  */
 
@@ -47,8 +47,6 @@
 
 /* 缓冲区容量与默认等级 */
 
-#define BSP_LOG_COMMAND_READ_BUFFER_SIZE \
-  8u /**< 单次轮询从 RTT 下行通道读取的临时块大小（字节）。 */
 #define BSP_LOG_COMMAND_BUFFER_SIZE \
   32u /**< 命令缓冲区容量（字节，包含 NUL）。 */
 #define BSP_LOG_DATA_BUFFER_SIZE \
@@ -112,20 +110,21 @@ err_t BSPLogInit(void);
  * @retval ARG_ERR 日志等级非法。
  * @retval PTR_NULL file、tag 或 format 为空。
  * @retval INIT_ERR 日志尚未初始化。
- * @retval STATE_ERR 上下文被拒绝。
- * @retval BUSY 获取日志互斥锁失败。
+ * @retval STATE_ERR 上下文被拒绝或释放日志互斥锁失败。
+ * @retval BUSY 日志互斥锁忙，本条记录跳过且未输出。
  * @retval NO_BUFF RTT 空间不足。
  * @retval NOT_SUPPORT 日志已关闭。
  * @note 通过日志事件调用 RTT printf/vprintf，不再使用日志层行缓冲区。
  *       记录格式为“[LEVEL][tag] file:line: 正文”，末尾为 CRLF。
  *       任务阶段用静态互斥锁串行化前缀、正文和换行；启动阶段不获取互斥锁。
+ *       获取锁不等待；释放失败优先返回 STATE_ERR，即使传输也发生错误。
  *       过滤在参数和初始化检查之后、上下文检查之前执行。
  *       PENDING 直接跳过记录，不入队且不改变已保存错误状态。
  *       其他结果更新启动状态或当前任务状态；ISR 结果不会更新状态。
  * @warning 未被过滤的写入拒绝 ISR、中断屏蔽和调度器挂起上下文。
  *          原生 RTT 格式支持 d/u/x/X/c/s/p/%%，不支持浮点和标准长度修饰符语义。
  *          浮点数应先用 Float2StrN() 转换，再通过 %s 输出。
- *          RTT 写入不等待主机，但任务可能等待互斥锁；NO_BUFF 时可能已输出部分记录。
+ *          RTT 写入和日志加锁均不等待；NO_BUFF 或释放锁失败时可能已输出部分记录。
  *          初始化后通道 0 必须保持 SEGGER_RTT_MODE_NO_BLOCK_SKIP 模式。
  */
 err_t BSPLogWrite(bsp_log_level_t level, const char* file, int line,
@@ -148,6 +147,27 @@ err_t BSPLogWrite(bsp_log_level_t level, const char* file, int line,
  */
 err_t BSPLogVWrite(bsp_log_level_t level, const char* file, int line,
                    const char* tag, const char* format, va_list args);
+
+/* 终端控制 */
+
+/**
+ * @brief 通过 RTT 通道 0 提交终端清屏控制序列。
+ *
+ * @return 控制序列提交状态，具体取值如下。
+ * @retval OK 清屏序列提交成功。
+ * @retval INIT_ERR 日志尚未初始化。
+ * @retval STATE_ERR 上下文被拒绝或释放日志互斥锁失败。
+ * @retval NO_BUFF RTT 空间不足。
+ * @retval BUSY 日志互斥锁忙，清屏序列未输出。
+ * @retval NOT_SUPPORT 日志已关闭。
+ * @note 写入两个空格和 RTT_CTRL_CLEAR，不发送末尾 NUL。
+ *       控制序列由主机终端解释，不丢弃 RTT 缓冲数据。
+ *       结果写入启动状态或任务状态；ISR 结果不会更新状态。
+ *       获取锁不等待；释放失败优先返回 STATE_ERR，即使传输也发生错误。
+ * @warning 拒绝 ISR、中断屏蔽和调度器挂起上下文；通道 0 必须保持
+ *          SEGGER_RTT_MODE_NO_BLOCK_SKIP 模式。
+ */
+err_t BSPLogClear(void);
 
 /* 等级控制与状态查询 */
 
@@ -178,18 +198,16 @@ err_t BSPLogGetLevel(bsp_log_level_t* level);
  * @brief 轮询 RTT 下行通道 0 并应用完整的日志等级命令。
  *
  * @return 命令处理状态，具体取值如下。
- * @retval OK 至少应用一条命令。
+ * @retval OK 本次最后一条完整命令设置成功。
  * @retval PENDING 没有完整命令可用。
- * @retval ARG_ERR 完整命令非法。
+ * @retval ARG_ERR 本次最后一条完整命令非法或超长。
  * @retval STATE_ERR 不在任务上下文。
  * @retval INIT_ERR 尚未调用 BSPLogInit()。
  * @retval NOT_SUPPORT 日志已关闭。
- * @note 支持 0 至 5 的原始等级字节；文本命令不区分大小写，以 CR 或 LF 结束。
- *       文本格式：`0` 至 `5`、`TRACE` 至 `FATAL`、`level=<name>`、
- *       `level <name>` 或 `log level <name>`。
- *       不完整输入保留到下次调用；过长行丢弃至下一个结束符。
- *       每次 RTT 读取块大小由 BSP_LOG_COMMAND_READ_BUFFER_SIZE 配置，默认
- *       为 8 字节；该值只影响单次读取的栈占用和吞吐折中，不限制命令长度。
+ * @note 使用非阻塞 SEGGER_RTT_GetKey() 排空下行通道 0。
+ *       文本格式为 `log level <name>`，不区分大小写，以 CR 或 LF 结束。
+ *       不完整输入保留到下次调用；超过 31 字节的命令丢弃至下一个结束符。
+ *       一次处理多条命令时返回最后一条完整命令的结果；空行忽略。
  * @warning 应在 BSPLogInit() 后由单个线程周期调用。
  */
 err_t BSPLogPollLevelCommand(void);
@@ -198,31 +216,12 @@ err_t BSPLogPollLevelCommand(void);
  * @brief 读取已保存的启动阶段或当前任务日志状态，不修改该状态。
  *
  * @return 线程模式下返回已保存的 err_t 状态；ISR 中返回 STATE_ERR。
- * @note 调度器启动前读取启动状态，启动后读取任务本地存储槽 0。
+ * @note 调度器启动前读取启动状态，启动后读取当前任务的 TLS 槽位。
  *       新任务初始状态为 OK；被过滤记录保留已保存状态。ISR 查询不访问 TLS。
- * @warning FreeRTOS TLS 槽 0 专供本模块使用，不得复用。
+ *       槽位由 FreeRTOSConfig.h 的 configBSP_LOG_TLS_ERROR_INDEX 配置，默认是 0。
+ * @warning 该槽位由本模块独占；configNUM_THREAD_LOCAL_STORAGE_POINTERS 必须大于槽位编号。
  */
 err_t BSPLogGetLastError(void);
-
-/* 终端控制 */
-
-/**
- * @brief 通过 RTT 通道 0 提交终端清屏控制序列。
- *
- * @return 控制序列提交状态，具体取值如下。
- * @retval OK 清屏序列提交成功。
- * @retval INIT_ERR 日志尚未初始化。
- * @retval STATE_ERR 上下文被拒绝。
- * @retval NO_BUFF RTT 空间不足。
- * @retval BUSY 获取日志互斥锁失败。
- * @retval NOT_SUPPORT 日志已关闭。
- * @note 写入两个空格和 RTT_CTRL_CLEAR，不发送末尾 NUL。
- *       控制序列由主机终端解释，不丢弃 RTT 缓冲数据。
- *       结果写入启动状态或任务状态；ISR 结果不会更新状态。
- * @warning 拒绝 ISR、中断屏蔽和调度器挂起上下文；通道 0 必须保持
- *          SEGGER_RTT_MODE_NO_BLOCK_SKIP 模式。
- */
-err_t BSPLogClear(void);
 
 /**
  * @name 日志快捷宏

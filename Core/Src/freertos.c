@@ -52,7 +52,7 @@
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
     .name = "defaultTask",
-    /* BSPLogVWrite() has a 512-byte local line buffer. */
+    /* Keep stack headroom for RTT logging and command handlers. */
     .stack_size = 512 * 4,
     .priority = (osPriority_t)osPriorityNormal,
 };
