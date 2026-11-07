@@ -1,6 +1,6 @@
 # bsp_log
 
-`bsp_log` 是基于 SEGGER RTT 的并发安全日志库。日志使用通道 0 输出，调用者传入字符串 `tag` 作为显示标签；tag 不注册、不复制，也不参与等级配置。
+`bsp_log` 是基于 SEGGER RTT 的并发安全日志库。日志使用通道 0 输出，快捷宏自动传入 `__FILE__`、`__LINE__`，调用者传入字符串 `tag` 作为显示标签；tag 不注册、不复制，也不参与等级配置。
 
 ## 初始化
 
@@ -13,7 +13,7 @@ MX_FREERTOS_Init();
 osKernelStart();
 ```
 
-`BSPLogInit()` 初始化 RTT，将终端通道 0 显式设为 `SEGGER_RTT_MODE_NO_BLOCK_SKIP`，配置数据通道和 Reserved 通道，并把全局等级设为 `BSP_LOG_DEFAULT_LEVEL`（默认 `INFO`）。日志层不创建或使用 mutex。初始化接口标记为 `NO_THREAD_SAFE_PROMISE`，只能由调度器启动前的单个线程调用；ISR 或调度器启动后调用返回 `STATE_ERR`。成功后重复初始化直接返回成功，不重置 RTT 中已有的数据或运行时等级；初始化失败可以在启动阶段重试。
+`BSPLogInit()` 初始化 RTT，将终端通道 0 显式设为 `SEGGER_RTT_MODE_NO_BLOCK_SKIP`，配置数据通道和 Reserved 通道，并把全局等级设为 `BSP_LOG_DEFAULT_LEVEL`（默认 `INFO`）。日志层创建一个静态 FreeRTOS 互斥锁，任务发送期间使用，不分配堆内存。初始化接口标记为 `NO_THREAD_SAFE_PROMISE`，只能由调度器启动前的单个线程调用；ISR 或调度器启动后调用返回 `STATE_ERR`。成功后重复初始化直接返回成功，不重置 RTT 中已有的数据或运行时等级；初始化失败可以在启动阶段重试。
 
 ## 等级和过滤
 
@@ -33,7 +33,8 @@ BSPLogSetLevel(BSP_LOG_LEVEL_DEBUG);
 
 ```c
 err_t result =
-    BSPLogWrite(BSP_LOG_LEVEL_DEBUG, "motor", "speed=%d", speed);
+    BSPLogWrite(BSP_LOG_LEVEL_DEBUG, __FILE__, __LINE__,
+                "motor", "speed=%d", speed);
 if (result == PENDING) {
   // 日志被当前等级正常过滤
 }
@@ -43,11 +44,13 @@ if (result == PENDING) {
 
 ```c
 err_t BSPLogWrite(bsp_log_level_t level,
+                  const char *file, int line,
                   const char *tag,
                   const char *format,
                   ...);
 
 err_t BSPLogVWrite(bsp_log_level_t level,
+                   const char *file, int line,
                    const char *tag,
                    const char *format,
                    va_list args);
@@ -60,14 +63,21 @@ LOG_INFO("motor", "speed=%d", speed);
 LOG_ERROR("can", "send failed: %d", status);
 ```
 
-输出格式为：
+六个快捷宏采用以下形式，现有 `LOG_INFO("motor", "speed=%d", speed)` 调用无需修改：
 
-```text
-[INFO][motor] speed=1200\r\n
-[ERROR][can] send failed: -15\r\n
+```c
+#define LOG_TRACE(...) \
+  BSPLogWrite(BSP_LOG_LEVEL_TRACE, __FILE__, __LINE__, __VA_ARGS__)
 ```
 
-`tag` 和 `format` 不能为 `NULL`，否则返回 `PTR_NULL`。允许使用空字符串 tag。
+输出格式为（文件名和行号随实际调用位置变化）：
+
+```text
+[INFO][motor] motor.c:42: speed=1200\r\n
+[ERROR][can] can.c:80: send failed: -15\r\n
+```
+
+`file`、`tag` 和 `format` 不能为 `NULL`，否则返回 `PTR_NULL`。允许使用空字符串 tag。
 
 ## 返回状态
 
@@ -77,32 +87,31 @@ LOG_ERROR("can", "send failed: %d", status);
 | --- | --- | --- |
 | `PENDING` | 1 | 等级过滤，正常跳过，不更新最后错误 |
 | `OK` | 0 | 操作成功；写日志时表示整条记录已写入 RTT |
-| `FAILED` | -1 | `snprintf/vsnprintf` 返回负值，格式化失败 |
-| `INIT_ERR` | -2 | 尚未初始化，或 RTT 通道配置失败 |
+| `INIT_ERR` | -2 | 尚未初始化、RTT 通道配置或静态互斥锁创建失败 |
 | `ARG_ERR` | -3 | 日志等级非法 |
 | `STATE_ERR` | -4 | 初始化或输出的调用上下文非法 |
-| `SIZE_ERR` | -5 | 标签或正文过长，整条日志不提交 |
 | `NOT_SUPPORT` | -7 | 编译时关闭日志后，直接调用初始化、输出或清屏接口 |
-| `NO_BUFF` | -11 | RTT 空间不足，整条记录未写入 |
-| `PTR_NULL` | -16 | 标签、格式串或等级输出指针为空 |
+| `NO_BUFF` | -11 | RTT 空间不足，可能已写入部分记录 |
+| `BUSY` | -15 | 获取日志互斥锁失败 |
+| `PTR_NULL` | -16 | 源文件名、标签、格式串或等级输出指针为空 |
 
 RTT 写入不等待，因此不会返回 `TIMEOUT`。日志关闭时 `LOG_*` 宏仍为 `((void)0)`，不求值参数；等级设置、等级查询和最后错误查询接口仍可使用。
 
-## 并发规则
+## 原生 RTT 格式化与并发规则
 
-每次调用使用独立的 512 字节栈缓冲区，先完成标签、正文和 `\r\n` 的格式化，再调用一次 `SEGGER_RTT_Write()` 提交整条记录。RTT 内置的 `SEGGER_RTT_LOCK/UNLOCK` 负责保护环形缓冲区；日志层不加锁，也不在关闭中断的临界区内执行 `snprintf/vsnprintf`。
+`BSPLogVWrite()` 检查参数、初始化、等级及调用上下文后，将日志事件交给内部输出回调。回调使用 `SEGGER_RTT_printf()` 输出等级、标签、源文件和行号，用 `SEGGER_RTT_vprintf()` 输出正文，最后通过 `SEGGER_RTT_Write()` 输出 CRLF。`SEGGER_RTT_Write()` 只复制字节，不进行格式化；日志层不再调用 `snprintf/vsnprintf` 拼接记录，也不再持有 512 字节行缓冲区。
 
-通道 0 使用 `NO_BLOCK_SKIP`：空间足够时整条写入，不足时整条跳过并返回 `NO_BUFF`，不等待主机读取。请勿在初始化后将该通道改成阻塞或截断模式。清屏也通过一次 RTT 写入提交。
+六个快捷宏自动捕获调用位置；直接调用 `BSPLogWrite/BSPLogVWrite` 时需要显式提供 `file`、`line`。支持 RTT 原生的 `%d`、`%u`、`%x/%X`、`%c`、`%s`、`%p` 和 `%%`，以及其支持的宽度、精度和标志。原生实现会跳过 `l/h`，仍按 32 位整数取参数，不能替代标准 printf 的长度修饰符语义。整数日志使用匹配的 `int/unsigned` 参数；不支持 `%f`、`%e`、`%g`、`%z` 或 64 位整数格式。
 
-512 字节容量包括前缀、正文、两字节换行及字符串结束符，最多提交 511 字节。超长标签或正文返回 `SIZE_ERR`，不产生半条日志。`vsnprintf` 保留标准格式化及浮点支持。
+浮点日志先调用 `Float2StrN()`，再以 `%s` 输出；项目内 PWM、VOFA、电机故障日志已按此方式转换，保留三位小数，转换失败显示 `<invalid>`。DWT 计时日志改为三位小数的毫秒，计时变量仍为秒。关闭日志时，这些转换参数也不会求值。
 
-独立行缓冲区会占用调用任务的栈；栈预算还必须包括 libc 浮点格式化及其调用链。DR16 任务保留 2048 字节栈；其他只有 512 字节栈的任务如需使用格式化日志，应先增加栈并测量运行时余量。日志层不分配堆内存，但 newlib 浮点格式化本身可能分配内存。
+`BSPLogVWrite()` 用 `va_copy/va_end` 为回调管理独立参数列表。事件和借用字符串仅在当前同步调用内有效；调用者可继续使用原始列表，并仍负责对其执行 `va_end()`。
 
-为支持并发 `vsnprintf`（尤其是 `%f`），`FreeRTOSConfig.h` 启用 `configUSE_NEWLIB_REENTRANT=1`，由内核为每个任务维护独立的 newlib 状态，增加每个任务 TCB 的内存开销。`sysmem.c` 提供 `__malloc_lock/unlock`，只在 newlib 分配/释放内存期间嵌套挂起调度器，不使用 mutex，不关闭中断，也不包住整个格式化过程。newlib 堆接口仅用于线程上下文。
+RTT 原生格式化使用内部 64 字节缓冲区，长正文会分段写入，不再有日志层 511 字节上限。通道 0 保持 `SEGGER_RTT_MODE_NO_BLOCK_SKIP`，每次分段复制不等待主机；空间不足返回 `NO_BUFF`，但前面的分段可能已经发出，不能保证整条记录要么全部写入、要么全部跳过。本项目同时修正原生 `vprintf` 的末段写入失败检查及末段字节重复计数，以保证失败和成功字节数可被调用者准确识别。
 
-普通任务和调度器启动前可以调用格式化日志。ISR、关闭中断、使用 `BASEPRI` 的临界区以及调度器挂起期间调用会返回 `STATE_ERR`。
+任务阶段使用一个静态 FreeRTOS 互斥锁，覆盖前缀、正文及换行，避免不同日志任务的记录交错；清屏也使用同一把锁。任务可能等待这把具有优先级继承的锁；RTT 的内部锁只保护每次传输复制，不覆盖整条记录。直接调用 RTT 的其他输出者不受日志互斥锁保护。
 
-`NO_THREAD_SAFE_PROMISE` 是接口注解，只标记必须由调用者保证单线程调用的初始化接口。日志写入和等级读写支持并发。RTT 锁范围内没有格式化操作；本项目 Cortex-M4 的 RTT 默认锁使用 `BASEPRI=0x20` 屏蔽相关中断及任务切换。
+启动阶段单线程输出不获取互斥锁。ISR、中断屏蔽、BASEPRI 临界区及调度器挂起期间的输出返回 `STATE_ERR`。日志本身不申请堆内存；`Float2StrN()` 仍使用整数 `snprintf()`，既有的 newlib 任务状态及内存分配锁配置保留。
 
 ## 每任务错误状态
 

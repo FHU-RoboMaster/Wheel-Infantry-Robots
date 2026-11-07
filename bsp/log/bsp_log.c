@@ -12,6 +12,10 @@
 #include "stm32f4xx.h"
 #include "task.h"
 
+#if BSP_LOG_ENABLED
+#include "semphr.h"
+#endif
+
 #define BSP_LOG_TLS_ERROR_INDEX 0
 
 #if configNUM_THREAD_LOCAL_STORAGE_POINTERS <= BSP_LOG_TLS_ERROR_INDEX
@@ -20,15 +24,27 @@
 
 #if BSP_LOG_ENABLED
 /* RTT 在整个程序运行期间保留通道缓冲区地址，因此必须使用静态存储。
- * 这些缓冲区与每次调用的格式化缓冲区相互独立。 */
+ * 原生 RTT 格式化使用其内部临时缓冲区。 */
 static char data_buffer[BSP_LOG_DATA_BUFFER_SIZE];
 static char reserved_buffer[BSP_LOG_RESERVED_BUFFER_SIZE];
+static StaticSemaphore_t log_mutex_storage;
+static SemaphoreHandle_t log_mutex;
 #endif
 
 static err_t startup_error = OK;
 static _Atomic uint8_t current_level = BSP_LOG_DEFAULT_LEVEL;
 
 #if BSP_LOG_ENABLED
+/* 事件只在一次同步输出期间有效；输出回调不保留指针或参数列表。 */
+typedef struct {
+  bsp_log_level_t level;
+  const char *file;
+  int line;
+  const char *tag;
+  const char *format;
+  va_list args;
+} bsp_log_event_t;
+
 static char level_command_buffer[BSP_LOG_COMMAND_BUFFER_SIZE];
 static size_t level_command_size;
 static bool level_command_overflowed;
@@ -54,8 +70,7 @@ static bool BSPLogContextAllowsWrite(void) {
     return false;
   }
   /* 只查询一次调度器状态，后续判断使用同一次结果。NOT_STARTED
-   * 使用启动阶段状态， RUNNING 允许任务输出；SUSPENDED 拒绝可能触发 libc
-   * 内存分配的格式化， 避免在禁止任务切换期间执行该操作。 */
+   * 使用启动阶段状态，RUNNING 允许任务输出；SUSPENDED 拒绝等待日志互斥锁。 */
   scheduler_state = xTaskGetSchedulerState();
 
   /* 调度器状态和两组中断屏蔽条件必须同时满足。 */
@@ -229,6 +244,42 @@ static err_t BSPLogWriteRaw(const char *data, size_t size) {
       SEGGER_RTT_Write(BSP_LOG_CHANNEL_TERMINAL, data, (unsigned)size);
   return (written == size) ? OK : NO_BUFF;
 }
+
+/* 启动阶段只有一个调用线程；任务阶段用静态互斥锁串行化整条记录。
+ * RTT 自身的锁只保护单次分段复制，不能覆盖前缀、正文及换行。 */
+static err_t BSPLogLock(void) {
+  if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED &&
+      xSemaphoreTake(log_mutex, portMAX_DELAY) != pdTRUE) {
+    return BUSY;
+  }
+  return OK;
+}
+
+static void BSPLogUnlock(void) {
+  if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
+    (void)xSemaphoreGive(log_mutex);
+  }
+}
+
+/**
+ * @brief 使用 RTT 原生格式化接口发送已通过检查的日志事件。
+ * @param[in,out] event 仅在本次调用期间有效的事件，消耗其私有参数列表。
+ * @return OK 或 NO_BUFF；由分发入口记录错误状态。
+ * @note 调用者持有日志互斥锁；RTT 空间不足时可能已发送部分记录。
+ */
+static err_t BSPLogTerminalCallback(bsp_log_event_t *event) {
+  static const char line_end[] = "\r\n";
+  if (SEGGER_RTT_printf(BSP_LOG_CHANNEL_TERMINAL, "[%s][%s] %s:%d: ",
+                        BSPLogLevelName(event->level), event->tag,
+                        event->file, event->line) < 0) {
+    return NO_BUFF;
+  }
+  if (SEGGER_RTT_vprintf(BSP_LOG_CHANNEL_TERMINAL, event->format,
+                         &event->args) < 0) {
+    return NO_BUFF;
+  }
+  return BSPLogWriteRaw(line_end, sizeof(line_end) - 1u);
+}
 #endif
 
 err_t BSPLogInit(void) {
@@ -265,6 +316,10 @@ err_t BSPLogInit(void) {
                  : OK;
   }
   if (result == OK) {
+    log_mutex = xSemaphoreCreateMutexStatic(&log_mutex_storage);
+    if (log_mutex == NULL) {
+      return BSPLogRecordResult(INIT_ERR);
+    }
     /* 所有通道配置成功后，才发布默认等级和可用状态。 */
     atomic_store_explicit(&current_level, BSP_LOG_DEFAULT_LEVEL,
                           memory_order_release);
@@ -373,21 +428,22 @@ err_t BSPLogGetLastError(void) {
       NULL, BSP_LOG_TLS_ERROR_INDEX);
 }
 
-err_t BSPLogVWrite(bsp_log_level_t level, const char *tag, const char *format,
-                   va_list args) {
+err_t BSPLogVWrite(bsp_log_level_t level, const char *file, int line,
+                   const char *tag, const char *format, va_list args) {
 #if BSP_LOG_ENABLED
-  static const char line_end[] = "\r\n";
-  /* 每次调用独占栈缓冲区。格式化在 RTT 锁外完成，锁只保护最后的传输复制。 */
-  char line_buffer[BSP_LOG_LINE_BUFFER_SIZE];
-  int prefix_size;
-  int body_size;
-  size_t body_capacity;
-  size_t total_size;
+  bsp_log_event_t event = {
+      .level = level,
+      .file = file,
+      .line = line,
+      .tag = tag,
+      .format = format,
+  };
+  err_t result;
 
   if (BSPLogValidateLevel(level) != OK) {
     return BSPLogRecordResult(ARG_ERR);
   }
-  if (tag == NULL || format == NULL) {
+  if (file == NULL || tag == NULL || format == NULL) {
     return BSPLogRecordResult(PTR_NULL);
   }
   if (!log_initialized) {
@@ -403,36 +459,23 @@ err_t BSPLogVWrite(bsp_log_level_t level, const char *tag, const char *format,
     return BSPLogRecordResult(STATE_ERR);
   }
 
-  /* 检查 snprintf 返回的完整所需长度，而非实际写入长度。
-   * 即使正文为空，也至少为 CR、LF 和 NUL 预留三个字节。 */
-  prefix_size = snprintf(line_buffer, sizeof(line_buffer), "[%s][%s] ",
-                         BSPLogLevelName(level), tag);
-  if (prefix_size < 0) {
-    return BSPLogRecordResult(FAILED);
+  result = BSPLogLock();
+  if (result != OK) {
+    return BSPLogRecordResult(result);
   }
-  if ((size_t)prefix_size > sizeof(line_buffer) - sizeof(line_end)) {
-    return BSPLogRecordResult(SIZE_ERR);
-  }
-  /* 先预留 CRLF，再将包含 NUL 空间的剩余容量交给 vsnprintf。 */
-  body_capacity =
-      sizeof(line_buffer) - (size_t)prefix_size - (sizeof(line_end) - 1u);
-  body_size = vsnprintf(line_buffer + prefix_size, body_capacity, format, args);
-  if (body_size < 0) {
-    return BSPLogRecordResult(FAILED);
-  }
-  if ((size_t)body_size >= body_capacity) {
-    /* 拒绝发送被截断的半条记录，避免误读诊断信息。 */
-    return BSPLogRecordResult(SIZE_ERR);
-  }
-  /* 用 CRLF 覆盖正文结束符，再附加 NUL；RTT 发送长度不包含 NUL。 */
-  total_size = (size_t)prefix_size + (size_t)body_size;
-  memcpy(line_buffer + total_size, line_end, sizeof(line_end));
-  total_size += sizeof(line_end) - 1u;
 
-  return BSPLogRecordResult(BSPLogWriteRaw(line_buffer, total_size));
+  /* 与参考库为每个回调建立独立参数列表的做法一致。
+   * 这里复制调用者的 va_list，所有输出结果都先清理，再统一记录状态。 */
+  va_copy(event.args, args);
+  result = BSPLogTerminalCallback(&event);
+  va_end(event.args);
+  BSPLogUnlock();
+  return BSPLogRecordResult(result);
 #else
   /* 日志关闭时，直接调用接口仍返回明确状态；LOG_* 宏则完全不求值参数。 */
   RM_UNUSED(level);
+  RM_UNUSED(file);
+  RM_UNUSED(line);
   RM_UNUSED(tag);
   RM_UNUSED(format);
   RM_UNUSED(args);
@@ -440,12 +483,12 @@ err_t BSPLogVWrite(bsp_log_level_t level, const char *tag, const char *format,
 #endif
 }
 
-err_t BSPLogWrite(bsp_log_level_t level, const char *tag, const char *format,
-                  ...) {
+err_t BSPLogWrite(bsp_log_level_t level, const char *file, int line,
+                  const char *tag, const char *format, ...) {
   err_t result;
   va_list args;
   va_start(args, format);
-  result = BSPLogVWrite(level, tag, format, args);
+  result = BSPLogVWrite(level, file, line, tag, format, args);
   va_end(args);
   return result;
 }
@@ -453,6 +496,7 @@ err_t BSPLogWrite(bsp_log_level_t level, const char *tag, const char *format,
 err_t BSPLogClear(void) {
 #if BSP_LOG_ENABLED
   static const char clear[] = "  " RTT_CTRL_CLEAR;
+  err_t result;
 
   if (!log_initialized) {
     return BSPLogRecordResult(INIT_ERR);
@@ -460,7 +504,13 @@ err_t BSPLogClear(void) {
   if (!BSPLogContextAllowsWrite()) {
     return BSPLogRecordResult(STATE_ERR);
   }
-  return BSPLogRecordResult(BSPLogWriteRaw(clear, sizeof(clear) - 1u));
+  result = BSPLogLock();
+  if (result != OK) {
+    return BSPLogRecordResult(result);
+  }
+  result = BSPLogWriteRaw(clear, sizeof(clear) - 1u);
+  BSPLogUnlock();
+  return BSPLogRecordResult(result);
 #else
   return BSPLogRecordResult(NOT_SUPPORT);
 #endif
