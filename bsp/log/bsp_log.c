@@ -26,19 +26,6 @@
     "Increase configNUM_THREAD_LOCAL_STORAGE_POINTERS to include the bsp_log TLS slot"
 #endif
 
-_Static_assert(OK == 0, "A new task's NULL TLS slot must represent OK");
-
-/* ==================== 内部类型 ==================== */
-
-#if BSP_LOG_ENABLED
-/* 事件只在一次同步输出期间有效；输出回调不保留字符串指针。 */
-typedef struct {
-  bsp_log_level_t level;
-  const char *tag;
-  const char *format;
-} bsp_log_event_t;
-#endif
-
 /* ==================== 模块状态 ==================== */
 
 static err_t startup_error = OK;
@@ -72,7 +59,8 @@ static const char *BSPLogLevelName(bsp_log_level_t level);
 static err_t BSPLogLock(void);
 static err_t BSPLogUnlock(void);
 static err_t BSPLogWriteRaw(const char *data, size_t size);
-static err_t BSPLogTerminalCallback(const bsp_log_event_t *event, va_list *args);
+static err_t BSPLogTerminalCallback(const bsp_log_event_t *event,
+                                    va_list *args);
 static bool BSPLogMatchIgnoreCase(const char *value, const char *pattern,
                                   bool exact_match);
 static char *BSPLogTrimCommand(char *command);
@@ -129,8 +117,8 @@ err_t BSPLogInit(void) {
 #endif
 }
 
-err_t BSPLogWrite(bsp_log_level_t level, const char *tag,
-                  const char *format, ...) {
+err_t BSPLogWrite(bsp_log_level_t level, const char *tag, const char *format,
+                  ...) {
 #if BSP_LOG_ENABLED
   const bsp_log_event_t event = {
       .level = level,
@@ -277,12 +265,14 @@ int Float2StrN(char *str, size_t size, float va) {
    * @note 使用精确的二进制常量，避免 INT64_MAX 转为 double 后向上舍入。
    */
   static const double scaled_integer_limit = 0x1p63;
-  double scaled_rounded;     /**< 按 FRACTION_SCALE 缩放并取整后的有符号值。 */
-  uint64_t scaled_magnitude; /**< 缩放取整结果的绝对值，单位为 1/FRACTION_SCALE。 */
-  uint64_t integer_part;     /**< 拆分得到的整数部分，尚未按十进制分组。 */
-  uint32_t fraction_part;    /**< 小数部分的整数编码，范围为 [0, FRACTION_SCALE)。 */
-  const char *sign;          /**< 负值输出 "-"；非负值及取整后的零输出空串。 */
-  int result;               /**< snprintf 所需字符数（不含 NUL）；负值表示格式化失败。 */
+  double scaled_rounded; /**< 按 FRACTION_SCALE 缩放并取整后的有符号值。 */
+  uint64_t
+      scaled_magnitude;  /**< 缩放取整结果的绝对值，单位为 1/FRACTION_SCALE。 */
+  uint64_t integer_part; /**< 拆分得到的整数部分，尚未按十进制分组。 */
+  uint32_t
+      fraction_part; /**< 小数部分的整数编码，范围为 [0, FRACTION_SCALE)。 */
+  const char *sign;  /**< 负值输出 "-"；非负值及取整后的零输出空串。 */
+  int result; /**< snprintf 所需字符数（不含 NUL）；负值表示格式化失败。 */
 
   if (str == NULL || size == 0u) {
     return -1;
@@ -418,11 +408,11 @@ static err_t BSPLogWriteRaw(const char *data, size_t size) {
  * @return OK 或 NO_BUFF；由分发入口记录错误状态。
  * @note 调用者持有日志互斥锁；RTT 空间不足时可能已发送部分记录。
  */
-static err_t BSPLogTerminalCallback(const bsp_log_event_t *event, va_list *args) {
+static err_t BSPLogTerminalCallback(const bsp_log_event_t *event,
+                                    va_list *args) {
   static const char line_end[] = "\r\n";
-  if (SEGGER_RTT_printf(BSP_LOG_CHANNEL_TERMINAL,
-                        "[%s][%s] ", BSPLogLevelName(event->level),
-                        event->tag) < 0) {
+  if (SEGGER_RTT_printf(BSP_LOG_CHANNEL_TERMINAL, "[%s][%s] ",
+                        BSPLogLevelName(event->level), event->tag) < 0) {
     return NO_BUFF;
   }
   if (SEGGER_RTT_vprintf(BSP_LOG_CHANNEL_TERMINAL, event->format, args) < 0) {

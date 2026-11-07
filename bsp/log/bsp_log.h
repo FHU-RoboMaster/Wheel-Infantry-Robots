@@ -86,6 +86,16 @@ typedef enum {
 } bsp_log_level_t;
 
 /**
+ * @brief 日志事件结构体。
+ * @details 用于传递日志等级、标签和格式化字符串。
+ */
+typedef struct {
+  bsp_log_level_t level; /**< 日志等级。 */
+  const char* tag;       /**< 日志标签。 */
+  const char* format;    /**< 字符串。 */
+} bsp_log_event_t;
+
+/**
  * @brief 固定小数输出的精度、缩放系数及整数分组参数。
  * @details 缩放系数等于 10 的小数位数次方，分组基数等于 10 的分组位数次方。
  *          分组后分别使用 uint32_t 输出，兼容 newlib-nano 的整数格式化。
@@ -142,8 +152,8 @@ err_t BSPLogInit(void);
  * 或释放锁失败时可能已输出部分记录。 初始化后通道 0 必须保持
  * SEGGER_RTT_MODE_NO_BLOCK_SKIP 模式。
  */
-err_t BSPLogWrite(bsp_log_level_t level, const char* tag,
-                  const char* format, ...);
+err_t BSPLogWrite(bsp_log_level_t level, const char* tag, const char* format,
+                  ...);
 
 /* 终端控制 */
 
@@ -237,28 +247,22 @@ err_t BSPLogGetLastError(void);
  */
 #if BSP_LOG_ENABLED
 /** @brief 提交 TRACE 记录；详细信息。 */
-#define LOG_TRACE(...) \
-  BSPLogWrite(BSP_LOG_LEVEL_TRACE, __VA_ARGS__)
+#define LOG_TRACE(...) BSPLogWrite(BSP_LOG_LEVEL_TRACE, __VA_ARGS__)
 
 /** @brief 提交 DEBUG 记录；调试信息。 */
-#define LOG_DEBUG(...) \
-  BSPLogWrite(BSP_LOG_LEVEL_DEBUG, __VA_ARGS__)
+#define LOG_DEBUG(...) BSPLogWrite(BSP_LOG_LEVEL_DEBUG, __VA_ARGS__)
 
 /** @brief 提交 INFO 记录；正常运行信息。 */
-#define LOG_INFO(...) \
-  BSPLogWrite(BSP_LOG_LEVEL_INFO, __VA_ARGS__)
+#define LOG_INFO(...) BSPLogWrite(BSP_LOG_LEVEL_INFO, __VA_ARGS__)
 
 /** @brief 提交 WARN 记录；警告信息。 */
-#define LOG_WARN(...) \
-  BSPLogWrite(BSP_LOG_LEVEL_WARN, __VA_ARGS__)
+#define LOG_WARN(...) BSPLogWrite(BSP_LOG_LEVEL_WARN, __VA_ARGS__)
 
 /** @brief 提交 ERROR 记录；错误信息。 */
-#define LOG_ERROR(...) \
-  BSPLogWrite(BSP_LOG_LEVEL_ERROR, __VA_ARGS__)
+#define LOG_ERROR(...) BSPLogWrite(BSP_LOG_LEVEL_ERROR, __VA_ARGS__)
 
 /** @brief 提交 FATAL 记录；严重错误。 */
-#define LOG_FATAL(...) \
-  BSPLogWrite(BSP_LOG_LEVEL_FATAL, __VA_ARGS__)
+#define LOG_FATAL(...) BSPLogWrite(BSP_LOG_LEVEL_FATAL, __VA_ARGS__)
 #else
 #define LOG_TRACE(...) ((void)0)
 #define LOG_DEBUG(...) ((void)0)
