@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>bsp_lpg: bsp_log</title>
+<title>bsp_log: bsp_log</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,7 +30,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">bsp_lpg<span id="projectnumber">&#160;1.0.1</span>
+   <div id="projectname">bsp_log<span id="projectnumber">&#160;1.0.1</span>
    </div>
   </td>
  </tr>
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('md_bsp_2log_2b
 <div class="line">osKernelInitialize();</div>
 <div class="line">MX_FREERTOS_Init();</div>
 <div class="line">osKernelStart();</div>
-<div class="ttc" id="agroup__bsp__log_html_ga766e146fe24ee52f68895f22b2ca72e3"><div class="ttname"><a href="group__bsp__log.html#ga766e146fe24ee52f68895f22b2ca72e3">BSPLogInit</a></div><div class="ttdeci">err_t BSPLogInit(void)</div><div class="ttdoc">固定小数输出的精度、缩放系数及整数分组参数。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00074">bsp_log.c:74</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga766e146fe24ee52f68895f22b2ca72e3"><div class="ttname"><a href="group__bsp__log.html#ga766e146fe24ee52f68895f22b2ca72e3">BSPLogInit</a></div><div class="ttdeci">err_t BSPLogInit(void)</div><div class="ttdoc">固定小数输出的精度、缩放系数及整数分组参数。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00073">bsp_log.c:73</a></div></div>
 </div><!-- fragment --><p><span class="tt"><a class="el" href="group__bsp__log.html#ga766e146fe24ee52f68895f22b2ca72e3" title="固定小数输出的精度、缩放系数及整数分组参数。">BSPLogInit()</a></span> 初始化 RTT，将终端通道 0 显式设为 <span class="tt">SEGGER_RTT_MODE_NO_BLOCK_SKIP</span>，配置数据通道和 Reserved 通道，并把全局等级设为 <span class="tt"><a class="el" href="group__bsp__log.html#ga8d908a4fb5bb5dd6b46418c2179ebc68">BSP_LOG_DEFAULT_LEVEL</a></span>（默认 <span class="tt">INFO</span>）。日志层创建一个静态 FreeRTOS 互斥锁，任务发送期间使用，不分配堆内存。初始化接口标记为 <span class="tt">NO_THREAD_SAFE_PROMISE</span>，只能由调度器启动前的单个线程调用；ISR 或调度器启动后调用返回 <span class="tt">STATE_ERR</span>。成功后重复初始化直接返回成功，不重置 RTT 中已有的数据或运行时等级；初始化失败可以在启动阶段重试。</p>
 <p>通道 0 的默认容量在 <span class="tt">SEGGER/Config/SEGGER_RTT_Conf.h</span> 中设为 4096 字节，比原来的 1024 字节增加 3072 字节静态 RAM。仍采用非阻塞丢弃模式，不自动重发，也没有新增故障 输出通道；主机应持续读取 RTT 上行通道 0。扩容降低突发日志丢失概率，不保证无限缓存。 <span class="tt">main.c</span> 将初始化返回值保存在全局 <span class="tt">bsp_log_init_result</span>；调试器可直接查看，避免后续日志 覆盖初始化状态。首个断言及其日志返回值另保存在 <span class="tt">comp_utils.h</span> 声明的 <span class="tt">verify_failure</span>， 详情见 <span class="tt">component/comp_utils.md</span>。</p>
 <h1 class="doxsection"><a class="anchor" id="autotoc_md2"></a>
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('md_bsp_2log_2b
 <div class="fragment"><div class="line">TRACE &lt; DEBUG &lt; INFO &lt; WARN &lt; ERROR &lt; FATAL</div>
 </div><!-- fragment --><p>默认全局等级为 <span class="tt">INFO</span>，可以运行时修改：</p>
 <div class="fragment"><div class="line"><a class="code hl_function" href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7">BSPLogSetLevel</a>(<a class="code hl_enumvalue" href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ad7e338c14ea8186eca8d8202eb8edb7a">BSP_LOG_LEVEL_DEBUG</a>);</div>
-<div class="ttc" id="agroup__bsp__log_html_gaa83f7b624f3c1935147a0c27b6a0eca7"><div class="ttname"><a href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7">BSPLogSetLevel</a></div><div class="ttdeci">err_t BSPLogSetLevel(bsp_log_level_t level)</div><div class="ttdoc">设置后续日志记录使用的共享最低等级。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00197">bsp_log.c:197</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_gaa83f7b624f3c1935147a0c27b6a0eca7"><div class="ttname"><a href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7">BSPLogSetLevel</a></div><div class="ttdeci">err_t BSPLogSetLevel(bsp_log_level_t level)</div><div class="ttdoc">设置后续日志记录使用的共享最低等级。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00199">bsp_log.c:199</a></div></div>
 <div class="ttc" id="agroup__bsp__log_html_ggab8cf237ccbf0e84a374c75be30ab2045ad7e338c14ea8186eca8d8202eb8edb7a"><div class="ttname"><a href="group__bsp__log.html#ggab8cf237ccbf0e84a374c75be30ab2045ad7e338c14ea8186eca8d8202eb8edb7a">BSP_LOG_LEVEL_DEBUG</a></div><div class="ttdeci">@ BSP_LOG_LEVEL_DEBUG</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8h_source.html#l00080">bsp_log.h:80</a></div></div>
 </div><!-- fragment --><p>工程日志按用途分级：</p>
 <ul>
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('md_bsp_2log_2b
 <div class="line"><span class="keywordflow">if</span> (result == PENDING) {</div>
 <div class="line">  <span class="comment">// 日志被当前等级正常过滤</span></div>
 <div class="line">}</div>
-<div class="ttc" id="agroup__bsp__log_html_ga3dcb142eb943496e5c5d5dd79f0be5b6"><div class="ttname"><a href="group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6">BSPLogWrite</a></div><div class="ttdeci">err_t BSPLogWrite(bsp_log_level_t level, const char *tag, const char *format,...)</div><div class="ttdoc">按指定等级格式化并提交带标签的日志记录。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00120">bsp_log.c:120</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga3dcb142eb943496e5c5d5dd79f0be5b6"><div class="ttname"><a href="group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6">BSPLogWrite</a></div><div class="ttdeci">err_t BSPLogWrite(bsp_log_level_t level, const char *tag, const char *format,...)</div><div class="ttdoc">按指定等级格式化并提交带标签的日志记录。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00122">bsp_log.c:122</a></div></div>
 </div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md3"></a>
 输出接口</h1>
 <div class="fragment"><div class="line">err_t <a class="code hl_function" href="group__bsp__log.html#ga3dcb142eb943496e5c5d5dd79f0be5b6">BSPLogWrite</a>(<a class="code hl_enumeration" href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a> level,</div>
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('md_bsp_2log_2b
 <div class="line"><span class="keywordflow">if</span> (result &lt; 0 &amp;&amp; <a class="code hl_function" href="group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8">BSPLogGetLastError</a>() != OK) {</div>
 <div class="line">  <span class="comment">// 只读取当前任务的错误状态</span></div>
 <div class="line">}</div>
-<div class="ttc" id="agroup__bsp__log_html_ga10046a12de152e4237027fc3b52a13d8"><div class="ttname"><a href="group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8">BSPLogGetLastError</a></div><div class="ttdeci">err_t BSPLogGetLastError(void)</div><div class="ttdoc">读取已保存的启动阶段或当前任务日志状态，不修改该状态。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00250">bsp_log.c:250</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga10046a12de152e4237027fc3b52a13d8"><div class="ttname"><a href="group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8">BSPLogGetLastError</a></div><div class="ttdeci">err_t BSPLogGetLastError(void)</div><div class="ttdoc">读取已保存的启动阶段或当前任务日志状态，不修改该状态。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00252">bsp_log.c:252</a></div></div>
 </div><!-- fragment --><p>规则如下：</p>
 <ul>
 <li><span class="tt">PENDING</span> 不更新错误状态。</li>
@@ -241,8 +241,8 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('md_bsp_2log_2b
 <div class="line">err_t <a class="code hl_function" href="group__bsp__log.html#gaa83f7b624f3c1935147a0c27b6a0eca7">BSPLogSetLevel</a>(<a class="code hl_enumeration" href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a> level);</div>
 <div class="line">err_t <a class="code hl_function" href="group__bsp__log.html#ga53595ca0d680bf757bf17a50c13b5c26">BSPLogGetLevel</a>(<a class="code hl_enumeration" href="group__bsp__log.html#gab8cf237ccbf0e84a374c75be30ab2045">bsp_log_level_t</a> *level);</div>
 <div class="line">err_t <a class="code hl_function" href="group__bsp__log.html#ga10046a12de152e4237027fc3b52a13d8">BSPLogGetLastError</a>(<span class="keywordtype">void</span>);</div>
-<div class="ttc" id="agroup__bsp__log_html_ga387f170bcb7cb64383a69c877eb29af7"><div class="ttname"><a href="group__bsp__log.html#ga387f170bcb7cb64383a69c877eb29af7">BSPLogClear</a></div><div class="ttdeci">err_t BSPLogClear(void)</div><div class="ttdoc">通过 RTT 通道 0 提交终端清屏控制序列。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00171">bsp_log.c:171</a></div></div>
-<div class="ttc" id="agroup__bsp__log_html_ga53595ca0d680bf757bf17a50c13b5c26"><div class="ttname"><a href="group__bsp__log.html#ga53595ca0d680bf757bf17a50c13b5c26">BSPLogGetLevel</a></div><div class="ttdeci">err_t BSPLogGetLevel(bsp_log_level_t *level)</div><div class="ttdoc">将共享最低等级读取到调用方提供的存储位置。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00206">bsp_log.c:206</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga387f170bcb7cb64383a69c877eb29af7"><div class="ttname"><a href="group__bsp__log.html#ga387f170bcb7cb64383a69c877eb29af7">BSPLogClear</a></div><div class="ttdeci">err_t BSPLogClear(void)</div><div class="ttdoc">通过 RTT 通道 0 提交终端清屏控制序列。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00173">bsp_log.c:173</a></div></div>
+<div class="ttc" id="agroup__bsp__log_html_ga53595ca0d680bf757bf17a50c13b5c26"><div class="ttname"><a href="group__bsp__log.html#ga53595ca0d680bf757bf17a50c13b5c26">BSPLogGetLevel</a></div><div class="ttdeci">err_t BSPLogGetLevel(bsp_log_level_t *level)</div><div class="ttdoc">将共享最低等级读取到调用方提供的存储位置。</div><div class="ttdef"><b>定义</b> <a href="bsp__log_8c_source.html#l00208">bsp_log.c:208</a></div></div>
 </div><!-- fragment --><p>日志库通过 <span class="tt"><a class="el" href="group__bsp__log.html#ga05a169d4e46e9bdcfee71a8f97eed265" title="轮询 RTT 下行通道 0 并应用完整的日志等级命令。">BSPLogPollLevelCommand()</a></span> 调用非阻塞 <span class="tt">SEGGER_RTT_GetKey()</span>，逐字节排空 RTT 下行通道 0；无数据时立即结束轮询，不使用阻塞的 <span class="tt">WaitKey()</span>。上位机发送 <span class="tt">log level &lt;name&gt;</span>，例如 <span class="tt">log level DEBUG\n</span>，其中等级名称为 <span class="tt">TRACE</span>、<span class="tt">DEBUG</span>、<span class="tt">INFO</span>、<span class="tt">WARN</span>、<span class="tt">ERROR</span> 或 <span class="tt">FATAL</span>。命令不区分大小写，首尾空格和制表符会被去除，CR/LF 均可提交命令；空行忽略，半条命令保留至下次轮询。</p>
 <p>命令缓冲区为 32 字节，最多接受 31 字节文本并预留 NUL。长度达到缓冲区容量时作为超长标记，后续字节丢弃至 CR/LF，再返回 <span class="tt">ARG_ERR</span> 并恢复接收。一次轮询处理多条命令时，返回最后一条完整命令的结果；没有完整命令则返回 <span class="tt">PENDING</span>，保留当前任务的错误状态。默认任务每 10 ms 调用一次轮询接口，等级仅保存在 RAM，重启后恢复默认值。</p>
 <p><span class="tt"><a class="el" href="group__bsp__log.html#ga0b863622b6bc986893617c85b16f6d2e" title="将有限浮点数转换为固定三位小数的字符串。">Float2StrN()</a></span> 仍然是独立的浮点字符串工具，不参与日志等级、并发锁或错误状态。其返回值表示字符长度，因此保留 <span class="tt">int</span> 类型：失败返回 -1，成功返回完整结果所需字符数，不含结束符；返回值大于等于容量表示发生截断。</p>

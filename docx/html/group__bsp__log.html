@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>bsp_lpg: RTT 日志</title>
+<title>bsp_log: RTT 日志</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,7 +30,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">bsp_lpg<span id="projectnumber">&#160;1.0.1</span>
+   <div id="projectname">bsp_log<span id="projectnumber">&#160;1.0.1</span>
    </div>
   </td>
  </tr>
@@ -665,7 +665,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <dl class="section note"><dt>注解</dt><dd>写入两个空格和 RTT_CTRL_CLEAR，不发送末尾 NUL。 控制序列由主机终端解释，不丢弃 RTT 缓冲数据。 结果写入启动状态或任务状态；ISR 结果不会更新状态。 获取锁不等待；释放失败优先返回 STATE_ERR，即使传输也发生错误。 </dd></dl>
 <dl class="section warning"><dt>警告</dt><dd>拒绝 ISR、中断屏蔽和调度器挂起上下文；通道 0 必须保持 SEGGER_RTT_MODE_NO_BLOCK_SKIP 模式。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00171">171</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00173">173</a> 行定义.</p>
 <div class="dynheader">
 函数调用图:</div>
 <div class="dyncontent">
@@ -701,7 +701,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <dl class="section note"><dt>注解</dt><dd>调度器启动前读取启动状态，启动后读取当前任务的 TLS 槽位。 新任务初始状态为 OK；被过滤记录保留已保存状态。ISR 查询不访问 TLS。 槽位由 FreeRTOSConfig.h 的 configBSP_LOG_TLS_ERROR_INDEX 配置，默认是 0。 </dd></dl>
 <dl class="section warning"><dt>警告</dt><dd>该槽位由本模块独占；configNUM_THREAD_LOCAL_STORAGE_POINTERS 必须大于槽位编号。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00250">250</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00252">252</a> 行定义.</p>
 <div class="dynheader">
 函数调用图:</div>
 <div class="dyncontent">
@@ -747,7 +747,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </dl>
 <dl class="section note"><dt>注解</dt><dd>使用原子读取，即使关闭日志也可查询。成功读取保留已保存错误； 除 ISR 外，空指针错误会更新已保存状态。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00206">206</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00208">208</a> 行定义.</p>
 <div class="dynheader">
 函数调用图:</div>
 <div class="dyncontent">
@@ -794,7 +794,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <dl class="section note"><dt>注解</dt><dd>将终端设置为非阻塞分段跳过模式，创建静态日志互斥锁并设置等级为 INFO。 重复成功调用会保留缓冲数据和已配置等级。 初始化失败时可在调度器启动前重试。 结果写入启动状态或任务状态；ISR 结果不会更新状态。 </dd></dl>
 <dl class="section warning"><dt>警告</dt><dd>要求在调度器启动前调用此函数完成初始化。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00074">74</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00073">73</a> 行定义.</p>
 <div class="dynheader">
 函数调用图:</div>
 <div class="dyncontent">
@@ -842,7 +842,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <dl class="section note"><dt>注解</dt><dd>使用非阻塞 SEGGER_RTT_GetKey() 排空下行通道 0。 文本格式为 <span class="tt">log level &lt;name&gt;</span>，不区分大小写，以 CR 或 LF 结束。 不完整输入保留到下次调用；超过 31 字节的命令丢弃至下一个结束符。 一次处理多条命令时返回最后一条完整命令的结果；空行忽略。 </dd></dl>
 <dl class="section warning"><dt>警告</dt><dd>应在 <a class="el" href="#ga766e146fe24ee52f68895f22b2ca72e3" title="固定小数输出的精度、缩放系数及整数分组参数。">BSPLogInit()</a> 后由单个线程周期调用。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00215">215</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00217">217</a> 行定义.</p>
 <div class="dynheader">
 函数调用图:</div>
 <div class="dyncontent">
@@ -890,7 +890,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 </dl>
 <dl class="section note"><dt>注解</dt><dd>使用原子写入，即使关闭日志也可配置；非法输入保留原等级。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00197">197</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00199">199</a> 行定义.</p>
 <div class="dynheader">
 函数调用图:</div>
 <div class="dyncontent">
@@ -965,7 +965,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <dl class="section note"><dt>注解</dt><dd>通过日志事件调用 RTT printf/vprintf，不再使用日志层行缓冲区。 函数内部仅维护一份正文参数列表，在输出结束后执行 va_end。 记录格式为“[LEVEL][tag] 正文”，末尾为 CRLF。 任务阶段用静态互斥锁串行化前缀、正文和换行；启动阶段不获取互斥锁。 获取锁不等待；释放失败优先返回 STATE_ERR，即使传输也发生错误。 过滤在参数和初始化检查之后、上下文检查之前执行。 PENDING 直接跳过记录，不入队且不改变已保存错误状态。 其他结果更新启动状态或当前任务状态；ISR 结果不会更新状态。 </dd></dl>
 <dl class="section warning"><dt>警告</dt><dd>未被过滤的写入拒绝 ISR、中断屏蔽和调度器挂起上下文。 原生 RTT 格式支持 d/u/x/X/c/s/p/%，不支持浮点和标准长度修饰符语义。 浮点数应先用 <a class="el" href="#ga0b863622b6bc986893617c85b16f6d2e" title="将有限浮点数转换为固定三位小数的字符串。">Float2StrN()</a> 转换，再通过 s 输出。 RTT 写入和日志加锁均不等待；NO_BUFF 或释放锁失败时可能已输出部分记录。 初始化后通道 0 必须保持 SEGGER_RTT_MODE_NO_BLOCK_SKIP 模式。 </dd></dl>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00120">120</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00122">122</a> 行定义.</p>
 <div class="dynheader">
 函数调用图:</div>
 <div class="dyncontent">
@@ -1027,7 +1027,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('group__bsp__lo
 <p>&lt; 负值输出 "-"；非负值及取整后的零输出空串。</p>
 <p>&lt; snprintf 所需字符数（不含 NUL）；负值表示格式化失败。</p>
 
-<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00263">263</a> 行定义.</p>
+<p class="definition">在文件 <a class="el" href="bsp__log_8c_source.html">bsp_log.c</a> 第 <a class="el" href="bsp__log_8c_source.html#l00265">265</a> 行定义.</p>
 
 </div>
 </div>

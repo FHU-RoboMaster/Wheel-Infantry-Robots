@@ -24,7 +24,7 @@
 */
 var NAVTREE =
 [
-  [ "bsp_lpg", "index.html", [
+  [ "bsp_log", "index.html", [
     [ "bsp_log", "md_bsp_2log_2bsp__log.html", [
       [ "初始化", "md_bsp_2log_2bsp__log.html#autotoc_md1", null ],
       [ "等级和过滤", "md_bsp_2log_2bsp__log.html#autotoc_md2", null ],
