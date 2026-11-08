@@ -59,8 +59,7 @@ static const char *BSPLogLevelName(bsp_log_level_t level);
 static err_t BSPLogLock(void);
 static err_t BSPLogUnlock(void);
 static err_t BSPLogWriteRaw(const char *data, size_t size);
-static err_t BSPLogTerminalCallback(const bsp_log_event_t *event,
-                                    va_list *args);
+static err_t BSPLogTerminalSend(const bsp_log_event_t *event, va_list *args);
 static bool BSPLogMatchIgnoreCase(const char *value, const char *pattern,
                                   bool exact_match);
 static char *BSPLogTrimCommand(char *command);
@@ -72,7 +71,9 @@ static err_t BSPLogApplyLevelCommand(void);
 /* ==================== 公共接口：初始化与日志输出 ==================== */
 
 err_t BSPLogInit(void) {
-#if BSP_LOG_ENABLED
+#if !BSP_LOG_ENABLED
+  return BSPLogRecordResult(NOT_SUPPORT);
+#else
   err_t result = OK;
 
   if (!BSPLogInThreadMode() ||
@@ -94,32 +95,39 @@ err_t BSPLogInit(void) {
                                       SEGGER_RTT_MODE_NO_BLOCK_SKIP) < 0)
                ? INIT_ERR
                : OK;
-  if (result == OK) {
-    result = (SEGGER_RTT_ConfigUpBuffer(
-                  BSP_LOG_CHANNEL_RESERVED, "Reserved", reserved_buffer,
-                  sizeof(reserved_buffer), SEGGER_RTT_MODE_NO_BLOCK_SKIP) < 0)
-                 ? INIT_ERR
-                 : OK;
+  if (result != OK) {
+    return BSPLogRecordResult(INIT_ERR);
   }
-  if (result == OK) {
-    log_mutex = xSemaphoreCreateMutexStatic(&log_mutex_storage);
-    if (log_mutex == NULL) {
-      return BSPLogRecordResult(INIT_ERR);
-    }
-    /* 所有通道配置成功后，原子发布默认等级和可用状态。 */
-    atomic_store_explicit(&current_level, BSP_LOG_DEFAULT_LEVEL,
-                          memory_order_release);
-    log_initialized = true;
+  result = (SEGGER_RTT_ConfigUpBuffer(BSP_LOG_CHANNEL_RESERVED, "Reserved",
+                                      reserved_buffer, sizeof(reserved_buffer),
+                                      SEGGER_RTT_MODE_NO_BLOCK_SKIP) < 0)
+               ? INIT_ERR
+               : OK;
+  if (result != OK) {
+    return BSPLogRecordResult(INIT_ERR);
   }
+  log_mutex = xSemaphoreCreateMutexStatic(&log_mutex_storage);
+  if (log_mutex == NULL) {
+    return BSPLogRecordResult(INIT_ERR);
+  }
+  /* 所有通道配置成功后，原子发布默认等级和可用状态。 */
+  atomic_store_explicit(&current_level, BSP_LOG_DEFAULT_LEVEL,
+                        memory_order_release);
+  log_initialized = true;
+
   return BSPLogRecordResult(result);
-#else
-  return BSPLogRecordResult(NOT_SUPPORT);
 #endif
 }
 
 err_t BSPLogWrite(bsp_log_level_t level, const char *tag, const char *format,
                   ...) {
-#if BSP_LOG_ENABLED
+#if !BSP_LOG_ENABLED
+  /* 日志关闭时，直接调用接口仍返回明确状态；LOG_* 宏则完全不求值参数。 */
+  RM_UNUSED(level);
+  RM_UNUSED(tag);
+  RM_UNUSED(format);
+  return BSPLogRecordResult(NOT_SUPPORT);
+#else
   const bsp_log_event_t event = {
       .level = level,
       .tag = tag,
@@ -155,21 +163,17 @@ err_t BSPLogWrite(bsp_log_level_t level, const char *tag, const char *format,
 
   /* 正文可变参数只建立一次，所有输出结果都先清理参数列表，再释放锁。 */
   va_start(args, format);
-  result = BSPLogTerminalCallback(&event, &args);
+  result = BSPLogTerminalSend(&event, &args);
   va_end(args);
   unlock_result = BSPLogUnlock();
   return BSPLogRecordResult(unlock_result != OK ? unlock_result : result);
-#else
-  /* 日志关闭时，直接调用接口仍返回明确状态；LOG_* 宏则完全不求值参数。 */
-  RM_UNUSED(level);
-  RM_UNUSED(tag);
-  RM_UNUSED(format);
-  return BSPLogRecordResult(NOT_SUPPORT);
 #endif
 }
 
 err_t BSPLogClear(void) {
-#if BSP_LOG_ENABLED
+#if !BSP_LOG_ENABLED
+  return BSPLogRecordResult(NOT_SUPPORT);
+#else
   static const char clear[] = "  " RTT_CTRL_CLEAR;
   err_t result;
   err_t unlock_result;
@@ -187,8 +191,6 @@ err_t BSPLogClear(void) {
   result = BSPLogWriteRaw(clear, sizeof(clear) - 1u);
   unlock_result = BSPLogUnlock();
   return BSPLogRecordResult(unlock_result != OK ? unlock_result : result);
-#else
-  return BSPLogRecordResult(NOT_SUPPORT);
 #endif
 }
 
@@ -213,7 +215,9 @@ err_t BSPLogGetLevel(bsp_log_level_t *level) {
 }
 
 err_t BSPLogPollLevelCommand(void) {
-#if BSP_LOG_ENABLED
+#if !BSP_LOG_ENABLED
+  return BSPLogRecordResult(NOT_SUPPORT);
+#else
   int byte;
   err_t result = PENDING;
 
@@ -240,8 +244,6 @@ err_t BSPLogPollLevelCommand(void) {
   }
 
   return result;
-#else
-  return BSPLogRecordResult(NOT_SUPPORT);
 #endif
 }
 
@@ -408,8 +410,7 @@ static err_t BSPLogWriteRaw(const char *data, size_t size) {
  * @return OK 或 NO_BUFF；由分发入口记录错误状态。
  * @note 调用者持有日志互斥锁；RTT 空间不足时可能已发送部分记录。
  */
-static err_t BSPLogTerminalCallback(const bsp_log_event_t *event,
-                                    va_list *args) {
+static err_t BSPLogTerminalSend(const bsp_log_event_t *event, va_list *args) {
   static const char line_end[] = "\r\n";
   if (SEGGER_RTT_printf(BSP_LOG_CHANNEL_TERMINAL, "[%s][%s] ",
                         BSPLogLevelName(event->level), event->tag) < 0) {
