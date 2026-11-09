@@ -40,6 +40,14 @@
        关闭，非零启用；由$<$<CONFIG:Debug>:BSP_LOG_ENABLED>定义。 */
 #endif
 
+#ifndef BSP_LOG_TAG_ENABLED
+#define BSP_LOG_TAG_ENABLED 1 /**< 标签显示开关：0 关闭，非零启用。 */
+#endif
+
+#ifndef BSP_LOG_COLOR_ENABLED
+#define BSP_LOG_COLOR_ENABLED 0 /**< ANSI 颜色开关：0 关闭，非零启用。 */
+#endif
+
 #define BSP_LOG_CHANNEL_TERMINAL 0u /**< 上行通道：终端日志。 */
 #define BSP_LOG_CHANNEL_DATA 1u     /**< 上行通道：JScope 数据。 */
 #define BSP_LOG_CHANNEL_RESERVED 2u /**< 上行通道：预留输出。 */
@@ -136,7 +144,10 @@ err_t BSPLogInit(void);
  * @retval NOT_SUPPORT 日志已关闭。
  * @note 通过日志事件调用 RTT printf/vprintf，不再使用日志层行缓冲区。
  *       函数内部仅维护一份正文参数列表，在输出结束后执行 va_end。
- *       记录格式为“[LEVEL][tag] 正文”，末尾为 CRLF。
+ *       默认记录格式为“[LEVEL][tag] 正文”，末尾为 CRLF。
+ *       BSP_LOG_TAG_ENABLED 为 0 时省略 [tag]，tag 仍须非 NULL。
+ *       BSP_LOG_COLOR_ENABLED 非零时按等级着色，并在换行前复位颜色。
+ *       传输失败时仍尝试发送颜色复位及换行，但不保证终端已恢复颜色。
  *       任务阶段用静态互斥锁串行化前缀、正文和换行；启动阶段不获取互斥锁。
  *       获取锁不等待；释放失败优先返回 STATE_ERR，即使传输也发生错误。
  *       过滤在参数和初始化检查之后、上下文检查之前执行。

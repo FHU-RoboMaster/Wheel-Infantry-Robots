@@ -102,6 +102,24 @@ LOG_ERROR("can", "send failed: %d", status);
 
 `tag` 和 `format` 不能为 `NULL`，否则返回 `PTR_NULL`。允许使用空字符串 tag。
 
+### 标签和颜色开关
+
+在 `bsp_log.h` 中通过两个独立宏配置，也可用编译器 `-D` 覆盖默认值：
+
+```c
+#define BSP_LOG_TAG_ENABLED   1  // 0：隐藏标签；非零：显示标签（默认）
+#define BSP_LOG_COLOR_ENABLED 0  // 0：关闭颜色（默认）；非零：按等级着色
+```
+
+例如关闭标签、启用颜色后，`LOG_INFO("motor", "speed=%d", 1200)` 显示为绿色的
+`[INFO] speed=1200`；关闭颜色时不发送日志颜色控制序列。
+TRACE / DEBUG / INFO / WARN / ERROR / FATAL 分别使用白色、青色、绿色、黄色、红色和亮红色。
+启用颜色要求终端支持 ANSI 控制序列，每条记录在 CRLF 前发送颜色复位序列。
+前缀或正文发送失败时仍尝试发送复位和换行；缓冲区不足时复位也可能失败，仍返回 `NO_BUFF`。
+
+两个开关只控制显示，日志等级始终保留；调用方式不变，隐藏标签时 `tag` 仍须非 `NULL`。
+`BSP_LOG_ENABLED` 继续控制整个日志输出，`BSPLogClear()` 仍显式发送清屏控制序列。
+
 ## 返回状态
 
 日志接口直接复用 `component/comp_cmd.h` 中的公共 `err_t`，不再定义日志专用错误枚举或旧名称别名。实际使用的状态如下：

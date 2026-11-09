@@ -360,22 +360,43 @@ static err_t BSPLogWriteRaw(const char *data, size_t size) {
 }
 
 /**
- * @brief 使用 RTT 原生格式化接口发送已通过检查的日志事件。
+ * @brief 按标签和颜色编译开关，使用 RTT 原生格式化接口发送日志事件。
  * @param[in] event 仅在本次调用期间有效的日志元数据。
  * @param[in,out] args 借用的正文参数列表；本回调消耗它，由调用者执行 va_end。
- * @return OK 或 NO_BUFF；由分发入口记录错误状态。
- * @note 调用者持有日志互斥锁；RTT 空间不足时可能已发送部分记录。
+ * @return OK 表示整条记录发送成功；任一发送步骤失败返回 NO_BUFF。
+ * @note 调用者已完成参数及上下文检查，并持有日志互斥锁；入口负责记录结果。
+ *       始终输出 [LEVEL]；BSP_LOG_TAG_ENABLED 非零时追加 [tag]。
+ *       BSP_LOG_COLOR_ENABLED 非零时按等级着色，并在 CRLF 前发送颜色复位序列。
+ *       前缀失败时跳过正文；无论前缀或正文是否成功，均尝试发送行尾。
+ *       RTT 空间不足时可能已发送部分记录，颜色复位及换行也可能失败。
  */
 static err_t BSPLogTerminalSend(const bsp_log_event_t *event, va_list *args) {
+#if BSP_LOG_COLOR_ENABLED
+  static const char *const colors[BSP_LOG_LEVEL_COUNT] = {
+      RTT_CTRL_TEXT_WHITE,  RTT_CTRL_TEXT_CYAN, RTT_CTRL_TEXT_GREEN,
+      RTT_CTRL_TEXT_YELLOW, RTT_CTRL_TEXT_RED,  RTT_CTRL_TEXT_BRIGHT_RED};
+  const char *color = colors[event->level];
+  static const char line_end[] = RTT_CTRL_RESET "\r\n";
+#else
+  const char *color = "";
   static const char line_end[] = "\r\n";
-  if (SEGGER_RTT_printf(BSP_LOG_CHANNEL_TERMINAL, "[%s][%s] ",
-                        BSPLogLevelName(event->level), event->tag) < 0) {
-    return NO_BUFF;
+#endif
+  int written;
+  err_t end_result;
+
+#if BSP_LOG_TAG_ENABLED
+  written = SEGGER_RTT_printf(BSP_LOG_CHANNEL_TERMINAL, "%s[%s][%s] ",
+                              color, BSPLogLevelName(event->level), event->tag);
+#else
+  written = SEGGER_RTT_printf(BSP_LOG_CHANNEL_TERMINAL, "%s[%s] ", color,
+                              BSPLogLevelName(event->level));
+#endif
+  if (written >= 0) {
+    written = SEGGER_RTT_vprintf(BSP_LOG_CHANNEL_TERMINAL, event->format, args);
   }
-  if (SEGGER_RTT_vprintf(BSP_LOG_CHANNEL_TERMINAL, event->format, args) < 0) {
-    return NO_BUFF;
-  }
-  return BSPLogWriteRaw(line_end, sizeof(line_end) - 1u);
+  /* 前缀或正文失败时也尝试复位颜色，避免后续终端输出沿用当前等级颜色。 */
+  end_result = BSPLogWriteRaw(line_end, sizeof(line_end) - 1u);
+  return written < 0 ? NO_BUFF : end_result;
 }
 
 #endif /* BSP_LOG_ENABLED */
