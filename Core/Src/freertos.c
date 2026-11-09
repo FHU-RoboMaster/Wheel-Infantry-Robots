@@ -25,7 +25,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "bsp_log.h"
 #include "iwdg.h"
 
 /* USER CODE END Includes */
@@ -316,9 +315,6 @@ void StartDefaultTask(void *argument) {
      * that prevents normal scheduling can still cause an automatic reset.
      */
     (void)HAL_IWDG_Refresh(&hiwdg);
-#if BSP_LOG_ENABLED
-    (void)BSPLogPollLevelCommand();
-#endif
     osDelay(10u);
   }
   /* USER CODE END StartDefaultTask */

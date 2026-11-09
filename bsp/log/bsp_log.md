@@ -40,8 +40,9 @@ BSPLogSetLevel(BSP_LOG_LEVEL_DEBUG);
 
 - `INFO`：每个任务的一条就绪提示、运行模式切换、通信恢复等有意义的状态变化。
 - `DEBUG`：UART RX/TX 初始化、DMA 启动/停止、CAN 过滤器/订阅注册、GPIO/PWM/IIC/USB
-  配置成功、分步初始化及单发角度等调试细节。默认不显示，需要排查时发送
-  `log level DEBUG`（以换行结束）；恢复精简显示时发送 `log level INFO`。
+  配置成功、分步初始化及单发角度等调试细节。默认不显示，需要排查时调用
+  `BSPLogSetLevel(BSP_LOG_LEVEL_DEBUG)`；恢复精简显示时调用
+  `BSPLogSetLevel(BSP_LOG_LEVEL_INFO)`。
 - `WARN` / `ERROR` / `FATAL`：保留现有异常、失败和严重故障记录。
 
 例如 `RX initialized UART...`、`RX DMA started UART...` 不再占用默认 INFO 输出。
@@ -180,9 +181,7 @@ err_t BSPLogGetLevel(bsp_log_level_t *level);
 err_t BSPLogGetLastError(void);
 ```
 
-日志库通过 `BSPLogPollLevelCommand()` 调用非阻塞 `SEGGER_RTT_GetKey()`，逐字节排空 RTT 下行通道 0；无数据时立即结束轮询，不使用阻塞的 `WaitKey()`。上位机发送 `log level <name>`，例如 `log level DEBUG\n`，其中等级名称为 `TRACE`、`DEBUG`、`INFO`、`WARN`、`ERROR` 或 `FATAL`。命令不区分大小写，首尾空格和制表符会被去除，CR/LF 均可提交命令；空行忽略，半条命令保留至下次轮询。
-
-命令缓冲区为 32 字节，最多接受 31 字节文本并预留 NUL。长度达到缓冲区容量时作为超长标记，后续字节丢弃至 CR/LF，再返回 `ARG_ERR` 并恢复接收。一次轮询处理多条命令时，返回最后一条完整命令的结果；没有完整命令则返回 `PENDING`，保留当前任务的错误状态。默认任务每 10 ms 调用一次轮询接口，等级仅保存在 RAM，重启后恢复默认值。
+### 浮点转换
 
 `Float2StrN()` 仍然是独立的浮点字符串工具，不参与日志等级、并发锁或错误状态。其返回值表示字符长度，因此保留 `int` 类型：失败返回 -1，成功返回完整结果所需字符数，不含结束符；返回值大于等于容量表示发生截断。
 

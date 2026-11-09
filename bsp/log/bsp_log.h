@@ -43,12 +43,9 @@
 #define BSP_LOG_CHANNEL_TERMINAL 0u /**< 上行通道：终端日志。 */
 #define BSP_LOG_CHANNEL_DATA 1u     /**< 上行通道：JScope 数据。 */
 #define BSP_LOG_CHANNEL_RESERVED 2u /**< 上行通道：预留输出。 */
-#define BSP_LOG_CHANNEL_COMMAND 0u  /**< 下行通道：日志等级命令。 */
 
 /* 缓冲区容量与默认等级 */
 
-#define BSP_LOG_COMMAND_BUFFER_SIZE \
-  32u /**< 命令缓冲区容量（字节，包含 NUL）。 */
 #define BSP_LOG_DATA_BUFFER_SIZE \
   1024u /**< 静态 JScope 上行缓冲区容量（字节）。 */
 #define BSP_LOG_RESERVED_BUFFER_SIZE \
@@ -200,24 +197,6 @@ err_t BSPLogSetLevel(bsp_log_level_t level);
  *       除 ISR 外，空指针错误会更新已保存状态。
  */
 err_t BSPLogGetLevel(bsp_log_level_t* level);
-
-/**
- * @brief 轮询 RTT 下行通道 0 并应用完整的日志等级命令。
- *
- * @return 命令处理状态，具体取值如下。
- * @retval OK 本次最后一条完整命令设置成功。
- * @retval PENDING 没有完整命令可用。
- * @retval ARG_ERR 本次最后一条完整命令非法或超长。
- * @retval STATE_ERR 不在任务上下文。
- * @retval INIT_ERR 尚未调用 BSPLogInit()。
- * @retval NOT_SUPPORT 日志已关闭。
- * @note 使用非阻塞 SEGGER_RTT_GetKey() 排空下行通道 0。
- *       文本格式为 `log level <name>`，不区分大小写，以 CR 或 LF 结束。
- *       不完整输入保留到下次调用；超过 31 字节的命令丢弃至下一个结束符。
- *       一次处理多条命令时返回最后一条完整命令的结果；空行忽略。
- * @warning 应在 BSPLogInit() 后由单个线程周期调用。
- */
-err_t BSPLogPollLevelCommand(void);
 
 /**
  * @brief 读取已保存的启动阶段或当前任务日志状态，不修改该状态。

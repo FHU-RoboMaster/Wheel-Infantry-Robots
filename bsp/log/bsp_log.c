@@ -6,7 +6,6 @@
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <string.h>
 
 #include "FreeRTOS.h"
 #include "comp_utils.h"
@@ -41,10 +40,6 @@ static bool log_initialized;
 static StaticSemaphore_t log_mutex_storage;
 static SemaphoreHandle_t log_mutex = NULL;
 
-/* 下行等级命令的跨次轮询状态。 */
-static char level_command_buffer[BSP_LOG_COMMAND_BUFFER_SIZE];
-/* 长度达到缓冲区容量时表示命令超长，丢弃后续字节直到换行。 */
-static size_t level_command_size;
 #endif
 
 /* ==================== 内部函数声明 ==================== */
@@ -60,12 +55,6 @@ static err_t BSPLogLock(void);
 static err_t BSPLogUnlock(void);
 static err_t BSPLogWriteRaw(const char *data, size_t size);
 static err_t BSPLogTerminalSend(const bsp_log_event_t *event, va_list *args);
-static bool BSPLogMatchIgnoreCase(const char *value, const char *pattern,
-                                  bool exact_match);
-static char *BSPLogTrimCommand(char *command);
-static err_t BSPLogParseLevelCommand(const char *command,
-                                     bsp_log_level_t *level);
-static err_t BSPLogApplyLevelCommand(void);
 #endif
 
 /* ==================== 公共接口：初始化与日志输出 ==================== */
@@ -194,7 +183,7 @@ err_t BSPLogClear(void) {
 #endif
 }
 
-/* ==================== 公共接口：等级控制与命令轮询 ==================== */
+/* ==================== 公共接口：等级控制 ==================== */
 
 err_t BSPLogSetLevel(bsp_log_level_t level) {
   const err_t valid = BSPLogValidateLevel(level);
@@ -212,39 +201,6 @@ err_t BSPLogGetLevel(bsp_log_level_t *level) {
   *level = (bsp_log_level_t)atomic_load_explicit(&current_level,
                                                  memory_order_acquire);
   return OK;
-}
-
-err_t BSPLogPollLevelCommand(void) {
-#if !BSP_LOG_ENABLED
-  return BSPLogRecordResult(NOT_SUPPORT);
-#else
-  int byte;
-  err_t result = PENDING;
-
-  if (!BSPLogContextAllowsWrite()) {
-    return BSPLogRecordResult(STATE_ERR);
-  }
-  if (!log_initialized) {
-    return BSPLogRecordResult(INIT_ERR);
-  }
-
-  /* GetKey 固定读取下行通道 0；无数据时返回 -1，不等待主机。 */
-  while ((byte = SEGGER_RTT_GetKey()) >= 0) {
-    if (byte == '\r' || byte == '\n') {
-      if (level_command_size == 0u) {
-        continue;
-      }
-      result = level_command_size < sizeof(level_command_buffer)
-                   ? BSPLogApplyLevelCommand()
-                   : BSPLogRecordResult(ARG_ERR);
-      level_command_size = 0u;
-    } else if (level_command_size < sizeof(level_command_buffer)) {
-      level_command_buffer[level_command_size++] = (char)byte;
-    }
-  }
-
-  return result;
-#endif
 }
 
 /* ==================== 公共接口：任务状态查询 ==================== */
@@ -420,131 +376,6 @@ static err_t BSPLogTerminalSend(const bsp_log_event_t *event, va_list *args) {
     return NO_BUFF;
   }
   return BSPLogWriteRaw(line_end, sizeof(line_end) - 1u);
-}
-
-/* ==================== 内部实现：等级命令解析 ==================== */
-
-/**
- * @brief 比较两个字符串，忽略大小写。
- *
- * @param[in] value 要判断的字符串
- * @param[in] pattern 需要匹配的字符串
- * @param[in] exact_match 是否要求 value 在匹配后立即结束
- * @return 匹配成功返回 true；否则返回 false。
- * @note exact_match为 true 时，要求 value 与 pattern 完全匹配。
- *       exact_match为 false 时,只要求 value 以 pattern 开头。
- */
-static bool BSPLogMatchIgnoreCase(const char *value, const char *pattern,
-                                  bool exact_match) {
-  while (*pattern != '\0' && *value != '\0') {
-    char value_char = *value++;
-    char pattern_char = *pattern++;
-    if (value_char >= 'a' && value_char <= 'z') {
-      value_char = (char)(value_char - ('a' - 'A'));
-    }
-    if (pattern_char >= 'a' && pattern_char <= 'z') {
-      pattern_char = (char)(pattern_char - ('a' - 'A'));
-    }
-    if (value_char != pattern_char) {
-      return false;
-    }
-  }
-
-  if (*pattern != '\0') {
-    return false;
-  }
-  return !exact_match || *value == '\0';
-}
-
-/** @brief 去除命令字符串首尾的空白字符。
- *
- * @param[in] command 要处理的命令字符串。
- * @return 指向去除首尾空白后的字符串的指针。
- * @note 该函数会去除命令字符串首尾的空格和制表符，并在末尾添加 '\0' 终止符。
- *
- */
-static char *BSPLogTrimCommand(char *command) {
-  char *first = command;
-  char *last;
-  while (*first == ' ' || *first == '\t') {
-    ++first;
-  }
-  last = first + strlen(first);
-  while (last > first && (last[-1] == ' ' || last[-1] == '\t')) {
-    --last;
-    *last = '\0';
-  }
-  return first;
-}
-
-/** @brief 解析接收到的日志等级命令，根据解析结果设置日志等级
- *
- * @param[in] command 接收到的日志等级命令，
- * @param[out] level The parsed log level.
- * @return  日志解析结结果，具体取值如下。
- * @retval OK 解析成功，成功设置日志等级。
- * @retval ARG_ERR 解析失败，日志等级无效。
- * @throw None.
- * @note 日志等级命令格式为 `log level <name>`，其中 `<name>`
- * 为日志等级名称（TRACE、DEBUG、INFO、WARN、ERROR、FATAL）。
- */
-static err_t BSPLogParseLevelCommand(const char *command,
-                                     bsp_log_level_t *level) {
-  static const char *const names[] = {"TRACE", "DEBUG", "INFO",
-                                      "WARN",  "ERROR", "FATAL"};
-  const char *value;
-  size_t index;
-
-  /* 判断命令格式是否符合log level */
-  if (!BSPLogMatchIgnoreCase(command, "log level", false) ||
-      (command[9] != ' ' && command[9] != '\t')) {
-    return ARG_ERR;
-  }
-  value = command + 9;
-  while (*value == ' ' || *value == '\t') {
-    ++value;
-  }
-
-  for (index = 0u; index < ARRAY_LEN(names); ++index) {
-    if (BSPLogMatchIgnoreCase(value, names[index], true)) {
-      *level = (bsp_log_level_t)index;
-      return OK;
-    }
-  }
-
-  return ARG_ERR;
-}
-
-/**
- * @brief 解析上位机
- *
- * Terminates the buffered command, trims surrounding whitespace, parses the
- * `log level <name>` form, and applies the resulting log level. The buffered
- * command length is cleared before the function returns.
- *
- * @return The command result. Returns `OK` when the parsed level is applied or
- *         `ARG_ERR` when the command is invalid.
- * @throws None.
- * @note The function consumes the command currently stored in
- *       `level_command_buffer` and resets `level_command_size` even after a
- *       parse failure.
- * @warning The caller serializes access to the shared command buffer state.
- * @since 1.0.1.
- * @ingroup bsp_log.
- */
-static err_t BSPLogApplyLevelCommand(void) {
-  bsp_log_level_t level;
-  char *command;
-  err_t result;
-
-  level_command_buffer[level_command_size] = '\0';
-  command = BSPLogTrimCommand(level_command_buffer);
-  result = BSPLogParseLevelCommand(command, &level);
-  level_command_size = 0u;
-  if (result != OK) {
-    return BSPLogRecordResult(ARG_ERR);
-  }
-  return BSPLogSetLevel(level);
 }
 
 #endif /* BSP_LOG_ENABLED */
